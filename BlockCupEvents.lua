@@ -73,52 +73,52 @@ UICorner2.CornerRadius = UDim.new(0, 12)
 --// Logic
 local AutoFarmEnabled = false
 
--- LISTA COMPLETA DE NOMBRES
-local nombresABuscar = {
-    "ball",
-    "balls",
-    "Bolas más grandes",
-    "Legendary balls",
-    "probabilidad de mutación",
-    "Bolas dobles",
-    "Rare ball chance",
-    "Epic ball chance"
-}
-
--- Funcion para farmear (SIN MOVERSE)
+-- 🎯 AHORA BUSCA POR FORMA O NOMBRE CORTO
 local function FarmBalls()
     while AutoFarmEnabled do
         for _, descendant in pairs(Workspace:GetDescendants()) do
+            -- Buscamos Partes o MeshParts
             if descendant:IsA("Part") or descendant:IsA("MeshPart") then
-                local nombreObjeto = descendant.Name:lower()
                 
-                -- Revisar si coincide con algun nombre de la lista
-                local encontrado = false
-                for _, nombre in pairs(nombresABuscar) do
-                    if string.find(nombreObjeto, nombre:lower()) then
-                        encontrado = true
-                        break
-                    end
+                -- CONDICIONES PARA QUE LAS AGARRE A TODAS:
+                local nombre = descendant.Name:lower()
+                local esPelota = false
+
+                -- Si tiene "ball" en el nombre
+                if string.find(nombre, "ball") then
+                    esPelota = true
                 end
-                
-                if encontrado then
-                    -- Método 1: ClickDetector
+
+                -- O si es de forma redonda (Shape)
+                if descendant.Shape == Enum.PartType.Ball then
+                    esPelota = true
+                end
+
+                -- O si tiene ciertos colores que reconocimos en la foto
+                local color = descendant.Color
+                if color == Color3.new(0, 0, 1) or color == Color3.new(1, 0, 0) or color == Color3.new(0.5, 0, 0.5) then
+                    esPelota = true
+                end
+
+                -- SI ES UNA PELOTA, ENTONCES LA RECOGEMOS
+                if esPelota then
+                    -- Método 1: Click
                     local Click = descendant:FindFirstChildOfClass("ClickDetector")
                     if Click then
                         fireclickdetector(Click)
                     end
-                    
-                    -- Método 2: ProximityPrompt
+
+                    -- Método 2: Proximity
                     local Prompt = descendant:FindFirstChildOfClass("ProximityPrompt")
                     if Prompt then
                         Prompt:InputHoldBegin()
                         task.wait(0.05)
                         Prompt:InputHoldEnd()
                     end
-                    
-                    -- Método 3: Destruir para recoger instantaneo
+
+                    -- Método 3: Destruir para asegurar
                     task.wait(0.05)
-                    if descendant.Parent ~= nil then
+                    if descendant.Parent then
                         descendant:Destroy()
                     end
                 end
