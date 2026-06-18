@@ -5,7 +5,8 @@ local Players = game:GetService("Players")
 
 --// Variables
 local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
+local Character = Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 --// GUI
@@ -13,8 +14,7 @@ local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
 local Title = Instance.new("TextLabel")
-local AutoFarmButton = Instance.new("TextButton")
-local ImageLabel = Instance.new("ImageLabel")
+local AutoFarmButton = Instance.new("TextButton")local ImageLabel = Instance.new("ImageLabel")
 
 --// Properties
 ScreenGui.Parent = game.CoreGui
@@ -73,21 +73,45 @@ UICorner2.CornerRadius = UDim.new(0, 12)
 
 --// Logic
 local AutoFarmEnabled = false
+local VelocidadNormal = 16 -- La velocidad por defecto del juego
 
--- Funcion para farmear
+-- Funcion para ir caminando hacia la pelota
+local function irHacia(punto)
+    if not AutoFarmEnabled then return end
+    Humanoid:MoveTo(punto)
+    Humanoid.MoveToFinished:Wait()
+end
+
+-- Funcion principal de farm
 local function FarmBalls()
     while AutoFarmEnabled do
+        -- ACTIVAR VELOCIDAD MAXIMA
+        Humanoid.WalkSpeed = 100 -- Corre super rapido
+        
+        local encontrada = false
+        
         for _, descendant in pairs(Workspace:GetDescendants()) do
             if descendant:IsA("Part") or descendant:IsA("MeshPart") then
-                -- Busca cualquier nombre que tenga "ball" o "balls"
+                -- Busca cualquier nombre que tenga "ball"
                 if string.find(descendant.Name:lower(), "ball") then
-                    -- Ir hacia la pelota
-                    HumanoidRootPart.CFrame = descendant.CFrame + Vector3.new(0, 2, 0)
-                    task.wait(0.1)
+                    encontrada = true
+                    
+                    -- Camina hacia la pelota rapido
+                    irHacia(descendant.Position)
+                    
+                    -- Espera un poquito para que la toque y la recoja
+                    task.wait(0.2)
+                    
+                    -- Se detiene
+                    Humanoid:MoveTo(HumanoidRootPart.Position)
+                    break
                 end
             end
         end
-        task.wait(0.2)
+        
+        if not encontrada then
+            task.wait(0.3) -- Si no hay pelotas, espera un poco
+        end
     end
 end
 
@@ -101,6 +125,8 @@ AutoFarmButton.MouseButton1Click:Connect(function()
     else
         AutoFarmButton.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
         AutoFarmButton.Text = "Auto Farm Pelotas ⚽"
+        Humanoid:MoveTo(HumanoidRootPart.Position) -- Se detiene
+        Humanoid.WalkSpeed = VelocidadNormal -- Vuelve a la velocidad normal
     end
 end)
 
