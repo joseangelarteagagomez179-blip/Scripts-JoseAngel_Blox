@@ -73,36 +73,58 @@ UICorner2.CornerRadius = UDim.new(0, 12)
 --// Logic
 local AutoFarmEnabled = false
 
+-- LISTA COMPLETA DE NOMBRES
+local nombresABuscar = {
+    "ball",
+    "balls",
+    "Bolas más grandes",
+    "Legendary balls",
+    "probabilidad de mutación",
+    "Bolas dobles",
+    "Rare ball chance",
+    "Epic ball chance"
+}
+
 -- Funcion para farmear (SIN MOVERSE)
 local function FarmBalls()
     while AutoFarmEnabled do
         for _, descendant in pairs(Workspace:GetDescendants()) do
-            -- Buscamos cualquier cosa que sea parte y tenga "ball"
             if descendant:IsA("Part") or descendant:IsA("MeshPart") then
-                if string.find(descendant.Name:lower(), "ball") then
-                    
-                    -- MÉTODO 1: Si tiene Touched o evento para recoger, lo activamos
-                    if descendant:FindFirstChildOfClass("RemoteEvent") or descendant:FindFirstChildOfClass("BindableEvent") then
-                        -- Intenta disparar el evento de recolección
-                        fireclickdetector(descendant)
+                local nombreObjeto = descendant.Name:lower()
+                
+                -- Revisar si coincide con algun nombre de la lista
+                local encontrado = false
+                for _, nombre in pairs(nombresABuscar) do
+                    if string.find(nombreObjeto, nombre:lower()) then
+                        encontrado = true
+                        break
+                    end
+                end
+                
+                if encontrado then
+                    -- Método 1: ClickDetector
+                    local Click = descendant:FindFirstChildOfClass("ClickDetector")
+                    if Click then
+                        fireclickdetector(Click)
                     end
                     
-                    -- MÉTODO 2: Si es por proximidad
-                    local Proximity = descendant:FindFirstChildOfClass("ProximityPrompt")
-                    if Proximity then
-                        Proximity:InputHoldBegin()
+                    -- Método 2: ProximityPrompt
+                    local Prompt = descendant:FindFirstChildOfClass("ProximityPrompt")
+                    if Prompt then
+                        Prompt:InputHoldBegin()
                         task.wait(0.05)
-                        Proximity:InputHoldEnd()
+                        Prompt:InputHoldEnd()
                     end
                     
-                    -- MÉTODO 3: Clonar el objeto directamente a ti (Force Get)
+                    -- Método 3: Destruir para recoger instantaneo
+                    task.wait(0.05)
                     if descendant.Parent ~= nil then
-                        descendant:Destroy() -- O lo destruye o lo recoge dependiendo del juego
+                        descendant:Destroy()
                     end
                 end
             end
         end
-        task.wait(0.1) -- Muy rápido para que las agarre al instante
+        task.wait(0.1)
     end
 end
 
