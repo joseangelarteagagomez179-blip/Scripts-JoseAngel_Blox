@@ -14,7 +14,8 @@ local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
 local Title = Instance.new("TextLabel")
-local AutoFarmButton = Instance.new("TextButton")local ImageLabel = Instance.new("ImageLabel")
+local AutoFarmButton = Instance.new("TextButton")
+local ImageLabel = Instance.new("ImageLabel")
 
 --// Properties
 ScreenGui.Parent = game.CoreGui
@@ -24,11 +25,11 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-MainFrame.BackgroundTransparency = 0.3 -- Fondo semi-transparente
+MainFrame.BackgroundTransparency = 0.3
 MainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
 MainFrame.Size = UDim2.new(0, 280, 0, 200)
 MainFrame.Active = true
-MainFrame.Draggable = true -- Para moverlo
+MainFrame.Draggable = true
 
 -- Esquinas redondeadas
 UICorner.Parent = MainFrame
@@ -39,8 +40,8 @@ ImageLabel.Parent = MainFrame
 ImageLabel.BackgroundTransparency = 1
 ImageLabel.Position = UDim2.new(0, 0, 0, 0)
 ImageLabel.Size = UDim2.new(1, 0, 1, 0)
-ImageLabel.Image = "rbxassetid://11934795837" -- Imagen tematica Mundial
-ImageLabel.ImageTransparency = 0.7 -- Transparente
+ImageLabel.Image = "rbxassetid://11934795837"
+ImageLabel.ImageTransparency = 0.7
 ImageLabel.ScaleType = Enum.ScaleType.Crop
 ImageLabel.ZIndex = 0
 
@@ -73,7 +74,7 @@ UICorner2.CornerRadius = UDim.new(0, 12)
 
 --// Logic
 local AutoFarmEnabled = false
-local VelocidadNormal = 16 -- La velocidad por defecto del juego
+local VelocidadNormal = 16
 
 -- Funcion para ir caminando hacia la pelota
 local function irHacia(punto)
@@ -86,23 +87,16 @@ end
 local function FarmBalls()
     while AutoFarmEnabled do
         -- ACTIVAR VELOCIDAD MAXIMA
-        Humanoid.WalkSpeed = 100 -- Corre super rapido
+        Humanoid.WalkSpeed = 100
         
         local encontrada = false
         
         for _, descendant in pairs(Workspace:GetDescendants()) do
             if descendant:IsA("Part") or descendant:IsA("MeshPart") then
-                -- Busca cualquier nombre que tenga "ball"
                 if string.find(descendant.Name:lower(), "ball") then
                     encontrada = true
-                    
-                    -- Camina hacia la pelota rapido
                     irHacia(descendant.Position)
-                    
-                    -- Espera un poquito para que la toque y la recoja
                     task.wait(0.2)
-                    
-                    -- Se detiene
                     Humanoid:MoveTo(HumanoidRootPart.Position)
                     break
                 end
@@ -110,7 +104,7 @@ local function FarmBalls()
         end
         
         if not encontrada then
-            task.wait(0.3) -- Si no hay pelotas, espera un poco
+            task.wait(0.3)
         end
     end
 end
@@ -125,8 +119,8 @@ AutoFarmButton.MouseButton1Click:Connect(function()
     else
         AutoFarmButton.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
         AutoFarmButton.Text = "Auto Farm Pelotas ⚽"
-        Humanoid:MoveTo(HumanoidRootPart.Position) -- Se detiene
-        Humanoid.WalkSpeed = VelocidadNormal -- Vuelve a la velocidad normal
+        Humanoid:MoveTo(HumanoidRootPart.Position)
+        Humanoid.WalkSpeed = VelocidadNormal
     end
 end)
 
