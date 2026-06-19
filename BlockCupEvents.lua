@@ -1,16 +1,15 @@
--- JoseAngel_Blox - Block Cup (TODAS LAS BOLAS)
+-- JoseAngel_Blox - Block Cup (VERSION ESTABLE)
 
 local Player = game:GetService("Players").LocalPlayer
 local HumRoot = Player.Character:WaitForChild("HumanoidRootPart")
 
 local function RecogerBolas()
     for _, v in pairs(workspace:GetDescendants()) do
-        -- BUSCA CUALQUIER NOMBRE QUE TENGA "ball", "rare", "epic", "legend" O "mut"
         local name = string.lower(v.Name)
         if string.find(name, "ball") or string.find(name, "rare") or string.find(name, "epic") or string.find(name, "legend") or string.find(name, "mut") then
             if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("BasePart") then
+                -- Solo teletransportar, sin modificar fisica para evitar bugs
                 v.CFrame = HumRoot.CFrame
-                v.CanCollide = false
             end
         end
     end
@@ -100,7 +99,7 @@ Btn2.MouseButton1Click:Connect(function()
         Btn2.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
         Btn2.Text = "Auto Collect: ON"
         Loop = task.spawn(function()
-            while Auto and task.wait(0.05) do
+            while Auto and task.wait(0.1) do -- Mas lento = Mas estable
                 RecogerBolas()
             end
         end)
