@@ -32,7 +32,7 @@ MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
 MainFrame.Size = UDim2.new(0, 300, 0, 250)
 MainFrame.ClipsDescendants = true
 
---// Esquinas Redondeadas (UICorner)
+--// Esquinas Redondeadas
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
@@ -57,7 +57,7 @@ VIPText.BackgroundTransparency = 1
 VIPText.Position = UDim2.new(0, 0, 0, 40)
 VIPText.Size = UDim2.new(1, 0, 0, 20)
 VIPText.Font = Enum.Font.Gotham
-VIPText.Text = "💎 VERSIÓN VIP 💎"
+VIPText.Text = "💎 VERSIÓN VIP - MUTACIONES 💎"
 VIPText.TextColor3 = Color3.fromRGB(255, 215, 0)
 VIPText.TextSize = 14
 
@@ -70,7 +70,7 @@ InputBox.BorderColor3 = Color3.fromRGB(0, 170, 255)
 InputBox.Position = UDim2.new(0.1, 0, 0.35, 0)
 InputBox.Size = UDim2.new(0.8, 0, 0, 40)
 InputBox.Font = Enum.Font.Gotham
-InputBox.PlaceholderText = "Escribe el nombre del Brainrot..."
+InputBox.PlaceholderText = "Ej: Nombre (Diamante) o Nombre [Oro]"
 InputBox.Text = ""
 InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 InputBox.TextSize = 16
@@ -96,48 +96,56 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = DuplicateBtn
 
---// Función de Duplicar
+--// FUNCIÓN MEJORADA PARA MUTACIONES 🔥
 DuplicateBtn.MouseButton1Click:Connect(function()
     BrainrotName = InputBox.Text
     
     if BrainrotName == "" then
-        InputBox.PlaceholderText = "⚠️ Escribe un nombre primero!"
+        InputBox.PlaceholderText = "⚠️ Escribe un nombre!"
         return
     end
     
-    -- Efecto visual al presionar
+    -- Efecto de click
     local tweenOut = TweenService:Create(DuplicateBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.68, 0, 0, 43)})
     local tweenIn = TweenService:Create(DuplicateBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.7, 0, 0, 45)})
     tweenOut:Play()
     tweenIn:Play()
     
-    print("Intentando duplicar: " .. BrainrotName)
+    DuplicateBtn.Text = "🔍 BUSCANDO..."
     
-    -- Aquí iría la lógica real para encontrar y clonar el objeto
-    -- Como cada actualización del juego cambia las rutas, esto es la base:
-    
-    -- Ejemplo básico (necesitas adaptar la ruta según donde estén los brainrots):
     local success, err = pcall(function()
-        -- Ruta ejemplo, ajusta según la estructura actual del juego
-        local Backpack = Player:FindFirstChild("Backpack")
-        if Backpack then
-            local Item = Backpack:FindFirstChild(BrainrotName)
-            if Item then
-                local Clone = Item:Clone()
-                Clone.Parent = Backpack
-                DuplicateBtn.Text = "✅ ¡DUPLICADO!"
-                wait(1)
-                DuplicateBtn.Text = "🚀 DUPLICAR"
-            else
-                DuplicateBtn.Text = "❌ NO ENCONTRADO"
-                wait(1)
-                DuplicateBtn.Text = "🚀 DUPLICAR"
+        local found = nil
+        
+        -- 🔍 BUSQUEDA ULTRA COMPLETA
+        -- Busca en TODO lo que tiene el jugador, incluyendo objetos con paréntesis o corchetes
+        for _, descendant in pairs(Player:GetDescendants()) do
+            -- Compara el nombre EXACTO, incluyendo (Diamante), [Oro], etc.
+            if string.lower(descendant.Name) == string.lower(BrainrotName) then
+                found = descendant
+                break
             end
+        end
+
+        -- ✅ SI LO ENCONTRÓ, LO DUPLICA
+        if found then
+            local Clone = found:Clone()
+            Clone.Parent = found.Parent -- Lo pone en el MISMO LUGAR
+            DuplicateBtn.Text = "✅ ¡DUPLICADO!"
+            wait(1)
+            DuplicateBtn.Text = "🚀 DUPLICAR"
+        else
+            -- ❌ SI NO LO ENCONTRÓ
+            DuplicateBtn.Text = "❌ NO ENCONTRADO"
+            wait(1)
+            DuplicateBtn.Text = "🚀 DUPLICAR"
         end
     end)
     
     if not success then
         warn("Error: " .. err)
+        DuplicateBtn.Text = "⚠️ ERROR"
+        wait(1)
+        DuplicateBtn.Text = "🚀 DUPLICAR"
     end
 end)
 
@@ -167,4 +175,4 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Script Duplicar Brainrots Pro VIP cargado!")
+print("✅ Script Duplicar Brainrots Pro VIP V3 (MUTACIONES) Cargado!")
