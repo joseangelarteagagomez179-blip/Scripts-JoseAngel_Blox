@@ -1,117 +1,196 @@
--- JoseAngel_Blox Block Cup | SYSTEM LUXVS
+-- ============================================
+--  JOSEANGEL_BLOX BLOCK CUP - MODO IMÁN
+--  Atrae todas las balls hacia el jugador
+-- ============================================
 
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- CONFIG
-_G.AutoFarmEvent = false
-local Range = 300
+-- ============================================
+--  CONFIGURACIÓN DEL IMÁN
+-- ============================================
+local CONFIG = {
+    RadioImán = 50,              -- Distancia de atracción
+    FuerzaImán = 5,              -- Velocidad de atracción (0.5 - 10)
+    TeclaActivar = Enum.KeyCode.F1,
+    -- Lista de posibles nombres (probamos todos)
+    NombresBalls = {
+        "Ball", "RareBall", "EpicBall", "LegendaryBall", 
+        "MutationBall", "CupBall", "EventBall", "SoccerBall",
+        "Bola", "Rare", "Epic", "Legendary", "Mutation",
+        "Collectible", "Cup_Collectible", "Part"
+    }
+}
 
--- == INTERFAZ ==
-local Gui = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-local Fondo = Instance.new("ImageLabel")
-local Titulo = Instance.new("TextLabel")
-local Boton = Instance.new("TextButton")
+local imanActivo = false
+local ballsAtraidas = 0
 
-Gui.Name = "JoseAngel_Blox"
-Gui.Parent = game:GetService("CoreGui")
-Gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-
-Main.Name = "MainFrame"
-Main.Size = UDim2.new(0, 200, 0, 200)
-Main.Position = UDim2.new(0.1, 0, 0.3, 0)
-Main.BackgroundColor3 = Color3.new(0.08, 0.08, 0.08)
-Main.BorderSizePixel = 0
-Main.ClipsDescendants = true
-Main.Active = true
-Main.Draggable = true
-Main.Parent = Gui
-
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
-UICorner.Parent = Main
-
-Fondo.Name = "Fondo"
-Fondo.Size = UDim2.new(1, 0, 1, 0)
-Fondo.Position = UDim2.new(0,0,0,0)
-Fondo.Image = "http://www.roblox.com/asset/?id=13559396885"
-Fondo.BackgroundTransparency = 1
-Fondo.ScaleType = Enum.ScaleType.Stretch
-Fondo.Parent = Main
-
-Titulo.Name = "Titulo"
-Titulo.Size = UDim2.new(1, 0, 0, 30)
-Titulo.Position = UDim2.new(0, 0, 0, 5)
-Titulo.BackgroundTransparency = 1
-Titulo.Text = "JoseAngel_Blox"
-Titulo.TextColor3 = Color3.new(1,1,1)
-Titulo.Font = Enum.Font.GothamBold
-Titulo.TextSize = 16
-Titulo.Parent = Main
-
-Boton.Name = "BotonFarm"
-Boton.Size = UDim2.new(0, 160, 0, 40)
-Boton.Position = UDim2.new(0.5, -80, 0.7, 0)
-Boton.BackgroundColor3 = Color3.new(0.5,0,0)
-Boton.Text = "Event: OFF"
-Boton.TextColor3 = Color3.new(1,1,1)
-Boton.Font = Enum.Font.GothamBold
-Boton.TextSize = 14
-Boton.Parent = Main
-
-local UICornerBtn = Instance.new("UICorner")
-UICornerBtn.CornerRadius = UDim.new(0, 8)
-UICornerBtn.Parent = Boton
-
-Boton.MouseButton1Click:Connect(function()
-    _G.AutoFarmEvent = not _G.AutoFarmEvent
-    if _G.AutoFarmEvent then
-        Boton.Text = "Event: ON"
-        Boton.BackgroundColor3 = Color3.new(0,0.5,0)
-    else
-        Boton.Text = "Event: OFF"
-        Boton.BackgroundColor3 = Color3.new(0.5,0,0)
-    end
-end)
-
--- == SISTEMA DE IMAN FUERTE Y EFECTIVO ==
-spawn(function()
-    while task.wait(0.01) do
-        if _G.AutoFarmEvent and Humanoid.Health > 0 then
-            local HumRoot = Character.HumanoidRootPart
-
-            -- AUTO KICK
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("Part") and v:FindFirstChildOfClass("ClickDetector") then
-                    if (HumRoot.Position - v.Position).Magnitude <= Range then
-                        fireclickdetector(v.ClickDetector)
-                    end
+-- ============================================
+--  FUNCIÓN: DETECTAR BALLS
+-- ============================================
+local function detectarBalls()
+    local balls = {}
+    local posJugador = rootPart.Position
+    
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        -- Solo partes que sean físicas
+        if obj:IsA("Part") or obj:IsA("MeshPart") then
+            local nombre = obj.Name or ""
+            local nombreLower = string.lower(nombre)
+            
+            -- Verificar si es una ball
+            local esBall = false
+            for _, palabra in ipairs(CONFIG.NombresBalls) do
+                if string.find(nombreLower, string.lower(palabra)) then
+                    esBall = true
+                    break
                 end
             end
-
-            -- IMAN QUE SI FUNCIONA
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    local name = string.lower(v.Name)
-                    if name:find("ball") or name:find("chance") or name:find("dobles") or name:find("común") then
-                        if (HumRoot.Position - v.Position).Magnitude <= Range then
-                            -- LAS TRAE DIRECTO Y RAPIDO
-                            v.CFrame = CFrame.new(HumRoot.Position + Vector3.new(0, 1, 0))
-                        end
-                    end
+            
+            -- Si es una ball, verificar distancia
+            if esBall and obj.Parent ~= character then
+                local distancia = (obj.Position - posJugador).Magnitude
+                if distancia <= CONFIG.RadioImán then
+                    table.insert(balls, {
+                        objeto = obj,
+                        posicion = obj.Position,
+                        distancia = distancia
+                    })
                 end
             end
         end
     end
+    
+    return balls
+end
+
+-- ============================================
+--  FUNCIÓN: ATRAER BALLS (EFECTO IMÁN)
+-- ============================================
+local function atraerBalls()
+    local balls = detectarBalls()
+    
+    if #balls == 0 then
+        -- Si no hay balls, mostrar mensaje ocasional
+        if math.random(1, 100) == 1 then
+            print("[🔍] Buscando balls... (Activa F1 para desactivar)")
+        end
+        return
+    end
+    
+    local posJugador = rootPart.Position
+    
+    for _, ballData in ipairs(balls) do
+        local obj = ballData.objeto
+        local posBall = ballData.posicion
+        local distancia = ballData.distancia
+        
+        -- Calcular dirección hacia el jugador
+        local direccion = (posJugador - posBall).Unit
+        local fuerza = CONFIG.FuerzaImán / (distancia / 10 + 1) -- Más fuerza si está cerca
+        
+        -- Mover la ball hacia el jugador
+        local nuevaPos = posBall + direccion * fuerza * 0.5
+        
+        -- Aplicar movimiento (si tiene masa)
+        if obj:IsA("Part") then
+            -- Método 1: Mover directamente (más agresivo)
+            obj.Position = nuevaPos
+            
+            -- También podemos usar Velocity para un efecto más suave
+            -- obj.Velocity = direccion * 20
+        end
+        
+        -- Si está muy cerca, recolectar
+        if distancia < 3 then
+            print("[✅] Ball RECOLECTADA: " .. obj.Name)
+            ballsAtraidas = ballsAtraidas + 1
+            -- Guardar en el jugador
+            if obj.Parent then
+                obj:Destroy() -- Eliminar la ball (simula recolección)
+            end
+        end
+    end
+    
+    -- Mostrar conteo cada 10 balls
+    if ballsAtraidas > 0 and ballsAtraidas % 10 == 0 then
+        print("[📊] Balls recolectadas: " .. ballsAtraidas)
+    end
+end
+
+-- ============================================
+--  FUNCIÓN: LOOP DEL IMÁN
+-- ============================================
+local function loopIman()
+    print("[🧲] MODO IMÁN ACTIVADO")
+    print("[⚡] Atrayendo balls...")
+    
+    while imanActivo do
+        wait(0.05) -- Loop rápido para efecto suave
+        atraerBalls()
+    end
+end
+
+-- ============================================
+--  ACTIVAR/DESACTIVAR CON F1
+-- ============================================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == CONFIG.TeclaActivar then
+        imanActivo = not imanActivo
+        
+        if imanActivo then
+            print("[✅] IMÁN ACTIVADO | Presiona F1 para desactivar")
+            task.spawn(loopIman)
+        else
+            print("[⏹️] IMÁN DESACTIVADO")
+            print("[📊] Total recolectado: " .. ballsAtraidas .. " balls")
+        end
+    end
 end)
 
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "JoseAngel_Blox",
-    Text = "IMAN ACTIVO | FUNCIONANDO 🧲",
-    Duration = 3
-})
+-- ============================================
+--  EFECTO VISUAL (Opcional)
+-- ============================================
+-- Crea partículas alrededor del jugador (se ve cool)
+local function crearEfectoIman()
+    local attachment = Instance.new("Attachment")
+    attachment.Parent = rootPart
+    attachment.Position = Vector3.new(0, 2, 0)
+    
+    local particle = Instance.new("ParticleEmitter")
+    particle.Parent = attachment
+    particle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+    particle.Rate = 50
+    particle.SpreadAngle = Vector2.new(360, 360)
+    particle.Speed = NumberRange.new(1, 3)
+    particle.Lifetime = NumberRange.new(0.5, 1)
+    particle.Color = ColorSequence.new(Color3.new(0, 0.8, 1))
+    particle.Transparency = NumberSequence.new(0.7)
+    particle.Size = NumberSequence.new(0.5)
+    particle.Enabled = true
+    
+    print("[✨] Efecto visual activado")
+end
+
+-- Descomentar para activar efecto visual
+-- task.spawn(crearEfectoIman)
+
+-- ============================================
+--  INICIO
+-- ============================================
+print("")
+print("========================================")
+print("  🧲 JOSEANGEL_BLOX BLOCK CUP - IMÁN")
+print("  Presiona F1 para ACTIVAR/DESACTIVAR")
+print("  Radio de atracción: " .. CONFIG.RadioImán .. " estudios")
+print("========================================")
+print("")
