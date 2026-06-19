@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 --// Variables
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 --// GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -61,9 +62,9 @@ AutoFarmButton.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
 AutoFarmButton.Position = UDim2.new(0.15, 0, 0.6, 0)
 AutoFarmButton.Size = UDim2.new(0, 190, 0, 50)
 AutoFarmButton.Font = Enum.Font.GothamBold
-AutoFarmButton.Text = "Auto Farm Pelotas ⚽"
+AutoFarmButton.Text = "🧲 MODO IMÁN ACTIVADO"
 AutoFarmButton.TextColor3 = Color3.new(1, 1, 1)
-AutoFarmButton.TextSize = 18
+AutoFarmButton.TextSize = 16
 AutoFarmButton.ZIndex = 2
 
 local UICorner2 = Instance.new("UICorner")
@@ -71,73 +72,50 @@ UICorner2.Parent = AutoFarmButton
 UICorner2.CornerRadius = UDim.new(0, 12)
 
 --// Logic
-local AutoFarmEnabled = false
+local MagnetEnabled = false
 
--- 🎯 AHORA BUSCA POR FORMA O NOMBRE CORTO
-local function FarmBalls()
-    while AutoFarmEnabled do
+-- 🧲 FUNCIÓN IMÁN (LAS PELOTAS VIENEN HACIA TI)
+local function MagnetMode()
+    while MagnetEnabled do
         for _, descendant in pairs(Workspace:GetDescendants()) do
-            -- Buscamos Partes o MeshParts
             if descendant:IsA("Part") or descendant:IsA("MeshPart") then
-                
-                -- CONDICIONES PARA QUE LAS AGARRE A TODAS:
                 local nombre = descendant.Name:lower()
-                local esPelota = false
-
-                -- Si tiene "ball" en el nombre
-                if string.find(nombre, "ball") then
-                    esPelota = true
-                end
-
-                -- O si es de forma redonda (Shape)
-                if descendant.Shape == Enum.PartType.Ball then
-                    esPelota = true
-                end
-
-                -- O si tiene ciertos colores que reconocimos en la foto
-                local color = descendant.Color
-                if color == Color3.new(0, 0, 1) or color == Color3.new(1, 0, 0) or color == Color3.new(0.5, 0, 0.5) then
-                    esPelota = true
-                end
-
-                -- SI ES UNA PELOTA, ENTONCES LA RECOGEMOS
-                if esPelota then
-                    -- Método 1: Click
+                
+                -- Detectar si es una pelota
+                if string.find(nombre, "ball") or descendant.Shape == Enum.PartType.Ball then
+                    
+                    -- HACER QUE VUELE HACIA TI
+                    if descendant:FindFirstChild("BodyVelocity") then
+                        descendant.BodyVelocity:Destroy()
+                    end
+                    
+                    local BV = Instance.new("BodyVelocity", descendant)
+                    BV.Velocity = (HumanoidRootPart.Position - descendant.Position).Unit * 50 -- Velocidad de atracción
+                    BV.MaxForce = Vector3.new(10000,10000,10000)
+                    
+                    -- También intentamos recogerla
                     local Click = descendant:FindFirstChildOfClass("ClickDetector")
-                    if Click then
-                        fireclickdetector(Click)
-                    end
-
-                    -- Método 2: Proximity
+                    if Click then fireclickdetector(Click) end
+                    
                     local Prompt = descendant:FindFirstChildOfClass("ProximityPrompt")
-                    if Prompt then
-                        Prompt:InputHoldBegin()
-                        task.wait(0.05)
-                        Prompt:InputHoldEnd()
-                    end
-
-                    -- Método 3: Destruir para asegurar
-                    task.wait(0.05)
-                    if descendant.Parent then
-                        descendant:Destroy()
-                    end
+                    if Prompt then Prompt:InputHoldBegin() end
                 end
             end
         end
-        task.wait(0.1)
+        task.wait(0.05) -- Muy rápido
     end
 end
 
 -- Evento del boton
 AutoFarmButton.MouseButton1Click:Connect(function()
-    AutoFarmEnabled = not AutoFarmEnabled
-    if AutoFarmEnabled then
+    MagnetEnabled = not MagnetEnabled
+    if MagnetEnabled then
         AutoFarmButton.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
-        AutoFarmButton.Text = "RECOGIENDO... ✅"
-        task.spawn(FarmBalls)
+        AutoFarmButton.Text = "🛑 DETENER IMÁN"
+        task.spawn(MagnetMode)
     else
         AutoFarmButton.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
-        AutoFarmButton.Text = "Auto Farm Pelotas ⚽"
+        AutoFarmButton.Text = "🧲 ACTIVAR IMÁN"
     end
 end)
 
@@ -146,4 +124,4 @@ MainFrame.Size = UDim2.new(0, 0, 0, 0)
 local Tween = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 280, 0, 200)})
 Tween:Play()
 
-print("Script JoseAngel_Blox Block Cup cargado!")
+print("Script JoseAngel_Blox - MODO IMÁN CARGADO!")
