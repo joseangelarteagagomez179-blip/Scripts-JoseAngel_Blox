@@ -1,17 +1,15 @@
--- JoseAngel_Blox Block Cup | Luxvs System
+-- JoseAngel_Blox Block Cup | SYSTEM LUXVS
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
--- CONFIGURACION DEL EVENTO (IGUAL QUE LUXVS)
+-- CONFIG
 _G.AutoFarmEvent = false
-local Range = 200
-local Speed = 100
+local Range = 300
 
 -- == INTERFAZ ==
 local Gui = Instance.new("ScreenGui")
@@ -81,13 +79,13 @@ Boton.MouseButton1Click:Connect(function()
     end
 end)
 
--- == SISTEMA DEL EVENTO INTEGRADO (ESTILO LUXVS) ==
+-- == SISTEMA DE IMAN FUERTE Y EFECTIVO ==
 spawn(function()
-    while task.wait() do
+    while task.wait(0.01) do
         if _G.AutoFarmEvent and Humanoid.Health > 0 then
             local HumRoot = Character.HumanoidRootPart
 
-            -- AUTO KICK BLOQUES DEL EVENTO
+            -- AUTO KICK
             for _, v in pairs(Workspace:GetDescendants()) do
                 if v:IsA("Part") and v:FindFirstChildOfClass("ClickDetector") then
                     if (HumRoot.Position - v.Position).Magnitude <= Range then
@@ -96,14 +94,14 @@ spawn(function()
                 end
             end
 
-            -- IMAN PARA TODAS LAS BOLAS DEL EVENTO
+            -- IMAN QUE SI FUNCIONA
             for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("Part") or v:IsA("MeshPart") then
+                if v:IsA("BasePart") then
                     local name = string.lower(v.Name)
-                    if name:find("ball") or name:find("chance") or name:find("dobles") or name:find("brainrot") or name:find("mut") then
+                    if name:find("ball") or name:find("chance") or name:find("dobles") or name:find("común") then
                         if (HumRoot.Position - v.Position).Magnitude <= Range then
-                            -- METODO LUXVS (SUAVE Y EFECTIVO)
-                            v.CFrame = v.CFrame:Lerp(HumRoot.CFrame, 0.2)
+                            -- LAS TRAE DIRECTO Y RAPIDO
+                            v.CFrame = CFrame.new(HumRoot.Position + Vector3.new(0, 1, 0))
                         end
                     end
                 end
@@ -114,6 +112,6 @@ end)
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "JoseAngel_Blox",
-    Text = "Luxvs Event System Loaded 🧲",
+    Text = "IMAN ACTIVO | FUNCIONANDO 🧲",
     Duration = 3
 })
