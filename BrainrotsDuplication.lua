@@ -57,7 +57,7 @@ VIPText.BackgroundTransparency = 1
 VIPText.Position = UDim2.new(0, 0, 0, 40)
 VIPText.Size = UDim2.new(1, 0, 0, 20)
 VIPText.Font = Enum.Font.Gotham
-VIPText.Text = "💎 VERSIÓN VIP - MODO DIOS 💎"
+VIPText.Text = "💎 VERSIÓN VIP - MÉTODO INVENTARIO 💎"
 VIPText.TextColor3 = Color3.fromRGB(255, 215, 0)
 VIPText.TextSize = 14
 
@@ -70,7 +70,7 @@ InputBox.BorderColor3 = Color3.fromRGB(0, 170, 255)
 InputBox.Position = UDim2.new(0.1, 0, 0.35, 0)
 InputBox.Size = UDim2.new(0.8, 0, 0, 40)
 InputBox.Font = Enum.Font.Gotham
-InputBox.PlaceholderText = "Escribe nombre EXACTO (con paréntesis)"
+InputBox.PlaceholderText = "Ej: Krupuk Pagi Pagi (Fantasma)"
 InputBox.Text = ""
 InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 InputBox.TextSize = 16
@@ -96,7 +96,7 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = DuplicateBtn
 
---// 💥 MÉTODO NUEVO Y SECRETO 💥
+--// 💥 MÉTODO SECRETO: AGREGAR AL INVENTARIO 💥
 DuplicateBtn.MouseButton1Click:Connect(function()
     BrainrotName = InputBox.Text
     
@@ -111,43 +111,60 @@ DuplicateBtn.MouseButton1Click:Connect(function()
     tweenOut:Play()
     tweenIn:Play()
     
-    DuplicateBtn.Text = "🔍 BUSCANDO..."
+    DuplicateBtn.Text = "✨ PROCESANDO..."
     
     local success, err = pcall(function()
+        -- 🔑 INTENTA ENCONTRAR DONDE ESTÁN LOS DATOS
         local found = nil
         
-        -- 🔍 BUSQUEDA MODO DIOS
-        -- Busca en TODO el juego, no solo en el jugador
-        for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
-            if string.find(string.lower(obj.Name), string.lower(BrainrotName)) then
-                -- Verifica si tiene valores dentro (para asegurar que es un Brainrot)
-                if obj:FindFirstChildWhichIsA("ValueBase") or obj:FindFirstChild("Name") or obj:FindFirstChild("Rarity") then
-                    found = obj
-                    break
-                end
+        -- Busca en todas las carpetas conocidas de inventario
+        local foldersToCheck = {"Inventory", "Items", "Pets", "Brainrots", "Data"}
+        
+        for _, folderName in pairs(foldersToCheck) do
+            if Player:FindFirstChild(folderName) then
+                found = Player[folderName]
+                break
             end
         end
         
-        -- Si no lo encontró en Workspace, busca en el jugador
-        if not found then
-            for _, obj in pairs(Player:GetDescendants()) do
-                if string.find(string.lower(obj.Name), string.lower(BrainrotName)) then
-                    found = obj
-                    break
-                end
-            end
-        end
-
-        -- ✅ SI LO ENCONTRÓ, LO DUPLICA
+        -- Si encontró la carpeta, crea el objeto ahí
         if found then
-            local Clone = found:Clone()
-            Clone.Parent = found.Parent
-            DuplicateBtn.Text = "✅ ¡DUPLICADO!"
+            -- Crea un nuevo objeto igual al nombre que pusiste
+            local newItem = Instance.new("Folder") -- O Tool, depende del juego
+            newItem.Name = BrainrotName
+            
+            -- Copia las propiedades del original si lo encuentra cerca
+            local original = found:FindFirstChild(BrainrotName)
+            if original then
+                -- Clona TODO lo que tiene adentro (estadísticas, mutación, etc.)
+                for _, child in pairs(original:GetChildren()) do
+                    child:Clone().Parent = newItem
+                end
+                newItem.Parent = found
+                DuplicateBtn.Text = "✅ ¡DUPLICADO!"
+            else
+                -- Si no encuentra el original, lo crea igual
+                newItem.Parent = found
+                DuplicateBtn.Text = "✅ ¡AGREGADO!"
+            end
             wait(1)
             DuplicateBtn.Text = "🚀 DUPLICAR"
         else
-            DuplicateBtn.Text = "❌ NO ENCONTRADO"
-            wait(1)
+            -- MÉTODO DE EMERGENCIA: Busca cualquier valor numérico y lo aumenta
+            for _, descendant in pairs(Player:GetDescendants()) do
+                if descendant:IsA("NumberValue") or descendant:IsA("IntValue") then
+                    if string.find(string.lower(descendant.Name), string.lower(BrainrotName)) or string.find(string.lower(descendant.Parent.Name), string.lower(BrainrotName)) then
+                        descendant.Value = descendant.Value + 1 -- Aumenta la cantidad
+                        DuplicateBtn.Text = "✅ ¡CANTIDAD AUMENTADA!"
+                        wait(1)
+                        DuplicateBtn.Text = "🚀 DUPLICAR"
+                        return
+                    end
+                end
+            end
+            -- Si nada funciona
+            DuplicateBtn.Text = "⚠️ INTENTA OTRO NOMBRE"
+            wait(2)
             DuplicateBtn.Text = "🚀 DUPLICAR"
         end
     end)
@@ -186,4 +203,4 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Script Duplicar Brainrots Pro VIP MODO DIOS Cargado!")
+print("✅ Script Duplicar Brainrots Pro VIP MÉTODO INVENTARIO Cargado!")
