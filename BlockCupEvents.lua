@@ -1,196 +1,116 @@
--- ============================================
---  JOSEANGEL_BLOX BLOCK CUP - MODO IMÁN
---  Atrae todas las balls hacia el jugador
--- ============================================
+-- JoseAngel_Blox - Block Cup
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
+local Player = game:GetService("Players").LocalPlayer
+local HumRoot = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") or Player.CharacterAdded:Wait():WaitForChild("HumanoidRootPart")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
-
--- ============================================
---  CONFIGURACIÓN DEL IMÁN
--- ============================================
-local CONFIG = {
-    RadioImán = 50,              -- Distancia de atracción
-    FuerzaImán = 5,              -- Velocidad de atracción (0.5 - 10)
-    TeclaActivar = Enum.KeyCode.F1,
-    -- Lista de posibles nombres (probamos todos)
-    NombresBalls = {
-        "Ball", "RareBall", "EpicBall", "LegendaryBall", 
-        "MutationBall", "CupBall", "EventBall", "SoccerBall",
-        "Bola", "Rare", "Epic", "Legendary", "Mutation",
-        "Collectible", "Cup_Collectible", "Part"
-    }
-}
-
-local imanActivo = false
-local ballsAtraidas = 0
-
--- ============================================
---  FUNCIÓN: DETECTAR BALLS
--- ============================================
-local function detectarBalls()
-    local balls = {}
-    local posJugador = rootPart.Position
-    
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        -- Solo partes que sean físicas
-        if obj:IsA("Part") or obj:IsA("MeshPart") then
-            local nombre = obj.Name or ""
-            local nombreLower = string.lower(nombre)
-            
-            -- Verificar si es una ball
-            local esBall = false
-            for _, palabra in ipairs(CONFIG.NombresBalls) do
-                if string.find(nombreLower, string.lower(palabra)) then
-                    esBall = true
-                    break
-                end
-            end
-            
-            -- Si es una ball, verificar distancia
-            if esBall and obj.Parent ~= character then
-                local distancia = (obj.Position - posJugador).Magnitude
-                if distancia <= CONFIG.RadioImán then
-                    table.insert(balls, {
-                        objeto = obj,
-                        posicion = obj.Position,
-                        distancia = distancia
-                    })
-                end
+local function RecogerBolas()
+    for _, v in pairs(workspace:GetChildren()) do
+        if string.find(string.lower(v.Name), "ball") then
+            if v:IsA("Part") or v:IsA("MeshPart") then
+                v.CFrame = HumRoot.CFrame
             end
         end
     end
-    
-    return balls
 end
 
--- ============================================
---  FUNCIÓN: ATRAER BALLS (EFECTO IMÁN)
--- ============================================
-local function atraerBalls()
-    local balls = detectarBalls()
-    
-    if #balls == 0 then
-        -- Si no hay balls, mostrar mensaje ocasional
-        if math.random(1, 100) == 1 then
-            print("[🔍] Buscando balls... (Activa F1 para desactivar)")
-        end
-        return
-    end
-    
-    local posJugador = rootPart.Position
-    
-    for _, ballData in ipairs(balls) do
-        local obj = ballData.objeto
-        local posBall = ballData.posicion
-        local distancia = ballData.distancia
-        
-        -- Calcular dirección hacia el jugador
-        local direccion = (posJugador - posBall).Unit
-        local fuerza = CONFIG.FuerzaImán / (distancia / 10 + 1) -- Más fuerza si está cerca
-        
-        -- Mover la ball hacia el jugador
-        local nuevaPos = posBall + direccion * fuerza * 0.5
-        
-        -- Aplicar movimiento (si tiene masa)
-        if obj:IsA("Part") then
-            -- Método 1: Mover directamente (más agresivo)
-            obj.Position = nuevaPos
-            
-            -- También podemos usar Velocity para un efecto más suave
-            -- obj.Velocity = direccion * 20
-        end
-        
-        -- Si está muy cerca, recolectar
-        if distancia < 3 then
-            print("[✅] Ball RECOLECTADA: " .. obj.Name)
-            ballsAtraidas = ballsAtraidas + 1
-            -- Guardar en el jugador
-            if obj.Parent then
-                obj:Destroy() -- Eliminar la ball (simula recolección)
-            end
-        end
-    end
-    
-    -- Mostrar conteo cada 10 balls
-    if ballsAtraidas > 0 and ballsAtraidas % 10 == 0 then
-        print("[📊] Balls recolectadas: " .. ballsAtraidas)
-    end
-end
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "JoseAngel_Blox"
+Gui.Parent = Player.PlayerGui
 
--- ============================================
---  FUNCIÓN: LOOP DEL IMÁN
--- ============================================
-local function loopIman()
-    print("[🧲] MODO IMÁN ACTIVADO")
-    print("[⚡] Atrayendo balls...")
-    
-    while imanActivo do
-        wait(0.05) -- Loop rápido para efecto suave
-        atraerBalls()
-    end
-end
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 250, 0, 150)
+Frame.Position = UDim2.new(0.1, 0, 0.1, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+Frame.BorderSizePixel = 0
+Frame.ClipsDescendants = true
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = Gui
 
--- ============================================
---  ACTIVAR/DESACTIVAR CON F1
--- ============================================
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
-    if input.KeyCode == CONFIG.TeclaActivar then
-        imanActivo = not imanActivo
-        
-        if imanActivo then
-            print("[✅] IMÁN ACTIVADO | Presiona F1 para desactivar")
-            task.spawn(loopIman)
-        else
-            print("[⏹️] IMÁN DESACTIVADO")
-            print("[📊] Total recolectado: " .. ballsAtraidas .. " balls")
-        end
-    end
+local BackgroundImage = Instance.new("ImageLabel")
+BackgroundImage.Size = UDim2.new(1, 0, 1, 0)
+BackgroundImage.Position = UDim2.new(0,0,0,0)
+BackgroundImage.BackgroundTransparency = 1
+BackgroundImage.Image = "rbxassetid://1234567890"
+BackgroundImage.ScaleType = Enum.ScaleType.Fit
+BackgroundImage.Parent = Frame
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 15)
+UICorner.Parent = Frame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0,0,0,0)
+Title.BackgroundTransparency = 1
+Title.Text = "JoseAngel_Blox"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.ZIndex = 2
+Title.Parent = Frame
+
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Size = UDim2.new(1, 0, 0, 20)
+SubTitle.Position = UDim2.new(0, 0, 0, 25)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "Block Cup 🏆"
+SubTitle.TextColor3 = Color3.new(255, 215, 0)
+SubTitle.Font = Enum.Font.GothamBold
+SubTitle.TextSize = 12
+SubTitle.ZIndex = 2
+SubTitle.Parent = Frame
+
+local Btn1 = Instance.new("TextButton")
+Btn1.Size = UDim2.new(0.9, 0, 0, 35)
+Btn1.Position = UDim2.new(0.05, 0, 0, 55)
+Btn1.BackgroundColor3 = Color3.fromRGB(0, 80, 200)
+Btn1.BorderSizePixel = 0
+Btn1.Text = "Collect Ball Once"
+Btn1.TextColor3 = Color3.new(1,1,1)
+Btn1.Font = Enum.Font.GothamBold
+Btn1.TextSize = 14
+Btn1.ZIndex = 2
+Btn1.Parent = Frame
+
+local Corner1 = Instance.new("UICorner")
+Corner1.CornerRadius = UDim.new(0, 8)
+Corner1.Parent = Btn1
+
+local Btn2 = Instance.new("TextButton")
+Btn2.Size = UDim2.new(0.9, 0, 0, 35)
+Btn2.Position = UDim2.new(0.05, 0, 0, 95)
+Btn2.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
+Btn2.BorderSizePixel = 0
+Btn2.Text = "Auto Collect Ball: OFF"
+Btn2.TextColor3 = Color3.new(1,1,1)
+Btn2.Font = Enum.Font.GothamBold
+Btn2.TextSize = 14
+Btn2.ZIndex = 2
+Btn2.Parent = Frame
+
+local Corner2 = Instance.new("UICorner")
+Corner2.CornerRadius = UDim.new(0, 8)
+Corner2.Parent = Btn2
+
+local Auto = false
+
+Btn1.MouseButton1Click:Connect(function()
+    RecogerBolas()
 end)
 
--- ============================================
---  EFECTO VISUAL (Opcional)
--- ============================================
--- Crea partículas alrededor del jugador (se ve cool)
-local function crearEfectoIman()
-    local attachment = Instance.new("Attachment")
-    attachment.Parent = rootPart
-    attachment.Position = Vector3.new(0, 2, 0)
-    
-    local particle = Instance.new("ParticleEmitter")
-    particle.Parent = attachment
-    particle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-    particle.Rate = 50
-    particle.SpreadAngle = Vector2.new(360, 360)
-    particle.Speed = NumberRange.new(1, 3)
-    particle.Lifetime = NumberRange.new(0.5, 1)
-    particle.Color = ColorSequence.new(Color3.new(0, 0.8, 1))
-    particle.Transparency = NumberSequence.new(0.7)
-    particle.Size = NumberSequence.new(0.5)
-    particle.Enabled = true
-    
-    print("[✨] Efecto visual activado")
-end
-
--- Descomentar para activar efecto visual
--- task.spawn(crearEfectoIman)
-
--- ============================================
---  INICIO
--- ============================================
-print("")
-print("========================================")
-print("  🧲 JOSEANGEL_BLOX BLOCK CUP - IMÁN")
-print("  Presiona F1 para ACTIVAR/DESACTIVAR")
-print("  Radio de atracción: " .. CONFIG.RadioImán .. " estudios")
-print("========================================")
-print("")
+Btn2.MouseButton1Click:Connect(function()
+    Auto = not Auto
+    if Auto then
+        Btn2.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
+        Btn2.Text = "Auto Collect Ball: ON"
+        spawn(function()
+            while Auto and task.wait(0.1) do
+                RecogerBolas()
+            end
+        end)
+    else
+        Btn2.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
+        Btn2.Text = "Auto Collect Ball: OFF"
+    end
+end)
