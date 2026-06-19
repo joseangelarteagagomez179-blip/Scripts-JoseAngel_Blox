@@ -1,16 +1,13 @@
--- JoseAngel_Blox - Block Cup (TODAS LAS BOLAS INCLUIDAS)
+-- JoseAngel_Blox - Block Cup (VERSION FINAL)
 
 local Player = game:GetService("Players").LocalPlayer
 local HumRoot = Player.Character:WaitForChild("HumanoidRootPart")
 
--- 🎯 FUNCIÓN PERFECTA: AGARRA NORMALES, RARAS, ÉPICAS Y LEGENDARIAS
 local function RecogerBolas()
     for _, v in pairs(workspace:GetDescendants()) do
-        -- Busca TODO lo que tenga "Ball" en el nombre, sin importar lo demás
         if string.find(string.lower(v.Name), "ball") then
             if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("BasePart") then
-                -- Las teletransportamos directo y rápido
-                v.CFrame = HumRootRoot.CFrame
+                v.CFrame = HumRoot.CFrame -- ✅ AQUI ESTA CORREGIDO
                 v.CanCollide = false
             end
         end
@@ -40,7 +37,7 @@ local BackgroundImage = Instance.new("ImageLabel")
 BackgroundImage.Size = UDim2.new(1, 0, 1, 0)
 BackgroundImage.Position = UDim2.new(0,0,0,0)
 BackgroundImage.BackgroundTransparency = 1
-BackgroundImage.Image = "rbxassetid://1234567890" -- Pon tu ID aqui
+BackgroundImage.Image = "rbxassetid://1234567890"
 BackgroundImage.ScaleType = Enum.ScaleType.Fit
 BackgroundImage.Parent = Frame
 
