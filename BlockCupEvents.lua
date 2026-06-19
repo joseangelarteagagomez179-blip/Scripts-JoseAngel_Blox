@@ -1,4 +1,4 @@
--- JoseAngel_Blox - Block Cup (VERSION ESTABLE)
+-- JoseAngel_Blox - Block Cup (VERSION FINAL SIN BUGS)
 
 local Player = game:GetService("Players").LocalPlayer
 local HumRoot = Player.Character:WaitForChild("HumanoidRootPart")
@@ -6,10 +6,19 @@ local HumRoot = Player.Character:WaitForChild("HumanoidRootPart")
 local function RecogerBolas()
     for _, v in pairs(workspace:GetDescendants()) do
         local name = string.lower(v.Name)
+
+        -- 🛡️ NO TOCAR NADA DEL MAPA
+        if string.find(name, "floor") or string.find(name, "ground") or string.find(name, "base") or string.find(name, "wall") or string.find(name, "map") or string.find(name, "part") then
+            continue
+        end
+
+        -- ✅ SOLO BOLAS
         if string.find(name, "ball") or string.find(name, "rare") or string.find(name, "epic") or string.find(name, "legend") or string.find(name, "mut") then
             if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("BasePart") then
-                -- Solo teletransportar, sin modificar fisica para evitar bugs
-                v.CFrame = HumRoot.CFrame
+                -- 📍 La ponemos ENFRENTE tuyo, no encima, para no empujar
+                v.CFrame = HumRoot.CFrame * CFrame.new(0, 0, -2)
+                v.Velocity = Vector3.new(0,0,0)
+                v.Anchored = false
             end
         end
     end
@@ -99,7 +108,7 @@ Btn2.MouseButton1Click:Connect(function()
         Btn2.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
         Btn2.Text = "Auto Collect: ON"
         Loop = task.spawn(function()
-            while Auto and task.wait(0.1) do -- Mas lento = Mas estable
+            while Auto and task.wait(0.1) do
                 RecogerBolas()
             end
         end)
