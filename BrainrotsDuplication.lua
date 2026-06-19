@@ -57,7 +57,7 @@ VIPText.BackgroundTransparency = 1
 VIPText.Position = UDim2.new(0, 0, 0, 40)
 VIPText.Size = UDim2.new(1, 0, 0, 20)
 VIPText.Font = Enum.Font.Gotham
-VIPText.Text = "💎 VERSIÓN VIP - MUTACIONES 💎"
+VIPText.Text = "💎 VERSIÓN VIP - MODO DIOS 💎"
 VIPText.TextColor3 = Color3.fromRGB(255, 215, 0)
 VIPText.TextSize = 14
 
@@ -70,7 +70,7 @@ InputBox.BorderColor3 = Color3.fromRGB(0, 170, 255)
 InputBox.Position = UDim2.new(0.1, 0, 0.35, 0)
 InputBox.Size = UDim2.new(0.8, 0, 0, 40)
 InputBox.Font = Enum.Font.Gotham
-InputBox.PlaceholderText = "Ej: Nombre (Diamante) o Nombre [Oro]"
+InputBox.PlaceholderText = "Escribe nombre EXACTO (con paréntesis)"
 InputBox.Text = ""
 InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 InputBox.TextSize = 16
@@ -96,7 +96,7 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = DuplicateBtn
 
---// FUNCIÓN MEJORADA PARA MUTACIONES 🔥
+--// 💥 MÉTODO NUEVO Y SECRETO 💥
 DuplicateBtn.MouseButton1Click:Connect(function()
     BrainrotName = InputBox.Text
     
@@ -116,25 +116,36 @@ DuplicateBtn.MouseButton1Click:Connect(function()
     local success, err = pcall(function()
         local found = nil
         
-        -- 🔍 BUSQUEDA ULTRA COMPLETA
-        -- Busca en TODO lo que tiene el jugador, incluyendo objetos con paréntesis o corchetes
-        for _, descendant in pairs(Player:GetDescendants()) do
-            -- Compara el nombre EXACTO, incluyendo (Diamante), [Oro], etc.
-            if string.lower(descendant.Name) == string.lower(BrainrotName) then
-                found = descendant
-                break
+        -- 🔍 BUSQUEDA MODO DIOS
+        -- Busca en TODO el juego, no solo en el jugador
+        for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
+            if string.find(string.lower(obj.Name), string.lower(BrainrotName)) then
+                -- Verifica si tiene valores dentro (para asegurar que es un Brainrot)
+                if obj:FindFirstChildWhichIsA("ValueBase") or obj:FindFirstChild("Name") or obj:FindFirstChild("Rarity") then
+                    found = obj
+                    break
+                end
+            end
+        end
+        
+        -- Si no lo encontró en Workspace, busca en el jugador
+        if not found then
+            for _, obj in pairs(Player:GetDescendants()) do
+                if string.find(string.lower(obj.Name), string.lower(BrainrotName)) then
+                    found = obj
+                    break
+                end
             end
         end
 
         -- ✅ SI LO ENCONTRÓ, LO DUPLICA
         if found then
             local Clone = found:Clone()
-            Clone.Parent = found.Parent -- Lo pone en el MISMO LUGAR
+            Clone.Parent = found.Parent
             DuplicateBtn.Text = "✅ ¡DUPLICADO!"
             wait(1)
             DuplicateBtn.Text = "🚀 DUPLICAR"
         else
-            -- ❌ SI NO LO ENCONTRÓ
             DuplicateBtn.Text = "❌ NO ENCONTRADO"
             wait(1)
             DuplicateBtn.Text = "🚀 DUPLICAR"
@@ -175,4 +186,4 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Script Duplicar Brainrots Pro VIP V3 (MUTACIONES) Cargado!")
+print("✅ Script Duplicar Brainrots Pro VIP MODO DIOS Cargado!")
