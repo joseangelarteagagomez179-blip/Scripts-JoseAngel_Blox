@@ -86,7 +86,7 @@ Boton.MouseButton1Click:Connect(function()
     end
 end)
 
--- == SCRIPT ATRAE TODAS LAS BOLAS ==
+-- == SCRIPT CON NOMBRES EXACTOS QUE ME DIJISTE ==
 spawn(function()
     while task.wait(0.01) do
         if Humanoid.Health > 0 and _G.AutoFarm == true then
@@ -101,12 +101,18 @@ spawn(function()
                 end
             end
             
-            -- ATRAE TODAS LAS BOLAS (TODOS LOS COLORES)
+            -- ATRAE TODAS LAS BOLAS POR NOMBRE EXACTO
             for _, Objeto in pairs(Workspace:GetDescendants()) do
                 if Objeto:IsA("Part") or Objeto:IsA("MeshPart") then
                     local Nombre = string.lower(Objeto.Name)
-                    -- Busca cualquier cosa que sea bola
-                    if string.find(Nombre, "ball") or string.find(Nombre, "bola") then
+                    
+                    -- LISTA DE NOMBRES QUE ME DISTE
+                    if string.find(Nombre, "bolas dobles") or 
+                       string.find(Nombre, "legendary balls") or 
+                       string.find(Nombre, "rare ball chance") or 
+                       string.find(Nombre, "epic ball chance") or 
+                       string.find(Nombre, "ball común normales") then
+                       
                         if (HumRoot.Position - Objeto.Position).Magnitude <= Rango then
                             -- MODO IMAN
                             Objeto.CFrame = Objeto.CFrame:Lerp(HumRoot.CFrame, FuerzaImant / 100)
@@ -121,6 +127,6 @@ end)
 -- Notificacion
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "JoseAngel_Blox",
-    Text = "Listo | Todas las bolas 🧲",
+    Text = "Nombres Actualizados 🧲",
     Duration = 3
 })
