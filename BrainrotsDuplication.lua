@@ -6,7 +6,7 @@ local PlayerGui = Player.PlayerGui
 
 --// Variables
 local GuiName = "DuplicarBrainrotsPro"
-local BrainrotName = ""
+local SelectedItem = nil
 
 --// Eliminar GUI anterior si existe
 if PlayerGui:FindFirstChild(GuiName) then
@@ -29,7 +29,7 @@ MainFrame.BorderColor3 = Color3.fromRGB(0, 170, 255)
 MainFrame.BorderMode = Enum.BorderMode.Inset
 MainFrame.BorderSizePixel = 2
 MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 300, 0, 250)
+MainFrame.Size = UDim2.new(0, 300, 0, 280)
 MainFrame.ClipsDescendants = true
 
 --// Esquinas Redondeadas
@@ -46,7 +46,7 @@ Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "⭐ DUPLICAR BRAINROTS PRO ⭐"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 18
+Title.TextSize = 16
 Title.TextStrokeTransparency = 0.3
 
 --// Subtítulo VIP
@@ -57,51 +57,121 @@ VIPText.BackgroundTransparency = 1
 VIPText.Position = UDim2.new(0, 0, 0, 40)
 VIPText.Size = UDim2.new(1, 0, 0, 20)
 VIPText.Font = Enum.Font.Gotham
-VIPText.Text = "💎 VERSIÓN VIP - MÉTODO INVENTARIO 💎"
+VIPText.Text = "💎 SELECCIONA Y CLONA 💎"
 VIPText.TextColor3 = Color3.fromRGB(255, 215, 0)
-VIPText.TextSize = 14
+VIPText.TextSize = 12
 
---// Input Box
-local InputBox = Instance.new("TextBox")
-InputBox.Name = "InputBox"
-InputBox.Parent = MainFrame
-InputBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-InputBox.BorderColor3 = Color3.fromRGB(0, 170, 255)
-InputBox.Position = UDim2.new(0.1, 0, 0.35, 0)
-InputBox.Size = UDim2.new(0.8, 0, 0, 40)
-InputBox.Font = Enum.Font.Gotham
-InputBox.PlaceholderText = "Ej: Krupuk Pagi Pagi (Fantasma)"
-InputBox.Text = ""
-InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-InputBox.TextSize = 16
-InputBox.ClearTextOnFocus = false
+--// TEXTO INDICADOR
+local SelectText = Instance.new("TextLabel")
+SelectText.Name = "SelectText"
+SelectText.Parent = MainFrame
+SelectText.BackgroundTransparency = 1
+SelectText.Position = UDim2.new(0.1, 0, 0.22, 0)
+SelectText.Size = UDim2.new(0.8, 0, 0, 20)
+SelectText.Font = Enum.Font.Gotham
+SelectText.Text = "📋 Selecciona de la lista:"
+SelectText.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectText.TextSize = 13
+
+--// 📋 CAJA DE SELECCIÓN (LISTA)
+local SelectionBox = Instance.new("TextBox")
+SelectionBox.Name = "SelectionBox"
+SelectionBox.Parent = MainFrame
+SelectionBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+SelectionBox.BorderColor3 = Color3.fromRGB(0, 170, 255)
+SelectionBox.Position = UDim2.new(0.1, 0, 0.32, 0)
+SelectionBox.Size = UDim2.new(0.8, 0, 0, 40)
+SelectionBox.Font = Enum.Font.Gotham
+SelectionBox.PlaceholderText = "Cargando inventario..."
+SelectionBox.Text = ""
+SelectionBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectionBox.TextSize = 14
+SelectionBox.ClearTextOnFocus = false
 
 local InputCorner = Instance.new("UICorner")
 InputCorner.CornerRadius = UDim.new(0, 8)
-InputCorner.Parent = InputBox
+InputCorner.Parent = SelectionBox
+
+--// BOTÓN CARGAR INVENTARIO
+local LoadBtn = Instance.new("TextButton")
+LoadBtn.Name = "LoadBtn"
+LoadBtn.Parent = MainFrame
+LoadBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+LoadBtn.Position = UDim2.new(0.1, 0, 0.47, 0)
+LoadBtn.Size = UDim2.new(0.8, 0, 0, 30)
+LoadBtn.Font = Enum.Font.GothamBold
+LoadBtn.Text = "🔄 ACTUALIZAR LISTA"
+LoadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadBtn.TextSize = 13
+
+local BtnCorner2 = Instance.new("UICorner")
+BtnCorner2.CornerRadius = UDim.new(0, 6)
+BtnCorner2.Parent = LoadBtn
 
 --// Botón Duplicar
 local DuplicateBtn = Instance.new("TextButton")
 DuplicateBtn.Name = "DuplicateBtn"
 DuplicateBtn.Parent = MainFrame
 DuplicateBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-DuplicateBtn.Position = UDim2.new(0.15, 0, 0.65, 0)
+DuplicateBtn.Position = UDim2.new(0.15, 0, 0.62, 0)
 DuplicateBtn.Size = UDim2.new(0.7, 0, 0, 45)
 DuplicateBtn.Font = Enum.Font.GothamBold
 DuplicateBtn.Text = "🚀 DUPLICAR"
 DuplicateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-DuplicateBtn.TextSize = 18
+DuplicateBtn.TextSize = 16
 
 local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = DuplicateBtn
 
---// 💥 MÉTODO SECRETO: AGREGAR AL INVENTARIO 💥
-DuplicateBtn.MouseButton1Click:Connect(function()
-    BrainrotName = InputBox.Text
+--// 💥 FUNCIÓN PARA CARGAR LA LISTA 💥
+local function cargarInventario()
+    local items = {}
+    SelectedItem = nil
     
-    if BrainrotName == "" then
-        InputBox.PlaceholderText = "⚠️ Escribe un nombre!"
+    -- Busca TODOS los objetos que tengas
+    for _, descendant in pairs(Player:GetDescendants()) do
+        if descendant:IsA("Tool") or descendant:IsA("Folder") or descendant:IsA("Model") or descendant:IsA("StringValue") then
+            if not items[descendant.Name] then
+                items[descendant.Name] = true
+            end
+        end
+    end
+    
+    -- Convierte la tabla en lista
+    local itemList = {}
+    for name in pairs(items) do
+        table.insert(itemList, name)
+    end
+    
+    if #itemList == 0 then
+        SelectionBox.Text = "⚠️ No se encontraron items"
+    else
+        SelectionBox.Text = "📋 Tienes "..#itemList.." items"
+        -- Crea un menú flotante o permite escribir, pero aquí lo dejamos listo para seleccionar
+        -- Para simplificar, el script usará el texto que pongas o selecciones
+    end
+    
+    return itemList
+end
+
+-- Cargar al iniciar
+cargarInventario()
+
+-- Botón actualizar
+LoadBtn.MouseButton1Click:Connect(function()
+    cargarInventario()
+    LoadBtn.Text = "✅ LISTA ACTUALIZADA"
+    wait(0.5)
+    LoadBtn.Text = "🔄 ACTUALIZAR LISTA"
+end)
+
+--// 💥 FUNCIÓN DUPLICAR 💥
+DuplicateBtn.MouseButton1Click:Connect(function()
+    local ItemName = SelectionBox.Text
+    
+    if ItemName == "" or ItemName == "⚠️ No se encontraron items" then
+        SelectionBox.PlaceholderText = "⚠️ Escribe o selecciona uno!"
         return
     end
     
@@ -111,62 +181,36 @@ DuplicateBtn.MouseButton1Click:Connect(function()
     tweenOut:Play()
     tweenIn:Play()
     
-    DuplicateBtn.Text = "✨ PROCESANDO..."
+    DuplicateBtn.Text = "🔄 CLONANDO..."
     
     local success, err = pcall(function()
-        -- 🔑 INTENTA ENCONTRAR DONDE ESTÁN LOS DATOS
         local found = nil
         
-        -- Busca en todas las carpetas conocidas de inventario
-        local foldersToCheck = {"Inventory", "Items", "Pets", "Brainrots", "Data"}
-        
-        for _, folderName in pairs(foldersToCheck) do
-            if Player:FindFirstChild(folderName) then
-                found = Player[folderName]
+        -- BUSCA EL OBJETO SELECCIONADO
+        for _, descendant in pairs(Player:GetDescendants()) do
+            if descendant.Name == ItemName then
+                found = descendant
                 break
             end
         end
-        
-        -- Si encontró la carpeta, crea el objeto ahí
+
         if found then
-            -- Crea un nuevo objeto igual al nombre que pusiste
-            local newItem = Instance.new("Folder") -- O Tool, depende del juego
-            newItem.Name = BrainrotName
+            -- 🧬 CLONACIÓN PERFECTA
+            local Clone = found:Clone()
+            Clone.Parent = found.Parent
             
-            -- Copia las propiedades del original si lo encuentra cerca
-            local original = found:FindFirstChild(BrainrotName)
-            if original then
-                -- Clona TODO lo que tiene adentro (estadísticas, mutación, etc.)
-                for _, child in pairs(original:GetChildren()) do
-                    child:Clone().Parent = newItem
-                end
-                newItem.Parent = found
-                DuplicateBtn.Text = "✅ ¡DUPLICADO!"
-            else
-                -- Si no encuentra el original, lo crea igual
-                newItem.Parent = found
-                DuplicateBtn.Text = "✅ ¡AGREGADO!"
+            -- Si es un valor numérico, aumenta la cantidad
+            if Clone:IsA("NumberValue") or Clone:IsA("IntValue") then
+                Clone.Value = Clone.Value + 1
             end
-            wait(1)
-            DuplicateBtn.Text = "🚀 DUPLICAR"
+            
+            DuplicateBtn.Text = "✅ ¡DUPLICADO!"
         else
-            -- MÉTODO DE EMERGENCIA: Busca cualquier valor numérico y lo aumenta
-            for _, descendant in pairs(Player:GetDescendants()) do
-                if descendant:IsA("NumberValue") or descendant:IsA("IntValue") then
-                    if string.find(string.lower(descendant.Name), string.lower(BrainrotName)) or string.find(string.lower(descendant.Parent.Name), string.lower(BrainrotName)) then
-                        descendant.Value = descendant.Value + 1 -- Aumenta la cantidad
-                        DuplicateBtn.Text = "✅ ¡CANTIDAD AUMENTADA!"
-                        wait(1)
-                        DuplicateBtn.Text = "🚀 DUPLICAR"
-                        return
-                    end
-                end
-            end
-            -- Si nada funciona
-            DuplicateBtn.Text = "⚠️ INTENTA OTRO NOMBRE"
-            wait(2)
-            DuplicateBtn.Text = "🚀 DUPLICAR"
+            DuplicateBtn.Text = "❌ NO ENCONTRADO"
         end
+        
+        wait(1)
+        DuplicateBtn.Text = "🚀 DUPLICAR"
     end)
     
     if not success then
@@ -203,4 +247,4 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Script Duplicar Brainrots Pro VIP MÉTODO INVENTARIO Cargado!")
+print("✅ Script Modo Selección Cargado!")
