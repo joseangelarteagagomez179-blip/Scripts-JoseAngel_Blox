@@ -1,18 +1,19 @@
--- JoseAngel_Blox Block Cup
+-- JoseAngel_Blox Block Cup | Luxvs System
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
--- Configuracion
-_G.AutoFarm = false -- Empieza apagado
-local Rango = 150
-local FuerzaImant = 80
+-- CONFIGURACION DEL EVENTO (IGUAL QUE LUXVS)
+_G.AutoFarmEvent = false
+local Range = 200
+local Speed = 100
 
--- == INTERFAZ PEQUEÑA Y DESLIZABLE ==
+-- == INTERFAZ ==
 local Gui = Instance.new("ScreenGui")
 local Main = Instance.new("Frame")
 local Fondo = Instance.new("ImageLabel")
@@ -23,7 +24,6 @@ Gui.Name = "JoseAngel_Blox"
 Gui.Parent = game:GetService("CoreGui")
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
--- Marco Cuadrado Pequeño
 Main.Name = "MainFrame"
 Main.Size = UDim2.new(0, 200, 0, 200)
 Main.Position = UDim2.new(0.1, 0, 0.3, 0)
@@ -31,15 +31,13 @@ Main.BackgroundColor3 = Color3.new(0.08, 0.08, 0.08)
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
 Main.Active = true
-Main.Draggable = true -- DESLIZABLE
+Main.Draggable = true
 Main.Parent = Gui
 
--- Bordes Redondeados
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = Main
 
--- Imagen Fondo
 Fondo.Name = "Fondo"
 Fondo.Size = UDim2.new(1, 0, 1, 0)
 Fondo.Position = UDim2.new(0,0,0,0)
@@ -48,7 +46,6 @@ Fondo.BackgroundTransparency = 1
 Fondo.ScaleType = Enum.ScaleType.Stretch
 Fondo.Parent = Main
 
--- Titulo
 Titulo.Name = "Titulo"
 Titulo.Size = UDim2.new(1, 0, 0, 30)
 Titulo.Position = UDim2.new(0, 0, 0, 5)
@@ -59,12 +56,11 @@ Titulo.Font = Enum.Font.GothamBold
 Titulo.TextSize = 16
 Titulo.Parent = Main
 
--- Boton
 Boton.Name = "BotonFarm"
 Boton.Size = UDim2.new(0, 160, 0, 40)
 Boton.Position = UDim2.new(0.5, -80, 0.7, 0)
-Boton.BackgroundColor3 = Color3.new(0.5,0,0) -- ROJO = OFF
-Boton.Text = "Auto Farm: OFF"
+Boton.BackgroundColor3 = Color3.new(0.5,0,0)
+Boton.Text = "Event: OFF"
 Boton.TextColor3 = Color3.new(1,1,1)
 Boton.Font = Enum.Font.GothamBold
 Boton.TextSize = 14
@@ -74,48 +70,40 @@ local UICornerBtn = Instance.new("UICorner")
 UICornerBtn.CornerRadius = UDim.new(0, 8)
 UICornerBtn.Parent = Boton
 
--- Funcion Boton
 Boton.MouseButton1Click:Connect(function()
-    _G.AutoFarm = not _G.AutoFarm
-    if _G.AutoFarm then
-        Boton.Text = "Auto Farm: ON"
-        Boton.BackgroundColor3 = Color3.new(0,0.5,0) -- VERDE = ON
+    _G.AutoFarmEvent = not _G.AutoFarmEvent
+    if _G.AutoFarmEvent then
+        Boton.Text = "Event: ON"
+        Boton.BackgroundColor3 = Color3.new(0,0.5,0)
     else
-        Boton.Text = "Auto Farm: OFF"
+        Boton.Text = "Event: OFF"
         Boton.BackgroundColor3 = Color3.new(0.5,0,0)
     end
 end)
 
--- == SCRIPT CON NOMBRES EXACTOS QUE ME DIJISTE ==
+-- == SISTEMA DEL EVENTO INTEGRADO (ESTILO LUXVS) ==
 spawn(function()
-    while task.wait(0.01) do
-        if Humanoid.Health > 0 and _G.AutoFarm == true then
+    while task.wait() do
+        if _G.AutoFarmEvent and Humanoid.Health > 0 then
             local HumRoot = Character.HumanoidRootPart
-            
-            -- Patear Bloques
-            for _, Parte in pairs(Workspace:GetDescendants()) do
-                if Parte:IsA("Part") and Parte:FindFirstChildOfClass("ClickDetector") then
-                    if (HumRoot.Position - Parte.Position).Magnitude <= Rango then
-                        fireclickdetector(Parte.ClickDetector)
+
+            -- AUTO KICK BLOQUES DEL EVENTO
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v:IsA("Part") and v:FindFirstChildOfClass("ClickDetector") then
+                    if (HumRoot.Position - v.Position).Magnitude <= Range then
+                        fireclickdetector(v.ClickDetector)
                     end
                 end
             end
-            
-            -- ATRAE TODAS LAS BOLAS POR NOMBRE EXACTO
-            for _, Objeto in pairs(Workspace:GetDescendants()) do
-                if Objeto:IsA("Part") or Objeto:IsA("MeshPart") then
-                    local Nombre = string.lower(Objeto.Name)
-                    
-                    -- LISTA DE NOMBRES QUE ME DISTE
-                    if string.find(Nombre, "bolas dobles") or 
-                       string.find(Nombre, "legendary balls") or 
-                       string.find(Nombre, "rare ball chance") or 
-                       string.find(Nombre, "epic ball chance") or 
-                       string.find(Nombre, "ball común normales") then
-                       
-                        if (HumRoot.Position - Objeto.Position).Magnitude <= Rango then
-                            -- MODO IMAN
-                            Objeto.CFrame = Objeto.CFrame:Lerp(HumRoot.CFrame, FuerzaImant / 100)
+
+            -- IMAN PARA TODAS LAS BOLAS DEL EVENTO
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v:IsA("Part") or v:IsA("MeshPart") then
+                    local name = string.lower(v.Name)
+                    if name:find("ball") or name:find("chance") or name:find("dobles") or name:find("brainrot") or name:find("mut") then
+                        if (HumRoot.Position - v.Position).Magnitude <= Range then
+                            -- METODO LUXVS (SUAVE Y EFECTIVO)
+                            v.CFrame = v.CFrame:Lerp(HumRoot.CFrame, 0.2)
                         end
                     end
                 end
@@ -124,9 +112,8 @@ spawn(function()
     end
 end)
 
--- Notificacion
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "JoseAngel_Blox",
-    Text = "Nombres Actualizados 🧲",
+    Text = "Luxvs Event System Loaded 🧲",
     Duration = 3
 })
