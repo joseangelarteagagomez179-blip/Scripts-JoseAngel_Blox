@@ -1,13 +1,15 @@
--- JoseAngel_Blox - Block Cup (VERSION FINAL)
+-- JoseAngel_Blox - Block Cup (TODAS LAS BOLAS)
 
 local Player = game:GetService("Players").LocalPlayer
 local HumRoot = Player.Character:WaitForChild("HumanoidRootPart")
 
 local function RecogerBolas()
     for _, v in pairs(workspace:GetDescendants()) do
-        if string.find(string.lower(v.Name), "ball") then
+        -- BUSCA CUALQUIER NOMBRE QUE TENGA "ball", "rare", "epic", "legend" O "mut"
+        local name = string.lower(v.Name)
+        if string.find(name, "ball") or string.find(name, "rare") or string.find(name, "epic") or string.find(name, "legend") or string.find(name, "mut") then
             if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("BasePart") then
-                v.CFrame = HumRoot.CFrame -- ✅ AQUI ESTA CORREGIDO
+                v.CFrame = HumRoot.CFrame
                 v.CanCollide = false
             end
         end
