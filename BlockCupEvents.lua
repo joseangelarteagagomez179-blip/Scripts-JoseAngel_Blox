@@ -1,127 +1,122 @@
---// Services
-local TweenService = game:GetService("TweenService")
+-- JoseAngel_Blox Block Cup
+
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
---// Variables
-local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
---// GUI
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local Title = Instance.new("TextLabel")
-local AutoFarmButton = Instance.new("TextButton")
-local ImageLabel = Instance.new("ImageLabel")
+-- Configuracion
+_G.AutoFarmBalls = true
+local Rango = 150
+local FuerzaImant = 50 -- Que tan rapido atrae las balls
 
---// Properties
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- == CREAR INTERFAZ ==
+local Gui = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+local Fondo = Instance.new("ImageLabel")
+local Titulo = Instance.new("TextLabel")
+local Info = Instance.new("TextLabel")
+local Boton = Instance.new("TextButton")
 
--- Main Frame
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-MainFrame.BackgroundTransparency = 0.3 -- Fondo semi-transparente
-MainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
-MainFrame.Size = UDim2.new(0, 280, 0, 200)
-MainFrame.Active = true
-MainFrame.Draggable = true -- Para moverlo
+Gui.Name = "JoseAngel_Blox"
+Gui.Parent = game:GetService("CoreGui")
 
--- Esquinas redondeadas
-UICorner.Parent = MainFrame
-UICorner.CornerRadius = UDim.new(0, 18)
+Main.Name = "MainFrame"
+Main.Size = UDim2.new(0, 350, 0, 250)
+Main.Position = UDim2.new(0.2, 0, 0.3, 0)
+Main.BackgroundTransparency = 1
+Main.Parent = Gui
 
--- Imagen de fondo (Mundial)
-ImageLabel.Parent = MainFrame
-ImageLabel.BackgroundTransparency = 1
-ImageLabel.Position = UDim2.new(0, 0, 0, 0)
-ImageLabel.Size = UDim2.new(1, 0, 1, 0)
-ImageLabel.Image = "rbxassetid://11934795837" -- Imagen tematica Mundial
-ImageLabel.ImageTransparency = 0.7 -- Transparente
-ImageLabel.ScaleType = Enum.ScaleType.Crop
-ImageLabel.ZIndex = 0
+-- IMAGEN DE FONDO
+Fondo.Name = "Fondo"
+Fondo.Size = UDim2.new(1, 0, 1, 0)
+Fondo.Position = UDim2.new(0,0,0,0)
+Fondo.Image = "http://www.roblox.com/asset/?id=13559396885"
+Fondo.BackgroundTransparency = 1
+Fondo.ScaleType = Enum.ScaleType.Stretch
+Fondo.Parent = Main
 
 -- Titulo
-Title.Name = "Title"
-Title.Parent = MainFrame
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(0, 280, 0, 50)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "JoseAngel_Blox\nBlock Cup"
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.TextSize = 20
-Title.ZIndex = 2
+Titulo.Name = "Titulo"
+Titulo.Size = UDim2.new(1, 0, 0, 40)
+Titulo.Position = UDim2.new(0, 0, 0, 5)
+Titulo.BackgroundTransparency = 1
+Titulo.Text = "JoseAngel_Blox"
+Titulo.TextColor3 = Color3.new(1,1,1)
+Titulo.Font = Enum.Font.GothamBold
+Titulo.TextSize = 22
+Titulo.Parent = Main
 
--- Boton Auto Farm
-AutoFarmButton.Name = "AutoFarmButton"
-AutoFarmButton.Parent = MainFrame
-AutoFarmButton.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
-AutoFarmButton.Position = UDim2.new(0.15, 0, 0.6, 0)
-AutoFarmButton.Size = UDim2.new(0, 190, 0, 50)
-AutoFarmButton.Font = Enum.Font.GothamBold
-AutoFarmButton.Text = "🧲 MODO IMÁN ACTIVADO"
-AutoFarmButton.TextColor3 = Color3.new(1, 1, 1)
-AutoFarmButton.TextSize = 16
-AutoFarmButton.ZIndex = 2
+-- Texto Informativo
+Info.Name = "Info"
+Info.Size = UDim2.new(1, 0, 0, 30)
+Info.Position = UDim2.new(0, 0, 0, 45)
+Info.BackgroundTransparency = 1
+Info.Text = "MODO IMAN | Las balls vienen hacia ti"
+Info.TextColor3 = Color3.new(0.9,0.9,0.9)
+Info.Font = Enum.Font.Gotham
+Info.TextSize = 14
+Info.Parent = Main
 
-local UICorner2 = Instance.new("UICorner")
-UICorner2.Parent = AutoFarmButton
-UICorner2.CornerRadius = UDim.new(0, 12)
+-- Boton
+Boton.Name = "BotonFarm"
+Boton.Size = UDim2.new(0, 220, 0, 45)
+Boton.Position = UDim2.new(0.5, -110, 0.8, -20)
+Boton.BackgroundColor3 = Color3.new(0,0.5,0)
+Boton.Text = "Auto Farm Balls: ON"
+Boton.TextColor3 = Color3.new(1,1,1)
+Boton.Font = Enum.Font.GothamBold
+Boton.TextSize = 16
+Boton.Parent = Main
 
---// Logic
-local MagnetEnabled = false
-
--- 🧲 FUNCIÓN IMÁN (LAS PELOTAS VIENEN HACIA TI)
-local function MagnetMode()
-    while MagnetEnabled do
-        for _, descendant in pairs(Workspace:GetDescendants()) do
-            if descendant:IsA("Part") or descendant:IsA("MeshPart") then
-                local nombre = descendant.Name:lower()
-                
-                -- Detectar si es una pelota
-                if string.find(nombre, "ball") or descendant.Shape == Enum.PartType.Ball then
-                    
-                    -- HACER QUE VUELE HACIA TI
-                    if descendant:FindFirstChild("BodyVelocity") then
-                        descendant.BodyVelocity:Destroy()
-                    end
-                    
-                    local BV = Instance.new("BodyVelocity", descendant)
-                    BV.Velocity = (HumanoidRootPart.Position - descendant.Position).Unit * 50 -- Velocidad de atracción
-                    BV.MaxForce = Vector3.new(10000,10000,10000)
-                    
-                    -- También intentamos recogerla
-                    local Click = descendant:FindFirstChildOfClass("ClickDetector")
-                    if Click then fireclickdetector(Click) end
-                    
-                    local Prompt = descendant:FindFirstChildOfClass("ProximityPrompt")
-                    if Prompt then Prompt:InputHoldBegin() end
-                end
-            end
-        end
-        task.wait(0.05) -- Muy rápido
-    end
-end
-
--- Evento del boton
-AutoFarmButton.MouseButton1Click:Connect(function()
-    MagnetEnabled = not MagnetEnabled
-    if MagnetEnabled then
-        AutoFarmButton.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
-        AutoFarmButton.Text = "🛑 DETENER IMÁN"
-        task.spawn(MagnetMode)
+-- Funcion del Boton
+Boton.MouseButton1Click:Connect(function()
+    _G.AutoFarmBalls = not _G.AutoFarmBalls
+    if _G.AutoFarmBalls then
+        Boton.Text = "Auto Farm Balls: ON"
+        Boton.BackgroundColor3 = Color3.new(0,0.5,0)
     else
-        AutoFarmButton.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
-        AutoFarmButton.Text = "🧲 ACTIVAR IMÁN"
+        Boton.Text = "Auto Farm Balls: OFF"
+        Boton.BackgroundColor3 = Color3.new(0.5,0,0)
     end
 end)
 
---// Animacion de entrada
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-local Tween = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 280, 0, 200)})
-Tween:Play()
+-- == SCRIPT OPTIMIZADO MODO IMAN ==
+spawn(function()
+    while task.wait(0.01) do
+        if Humanoid.Health > 0 and _G.AutoFarmBalls then
+            local HumRoot = Character.HumanoidRootPart
+            
+            -- 1. Patear Bloques
+            for _, Parte in pairs(Workspace:GetDescendants()) do
+                if Parte:IsA("Part") and Parte:FindFirstChildOfClass("ClickDetector") then
+                    if (HumRoot.Position - Parte.Position).Magnitude <= Rango then
+                        fireclickdetector(Parte.ClickDetector)
+                    end
+                end
+            end
+            
+            -- 2. MODO IMAN (Jalar Balls)
+            for _, Objeto in pairs(Workspace:GetDescendants()) do
+                if Objeto:IsA("Part") or Objeto:IsA("MeshPart") then
+                    local Nombre = string.lower(Objeto.Name)
+                    if string.find(Nombre, "ball") or string.find(Nombre, "soccer") or string.find(Nombre, "cup") then
+                        if (HumRoot.Position - Objeto.Position).Magnitude <= Rango then
+                            -- Mover la ball hacia el jugador
+                            Objeto.CFrame = Objeto.CFrame:Lerp(HumRoot.CFrame, FuerzaImant / 100)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
 
-print("Script JoseAngel_Blox - MODO IMÁN CARGADO!")
+-- Notificacion
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "JoseAngel_Blox",
+    Text = "Modo Iman Activado 🧲",
+    Duration = 3
+})
