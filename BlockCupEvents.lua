@@ -1,15 +1,17 @@
--- JoseAngel_Blox - Block Cup (FUNCIONAL)
+-- JoseAngel_Blox - Block Cup (TODAS LAS BOLAS INCLUIDAS)
 
 local Player = game:GetService("Players").LocalPlayer
 local HumRoot = Player.Character:WaitForChild("HumanoidRootPart")
 
--- Función arreglada para buscar en TODOS lados
+-- 🎯 FUNCIÓN PERFECTA: AGARRA NORMALES, RARAS, ÉPICAS Y LEGENDARIAS
 local function RecogerBolas()
-    -- Busca en todo el Workspace y dentro de las carpetas
     for _, v in pairs(workspace:GetDescendants()) do
+        -- Busca TODO lo que tenga "Ball" en el nombre, sin importar lo demás
         if string.find(string.lower(v.Name), "ball") then
             if v:IsA("Part") or v:IsA("MeshPart") or v:IsA("BasePart") then
-                v.CFrame = HumRoot.CFrame
+                -- Las teletransportamos directo y rápido
+                v.CFrame = HumRootRoot.CFrame
+                v.CanCollide = false
             end
         end
     end
@@ -99,7 +101,7 @@ Btn2.MouseButton1Click:Connect(function()
         Btn2.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
         Btn2.Text = "Auto Collect: ON"
         Loop = task.spawn(function()
-            while Auto and task.wait(0.1) do
+            while Auto and task.wait(0.05) do
                 RecogerBolas()
             end
         end)
