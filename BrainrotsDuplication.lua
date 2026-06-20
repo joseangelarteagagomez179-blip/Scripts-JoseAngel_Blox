@@ -9,7 +9,7 @@ local UIS = game:GetService("UserInputService")
 local GuiName = "DuplicarBrainrotsPro"
 local SelectedItem = nil
 
---// Eliminar GUI anterior si existe
+--// Eliminar GUI anterior
 if PlayerGui:FindFirstChild(GuiName) then
     PlayerGui[GuiName]:Destroy()
 end
@@ -27,10 +27,9 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-MainFrame.BorderMode = Enum.BorderMode.Inset
 MainFrame.BorderSizePixel = 2
 MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 320, 0, 380)
+MainFrame.Size = UDim2.new(0, 320, 0, 360)
 MainFrame.ClipsDescendants = true
 
 --// Esquinas Redondeadas
@@ -48,7 +47,6 @@ Title.Font = Enum.Font.GothamBold
 Title.Text = "⭐ DUPLICAR BRAINROTS PRO ⭐"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
-Title.TextStrokeTransparency = 0.3
 
 --// Subtítulo VIP
 local VIPText = Instance.new("TextLabel")
@@ -62,7 +60,7 @@ VIPText.Text = "💎 MODO ARRASTRAR Y SOLTAR 💎"
 VIPText.TextColor3 = Color3.fromRGB(255, 215, 0)
 VIPText.TextSize = 12
 
---// 📦 CUADRO VACÍO PARA COLOCAR
+--// 📦 CUADRO VACÍO
 local DropBox = Instance.new("Frame")
 DropBox.Name = "DropBox"
 DropBox.Parent = MainFrame
@@ -70,7 +68,7 @@ DropBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 DropBox.BorderColor3 = Color3.fromRGB(255, 255, 255)
 DropBox.BorderSizePixel = 2
 DropBox.Position = UDim2.new(0.25, 0, 0.20, 0)
-DropBox.Size = UDim2.new(0.5, 0, 0, 80)
+DropBox.Size = UDim2.new(0.5, 0, 0, 70)
 
 local DropCorner = Instance.new("UICorner")
 DropCorner.CornerRadius = UDim.new(0, 10)
@@ -91,24 +89,23 @@ local InvText = Instance.new("TextLabel")
 InvText.Name = "InvText"
 InvText.Parent = MainFrame
 InvText.BackgroundTransparency = 1
-InvText.Position = UDim2.new(0.05, 0, 0.48, 0)
+InvText.Position = UDim2.new(0.05, 0, 0.45, 0)
 InvText.Size = UDim2.new(0.9, 0, 0, 20)
 InvText.Font = Enum.Font.Gotham
 InvText.Text = "📜 Tu Inventario:"
 InvText.TextColor3 = Color3.fromRGB(255, 255, 255)
 InvText.TextSize = 13
 
---// 📜 SCROLLING FRAME (Lista Deslizable)
+--// 📜 LISTA DESLIZABLE
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Name = "ScrollingFrame"
 ScrollingFrame.Parent = MainFrame
 ScrollingFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-ScrollingFrame.Position = UDim2.new(0.05, 0, 0.54, 0)
-ScrollingFrame.Size = UDim2.new(0.9, 0, 0, 100)
+ScrollingFrame.Position = UDim2.new(0.05, 0, 0.51, 0)
+ScrollingFrame.Size = UDim2.new(0.9, 0, 90, 0)
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollingFrame.ScrollBarThickness = 6
-ScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
 local ScrollCorner = Instance.new("UICorner")
 ScrollCorner.CornerRadius = UDim.new(0, 8)
@@ -119,15 +116,14 @@ UIListLayout.Parent = ScrollingFrame
 UIListLayout.FillDirection = Enum.FillDirection.Horizontal
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 8)
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 
 --// Botón Duplicar
 local DuplicateBtn = Instance.new("TextButton")
 DuplicateBtn.Name = "DuplicateBtn"
 DuplicateBtn.Parent = MainFrame
 DuplicateBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-DuplicateBtn.Position = UDim2.new(0.15, 0, 0.85, 0)
-DuplicateBtn.Size = UDim2.new(0.7, 0, 0, 45)
+DuplicateBtn.Position = UDim2.new(0.15, 0, 0.82, 0)
+DuplicateBtn.Size = UDim2.new(0.7, 0, 0, 40)
 DuplicateBtn.Font = Enum.Font.GothamBold
 DuplicateBtn.Text = "🚀 DUPLICAR"
 DuplicateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -137,7 +133,7 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = DuplicateBtn
 
---// 💥 FUNCIÓN DE ARRASTRE 💥
+--// 💥 FUNCIÓN ARRASTRAR ITEM 💥
 local function MakeDraggable(itemButton, itemName, itemObject)
     local dragging = false
     local startPos = nil
@@ -147,18 +143,14 @@ local function MakeDraggable(itemButton, itemName, itemObject)
         dragging = true
         startPos = UIS:GetMouseLocation()
         originalPos = itemButton.Position
-        itemButton.ZIndex = 100 -- Poner encima de todo
-    end
+        itemButton.ZIndex = 100
+        itemButton.Position = UDim2.new(0, startPos.X - 35, 0, startPos.Y - 35)
+    end)
 
     UIS.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = UIS:GetMouseLocation() - startPos
-            itemButton.Position = UDim2.new(
-                originalPos.X.Scale,
-                originalPos.X.Offset + delta.X,
-                originalPos.Y.Scale,
-                originalPos.Y.Offset + delta.Y
-            )
+            local mousePos = UIS:GetMouseLocation()
+            itemButton.Position = UDim2.new(0, mousePos.X - 35, 0, mousePos.Y - 35)
         end
     end)
 
@@ -166,24 +158,25 @@ local function MakeDraggable(itemButton, itemName, itemObject)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             if dragging then
                 dragging = false
-                itemButton.ZIndex = 1
-
-                -- Verificar si soltó sobre el cuadro blanco
                 local mousePos = UIS:GetMouseLocation()
                 local boxPos = DropBox.AbsolutePosition
                 local boxSize = DropBox.AbsoluteSize
 
+                -- Verificar si está dentro del cuadro
                 if mousePos.X > boxPos.X and mousePos.X < boxPos.X + boxSize.X and
                    mousePos.Y > boxPos.Y and mousePos.Y < boxPos.Y + boxSize.Y then
                     
-                    -- ✅ SELECCIONADO
                     SelectedItem = itemObject
                     DropText.Text = "✅ " .. itemName
                     DropText.TextColor3 = Color3.fromRGB(0, 255, 0)
                 else
-                    -- Volver a su lugar si no soltó en el cuadro
-                    itemButton.Position = originalPos
+                    DropText.Text = "❌ Fuera"
+                    DropText.TextColor3 = Color3.fromRGB(255, 0, 0)
                 end
+                
+                -- Regresar botón a su lugar
+                itemButton.Position = originalPos
+                itemButton.ZIndex = 1
             end
         end
     end)
@@ -191,7 +184,7 @@ end
 
 --// 💥 CARGAR INVENTARIO 💥
 local function LoadInventory()
-    -- Limpiar lista anterior
+    -- Limpiar
     for _, child in pairs(ScrollingFrame:GetChildren()) do
         if child:IsA("TextButton") then
             child:Destroy()
@@ -202,7 +195,7 @@ local function LoadInventory()
 
     -- Buscar items
     for _, descendant in pairs(Player:GetDescendants()) do
-        if descendant:IsA("Tool") or descendant:IsA("Folder") or descendant:IsA("Model") or descendant:IsA("StringValue") then
+        if descendant:IsA("Tool") or descendant:IsA("Folder") or descendant:IsA("Model") or descendant:IsA("StringValue") or descendant:IsA("NumberValue") then
             if not itemsFound[descendant.Name] then
                 itemsFound[descendant.Name] = descendant
             end
@@ -212,13 +205,12 @@ local function LoadInventory()
     -- Crear botones
     for name, obj in pairs(itemsFound) do
         local ItemBtn = Instance.new("TextButton")
-        ItemBtn.Name = "Item_"..name
         ItemBtn.Size = UDim2.new(0, 70, 0, 70)
         ItemBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         ItemBtn.BorderColor3 = Color3.fromRGB(0, 170, 255)
         ItemBtn.Text = name
         ItemBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        ItemBtn.TextSize = 12
+        ItemBtn.TextSize = 11
         ItemBtn.Font = Enum.Font.GothamBold
         ItemBtn.Parent = ScrollingFrame
 
@@ -226,36 +218,24 @@ local function LoadInventory()
         BtnCorner2.CornerRadius = UDim.new(0, 8)
         BtnCorner2.Parent = ItemBtn
 
-        -- Hacerlo arrastrable
         MakeDraggable(ItemBtn, name, obj)
     end
 
-    if next(itemsFound) == nil then
-        local nada = Instance.new("TextLabel")
-        nada.Size = UDim2.new(0, 200, 0, 70)
-        nada.BackgroundTransparency = 1
-        nada.Text = "No tienes items 😢"
-        nada.TextColor3 = Color3.fromRGB(255,255,255)
-        nada.Parent = ScrollingFrame
-    end
+    -- Ajustar tamaño del scroll
+    local numItems = #ScrollingFrame:GetChildren() - 1
+    ScrollingFrame.CanvasSize = UDim2.new(0, (numItems * 78) + 10, 0, 0)
 end
 
 -- Cargar al iniciar
 LoadInventory()
 
---// 💥 FUNCIÓN DUPLICAR 💥
+--// 💥 DUPLICAR 💥
 DuplicateBtn.MouseButton1Click:Connect(function()
     if not SelectedItem then
         DropText.Text = "⚠️ SELECCIONA UNO!"
         DropText.TextColor3 = Color3.fromRGB(255, 0, 0)
         return
     end
-
-    -- Efecto
-    local tweenOut = TweenService:Create(DuplicateBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.68, 0, 0, 43)})
-    local tweenIn = TweenService:Create(DuplicateBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.7, 0, 0, 45)})
-    tweenOut:Play()
-    tweenIn:Play()
 
     DuplicateBtn.Text = "🔄 CLONANDO..."
 
@@ -264,7 +244,7 @@ DuplicateBtn.MouseButton1Click:Connect(function()
         Clone.Parent = SelectedItem.Parent
         
         DuplicateBtn.Text = "✅ ¡DUPLICADO!"
-        wait(1)
+        wait(0.5)
         DuplicateBtn.Text = "🚀 DUPLICAR"
         
         -- Actualizar lista
@@ -272,20 +252,19 @@ DuplicateBtn.MouseButton1Click:Connect(function()
     end)
 
     if not success then
-        warn(err)
         DuplicateBtn.Text = "❌ ERROR"
-        wait(1)
+        wait(0.5)
         DuplicateBtn.Text = "🚀 DUPLICAR"
     end
 end)
 
---// Hacer la GUI arrastrable
+--// MOVER GUI PRINCIPAL
 local DraggingGUI = nil
 local DragStart = nil
 local StartPos = nil
 
 MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
         DraggingGUI = true
         DragStart = input.Position
         StartPos = MainFrame.Position
@@ -293,17 +272,16 @@ MainFrame.InputBegan:Connect(function(input)
 end)
 
 UIS.InputChanged:Connect(function(input)
-    if DraggingGUI and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if DraggingGUI and input.UserInputType == Enum.UserInputType.MouseMovement then
         local Delta = input.Position - DragStart
         MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
     end
 end)
 
 UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
         DraggingGUI = false
     end
 end)
 
-print("✅ Script Drag & Drop Cargado!")
-    
+print("✅ Script CARGADO y LISTO!")
