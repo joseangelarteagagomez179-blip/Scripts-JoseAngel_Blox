@@ -1,15 +1,17 @@
 --// SERVICES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 local UIS = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
 --// VARIABLES
 local GuiName = "DuplicarBrainrotsPro"
 local SelectedItem = nil
-local SelectedData = nil
+local SelectedName = nil
+local SelectedMutation = nil
+local SelectedColor = nil
 
 --// ELIMINAR GUI ANTERIOR
 if PlayerGui:FindFirstChild(GuiName) then PlayerGui[GuiName]:Destroy() end
@@ -55,7 +57,7 @@ VIPText.BackgroundTransparency = 1
 VIPText.Position = UDim2.new(0, 0, 0, 40)
 VIPText.Size = UDim2.new(1, 0, 0, 20)
 VIPText.Font = Enum.Font.Gotham
-VIPText.Text = "💎 VERSIÓN FINAL - COLOCABLES Y GUARDADOS 💎"
+VIPText.Text = "💎 SOLO BRAINROTS - MUTACIONES REALES 💎"
 VIPText.TextColor3 = Color3.fromRGB(255, 215, 0)
 VIPText.TextSize = 11
 
@@ -135,7 +137,7 @@ DuplicateBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 DuplicateBtn.Position = UDim2.new(0.15, 0, 0.85, 0)
 DuplicateBtn.Size = UDim2.new(0.7, 0, 0, 45)
 DuplicateBtn.Font = Enum.Font.GothamBold
-DuplicateBtn.Text = "🚀 DUPLICAR Y GUARDAR"
+DuplicateBtn.Text = "🚀 DUPLICAR Y COLOCAR"
 DuplicateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 DuplicateBtn.TextSize = 14
 
@@ -143,39 +145,35 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 10)
 BtnCorner.Parent = DuplicateBtn
 
---// 💥 FUNCION PARA DETECTAR MUTACION 💥
-local function GetMutation(item)
-    -- Busca dentro del objeto valores como "Mutation", "Tier", "Rarity", "Element"
-    local mutation = "Normal"
-    local mutationColor = Color3.fromRGB(255,255,255)
+--// 💥 DETECTAR MUTACIÓN REAL 💥
+local function DetectarMutacion(nombreObjeto)
+    local nombre = string.lower(nombreObjeto)
+    local mutacion = "Normal"
+    local color = Color3.fromRGB(255,255,255)
 
-    for _, child in pairs(item:GetDescendants()) do
-        if child:IsA("StringValue") then
-            local nameLower = string.lower(child.Name)
-            if nameLower == "mutation" or nameLower == "tier" or nameLower == "rarity" or nameLower == "element" then
-                mutation = child.Value
-                break
-            end
-        end
+    if string.find(nombre, "oro") or string.find(nombre, "gold") then
+        mutacion = "Oro"
+        color = Color3.fromRGB(255, 215, 0)
+    elseif string.find(nombre, "diamante") or string.find(nombre, "diamond") then
+        mutacion = "Diamante"
+        color = Color3.fromRGB(0, 191, 255)
+    elseif string.find(nombre, "fantasma") or string.find(nombre, "ghost") then
+        mutacion = "Fantasma"
+        color = Color3.fromRGB(200, 200, 255)
+    elseif string.find(nombre, "celestial") then
+        mutacion = "Celestial"
+        color = Color3.fromRGB(255, 20, 147)
+    elseif string.find(nombre, "fresa") or string.find(nombre, "strawberry") then
+        mutacion = "Fresa"
+        color = Color3.fromRGB(255, 105, 180)
     end
 
-    -- Colores según tipo
-    if string.find(string.lower(mutation), "diamante") or string.find(string.lower(mutation), "diamond") then
-        mutationColor = Color3.fromRGB(0, 191, 255)
-    elseif string.find(string.lower(mutation), "oro") or string.find(string.lower(mutation), "gold") then
-        mutationColor = Color3.fromRGB(255, 215, 0)
-    elseif string.find(string.lower(mutation), "fantasma") or string.find(string.lower(mutation), "ghost") then
-        mutationColor = Color3.fromRGB(200, 200, 255)
-    elseif string.find(string.lower(mutation), "celestial") then
-        mutationColor = Color3.fromRGB(255, 20, 147)
-    end
-
-    return mutation, mutationColor
+    return mutacion, color
 end
 
---// 💥 SISTEMA DE SELECCION 💥
-local function MakeItemButton(name, obj)
-    local mutation, color = GetMutation(obj)
+--// 💥 CREAR BOTÓN DE ITEM 💥
+local function CrearBoton(nombre, objeto)
+    local mutacion, color = DetectarMutacion(nombre)
 
     local ItemBtn = Instance.new("TextButton")
     ItemBtn.Size = UDim2.new(0, 70, 0, 70)
@@ -189,36 +187,38 @@ local function MakeItemButton(name, obj)
     BtnCorner2.CornerRadius = UDim.new(0, 8)
     BtnCorner2.Parent = ItemBtn
 
-    -- NOMBRE ARRIBA
+    -- NOMBRE
     local NameText = Instance.new("TextLabel")
     NameText.Size = UDim2.new(1, -5, 0.5, 0)
     NameText.Position = UDim2.new(0, 5, 0, 0)
     NameText.BackgroundTransparency = 1
     NameText.Font = Enum.Font.GothamBold
-    NameText.Text = name
+    NameText.Text = nombre
     NameText.TextColor3 = Color3.fromRGB(255,255,255)
     NameText.TextSize = 9
     NameText.Parent = ItemBtn
 
-    -- MUTACION ABAJO
+    -- MUTACION
     local MutText = Instance.new("TextLabel")
     MutText.Size = UDim2.new(1, -5, 0.4, 0)
     MutText.Position = UDim2.new(0, 5, 0.6, 0)
     MutText.BackgroundTransparency = 1
     MutText.Font = Enum.Font.GothamBold
-    MutText.Text = mutation
+    MutText.Text = mutacion
     MutText.TextColor3 = color
     MutText.TextSize = 8
     MutText.Parent = ItemBtn
 
     -- EVENTO CLICK
     ItemBtn.MouseButton1Click:Connect(function()
-        SelectedItem = obj
-        SelectedData = {Name = name, Mutation = mutation, Color = color}
+        SelectedItem = objeto
+        SelectedName = nombre
+        SelectedMutation = mutacion
+        SelectedColor = color
 
         -- MOSTRAR EN CAJA
-        DropText.Text = name
-        DropSubText.Text = mutation
+        DropText.Text = nombre
+        DropSubText.Text = mutacion
         DropSubText.TextColor3 = color
         DropText.TextColor3 = Color3.fromRGB(255,255,255)
 
@@ -230,48 +230,89 @@ local function MakeItemButton(name, obj)
 end
 
 --// 💥 CARGAR INVENTARIO 💥
-local function LoadInventory()
-    -- Limpiar
+local function CargarTodo()
+    -- LIMPIAR
     for _, child in pairs(ScrollingFrame:GetChildren()) do
         if child:IsA("TextButton") then child:Destroy() end
     end
 
-    local itemsFound = {}
+    local encontrados = {}
 
-    -- BUSCAR EN TODO LADO (Incluyendo Base)
-    for _, obj in pairs(game:GetService("Workspace"):GetDescendants()) do
-        -- Filtrar solo Brainrots (nombres largos o con paréntesis)
-        if string.len(obj.Name) > 3 and not obj:IsA("Tool") and obj:IsA("Model") then
-             if not string.find(string.lower(obj.Name), "humanoid") and not string.find(string.lower(obj.Name), "camera") and not string.find(string.lower(obj.Name), "effect") then
-                if not itemsFound[obj.Name] then
-                    itemsFound[obj.Name] = obj
+    -- 🔍 FILTRO: SOLO BRAINROTS
+    -- Palabras que NO queremos ver
+    local palabrasMalas = {"slot", "product", "money", "dinero", "weight", "effect", "camera", "humanoid", "bind", "key", "class", "tool"}
+
+    -- Buscar en Backpack
+    if Player:FindFirstChild("Backpack") then
+        for _, obj in pairs(Player.Backpack:GetChildren()) do
+            local nombre = string.lower(obj.Name)
+            local valido = true
+
+            -- Verificar que no sea basura
+            for _, mala in pairs(palabrasMalas) do
+                if string.find(nombre, mala) then
+                    valido = false
+                    break
+                end
+            end
+
+            if valido and obj.Name ~= "" then
+                encontrados[obj.Name] = obj
+            end
+        end
+    end
+
+    -- Buscar en Character (Equipados)
+    if Player.Character then
+        for _, obj in pairs(Player.Character:GetChildren()) do
+            if obj:IsA("Tool") then
+                local nombre = string.lower(obj.Name)
+                local valido = true
+
+                for _, mala in pairs(palabrasMalas) do
+                    if string.find(nombre, mala) then
+                        valido = false
+                        break
+                    end
+                end
+
+                if valido and obj.Name ~= "" then
+                    encontrados[obj.Name] = obj
                 end
             end
         end
     end
 
-    -- Buscar también en Backpack
-    if Player:FindFirstChild("Backpack") then
-        for _, obj in pairs(Player.Backpack:GetChildren()) do
-            if not string.find(string.lower(obj.Name), "humanoid") and not string.find(string.lower(obj.Name), "camera") then
-                 if not itemsFound[obj.Name] then
-                    itemsFound[obj.Name] = obj
+    -- Buscar en la Base (Mundo)
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj.Name ~= "" and obj.Parent and obj.Parent.Name ~= "Debris" then
+            local nombre = string.lower(obj.Name)
+            local valido = true
+
+            for _, mala in pairs(palabrasMalas) do
+                if string.find(nombre, mala) then
+                    valido = false
+                    break
                 end
+            end
+
+            if valido then
+                encontrados[obj.Name] = obj
             end
         end
     end
 
     -- CREAR BOTONES
-    for name, obj in pairs(itemsFound) do
-        MakeItemButton(name, obj)
+    for nombre, objeto in pairs(encontrados) do
+        CrearBoton(nombre, objeto)
     end
 
     -- AJUSTAR TAMAÑO
-    local count = 0
-    for _ in pairs(itemsFound) do count = count + 1 end
-    ScrollingFrame.CanvasSize = UDim2.new(0, (count * 78), 0, 0)
+    local cantidad = 0
+    for _ in pairs(encontrados) do cantidad = cantidad + 1 end
+    ScrollingFrame.CanvasSize = UDim2.new(0, (cantidad * 78), 0, 0)
 
-    if count == 0 then
+    if cantidad == 0 then
         local nada = Instance.new("TextLabel")
         nada.Size = UDim2.new(0, 200, 0, 70)
         nada.BackgroundTransparency = 1
@@ -282,9 +323,9 @@ local function LoadInventory()
 end
 
 -- CARGAR AL INICIAR
-LoadInventory()
+CargarTodo()
 
---// 💥 DUPLICAR Y GUARDAR 💥
+--// 💥 DUPLICAR 💥
 DuplicateBtn.MouseButton1Click:Connect(function()
     if not SelectedItem then
         DropText.Text = "⚠️"
@@ -292,75 +333,57 @@ DuplicateBtn.MouseButton1Click:Connect(function()
         return
     end
 
-    DuplicateBtn.Text = "🔄 PROCESANDO..."
+    DuplicateBtn.Text = "🔄..."
 
-    local success, err = pcall(function()
-        -- 🧬 CLONAR PERFECTAMENTE
-        local Clone = SelectedItem:Clone()
-        Clone.Name = SelectedData.Name -- Asegurar nombre correcto
+    local exito, error = pcall(function()
+        -- 🧬 CLONAR
+        local copia = SelectedItem:Clone()
+        copia.Name = SelectedName
 
-        -- 🔑 INTENTAR MÉTODO DE GUARDADO
-        -- Buscar eventos para que se guarde
-        local successEvent = false
-        
-        -- Método 1: Intentar enviar a servidor
-        for _, event in pairs(ReplicatedStorage:GetDescendants()) do
-            if event:IsA("RemoteEvent") or event:IsA("BindableFunction") then
-                if string.find(string.lower(event.Name), "give") or string.find(string.lower(event.Name), "add") or string.find(string.lower(event.Name), "item") then
-                    event:FireServer(SelectedData.Name, SelectedData.Mutation)
-                    successEvent = true
-                end
-            end
-        end
+        -- 📦 PONER EN INVENTARIO PARA USAR
+        copia.Parent = Player.Backpack
 
-        -- Método 2: Ponerlo en Backpack y Character
-        Clone.Parent = Player.Backpack
-        
-        -- También crear una copia física para colocar en base
-        local CloneWorld = SelectedItem:Clone()
-        CloneWorld.Parent = game:GetService("Workspace")
-        CloneWorld:MoveTo(Vector3.new(Player.Character.HumanoidRootPart.Position.X, Player.Character.HumanoidRootPart.Position.Y + 5, Player.Character.HumanoidRootPart.Position.Z))
-
-        DuplicateBtn.Text = "✅ ¡DUPLICADO Y GUARDADO!"
+        -- ✅ MENSAJE
+        DuplicateBtn.Text = "✅ ¡DUPLICADO!"
         wait(1)
-        DuplicateBtn.Text = "🚀 DUPLICAR Y GUARDAR"
+        DuplicateBtn.Text = "🚀 DUPLICAR Y COLOCAR"
 
-        -- ACTUALIZAR LISTA
-        LoadInventory()
+        -- 🔄 ACTUALIZAR LISTA
+        CargarTodo()
     end)
 
-    if not success then
-        warn(err)
+    if not exito then
+        warn(error)
         DuplicateBtn.Text = "❌ ERROR"
         wait(1)
-        DuplicateBtn.Text = "🚀 DUPLICAR Y GUARDAR"
+        DuplicateBtn.Text = "🚀 DUPLICAR Y COLOCAR"
     end
 end)
 
 --// MOVER GUI
-local DraggingGUI = nil
-local DragStart = nil
-local StartPos = nil
+local arrastrando = false
+local inicioPos = nil
+local inicioGui = nil
 
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        DraggingGUI = true
-        DragStart = input.Position
-        StartPos = MainFrame.Position
+        arrastrando = true
+        inicioPos = input.Position
+        inicioGui = MainFrame.Position
     end
 end)
 
 UIS.InputChanged:Connect(function(input)
-    if DraggingGUI and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local Delta = input.Position - DragStart
-        MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+    if arrastrando and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - inicioPos
+        MainFrame.Position = UDim2.new(inicioGui.X.Scale, inicioGui.X.Offset + delta.X, inicioGui.Y.Scale, inicioGui.Y.Offset + delta.Y)
     end
 end)
 
 UIS.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        DraggingGUI = false
+        arrastrando = false
     end
 end)
 
-print("✅ Script VERSIÓN DIOS CARGADO!")
+print("✅ SCRIPT LISTO AL 100%")
