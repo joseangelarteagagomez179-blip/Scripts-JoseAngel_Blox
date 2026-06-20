@@ -56,11 +56,11 @@ VIPText.BackgroundTransparency = 1
 VIPText.Position = UDim2.new(0, 0, 0, 40)
 VIPText.Size = UDim2.new(1, 0, 0, 20)
 VIPText.Font = Enum.Font.Gotham
-VIPText.Text = "💎 MODO SELECCIÓN DIRECTA 💎"
+VIPText.Text = "💎 SOLO BRAINROTS Y MUTACIONES 💎"
 VIPText.TextColor3 = Color3.fromRGB(255, 215, 0)
 VIPText.TextSize = 12
 
---// 📦 CUADRO DESTINO (Mismo tamaño que los items)
+--// 📦 CUADRO DESTINO
 local DropBox = Instance.new("Frame")
 DropBox.Name = "DropBox"
 DropBox.Parent = MainFrame
@@ -68,7 +68,7 @@ DropBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 DropBox.BorderColor3 = Color3.fromRGB(255, 255, 255)
 DropBox.BorderSizePixel = 2
 DropBox.Position = UDim2.new(0.18, 0, 0.22, 0)
-DropBox.Size = UDim2.new(0, 70, 0, 70) -- TAMAÑO EXACTO DE INVENTARIO
+DropBox.Size = UDim2.new(0, 70, 0, 70)
 
 local DropCorner = Instance.new("UICorner")
 DropCorner.CornerRadius = UDim.new(0, 8)
@@ -92,7 +92,7 @@ InvText.BackgroundTransparency = 1
 InvText.Position = UDim2.new(0.05, 0, 0.48, 0)
 InvText.Size = UDim2.new(0.9, 0, 0, 20)
 InvText.Font = Enum.Font.Gotham
-InvText.Text = "📜 TU INVENTARIO:"
+InvText.Text = "📜 TUS BRAINROTS:"
 InvText.TextColor3 = Color3.fromRGB(255, 255, 255)
 InvText.TextSize = 13
 
@@ -136,14 +136,9 @@ BtnCorner.Parent = DuplicateBtn
 --// 💥 SISTEMA DE SELECCIÓN 💥
 local function MakeSelectable(itemButton, itemName, itemObject)
     itemButton.MouseButton1Click:Connect(function()
-        -- Limpiar selección anterior
         SelectedItem = itemObject
-        
-        -- Mostrar en el cuadro
         DropText.Text = itemName
         DropText.TextColor3 = Color3.fromRGB(0, 255, 0)
-        
-        -- Efecto visual
         itemButton.BorderColor3 = Color3.fromRGB(0, 255, 0)
         wait(0.2)
         itemButton.BorderColor3 = Color3.fromRGB(0, 170, 255)
@@ -160,31 +155,31 @@ local function LoadInventory()
     end
 
     local itemsFound = {}
+    -- Lista de palabras clave para identificar Brainrots
+    local palabrasClave = {"Miau", "Krupuk", "Brainrot", "Skibidi", "Grimace", "Camera", "Speaker", "TV", "Man", "Woman", "Dog", "Cat"}
 
-    -- BUSCAR ITEMS (Incluyendo equipados)
-    -- Busca en Backpack
-    if Player:FindFirstChild("Backpack") then
-        for _, item in pairs(Player.Backpack:GetChildren()) do
-            if not itemsFound[item.Name] then
-                itemsFound[item.Name] = item
-            end
-        end
-    end
+    -- BUSCAR ITEMS
+    -- Busca en Backpack y Character
+    local contenedores = {Player.Backpack, Player.Character}
     
-    -- Busca en Character (Equipados)
-    if Player.Character then
-        for _, item in pairs(Player.Character:GetChildren()) do
-            if not itemsFound[item.Name] then
-                itemsFound[item.Name] = item
-            end
-        end
-    end
-
-    -- Busca en todo el jugador por si acaso
-    for _, descendant in pairs(Player:GetDescendants()) do
-        if descendant:IsA("Tool") or descendant:IsA("Folder") or descendant:IsA("Model") or descendant:IsA("StringValue") then
-            if not itemsFound[descendant.Name] then
-                itemsFound[descendant.Name] = descendant
+    for _, container in pairs(contenedores) do
+        if container then
+            for _, item in pairs(container:GetChildren()) do
+                -- Verifica si el nombre contiene alguna palabra clave
+                local esBrainrot = false
+                local nombreMinuscula = string.lower(item.Name)
+                
+                for _, palabra in pairs(palabrasClave) do
+                    if string.find(nombreMinuscula, string.lower(palabra)) then
+                        esBrainrot = true
+                        break
+                    end
+                end
+                
+                -- Si es Brainrot y no está repetido, lo agrega
+                if esBrainrot and not itemsFound[item.Name] then
+                    itemsFound[item.Name] = item
+                end
             end
         end
     end
@@ -193,11 +188,11 @@ local function LoadInventory()
     for name, obj in pairs(itemsFound) do
         local ItemBtn = Instance.new("TextButton")
         ItemBtn.Name = "Item_"..name
-        ItemBtn.Size = UDim2.new(0, 70, 0, 70) -- TAMAÑO IGUAL AL JUEGO
+        ItemBtn.Size = UDim2.new(0, 70, 0, 70)
         ItemBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         ItemBtn.BorderColor3 = Color3.fromRGB(0, 170, 255)
         ItemBtn.BorderSizePixel = 2
-        ItemBtn.Text = name
+        ItemBtn.Text = name -- Aquí sale el nombre completo con la mutación (Diamante), (Oro), etc.
         ItemBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
         ItemBtn.TextSize = 10
         ItemBtn.Font = Enum.Font.GothamBold
@@ -214,6 +209,15 @@ local function LoadInventory()
     local count = 0
     for _ in pairs(itemsFound) do count = count + 1 end
     ScrollingFrame.CanvasSize = UDim2.new(0, (count * 78), 0, 0)
+    
+    if count == 0 then
+        local nada = Instance.new("TextLabel")
+        nada.Size = UDim2.new(0, 200, 0, 70)
+        nada.BackgroundTransparency = 1
+        nada.Text = "No se encontraron Brainrots 😢"
+        nada.TextColor3 = Color3.fromRGB(255,255,255)
+        nada.Parent = ScrollingFrame
+    end
 end
 
 -- Cargar al iniciar
@@ -231,17 +235,23 @@ DuplicateBtn.MouseButton1Click:Connect(function()
 
     local success, err = pcall(function()
         local Clone = SelectedItem:Clone()
-        Clone.Parent = SelectedItem.Parent
+        
+        -- Asegurar que va a la mochila correctamente
+        if Clone:IsA("Tool") then
+            Clone.Parent = Player.Backpack
+        else
+            Clone.Parent = SelectedItem.Parent
+        end
         
         DuplicateBtn.Text = "✅ ¡DUPLICADO!"
         wait(0.8)
         DuplicateBtn.Text = "🚀 DUPLICAR"
         
-        -- Actualizar lista
         LoadInventory()
     end)
 
     if not success then
+        warn(err)
         DuplicateBtn.Text = "❌ ERROR"
         wait(0.8)
         DuplicateBtn.Text = "🚀 DUPLICAR"
@@ -274,4 +284,4 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Script LISTO y OPTIMIZADO!")
+print("✅ Script LISTO - SOLO MUESTRA BRAINROTS!")
