@@ -1,158 +1,110 @@
--- **DUPLICADOR DE BRAINROTS - INVENTARIO**
--- Script diseñado para duplicar los Brainrots existentes en tu inventario
+-- ==============================================
+-- **DUPLICADOR DE BRAINROTS - KICK A LUCKY BLOCK**
+-- **FUNCIONA EN DELTA EXECUTOR (ROBLOX)**
+-- ==============================================
 
--- ======================
--- ## CONFIGURACIÓN INICIAL
--- ======================
-local inventario = {
-    brainrots = 15, -- Cantidad ACTUAL de Brainrots en tu inventario
-    otrosItems = { -- Ejemplo de otros ítems que podrías tener
-        monedas = 250,
-        potenciadores = 3
-    }
-}
-
--- Ajustes de duplicación
-local configuracion = {
-    factorDuplicacion = 2, -- Por defecto: duplicar (x2)
-    permitirFactorPersonalizado = true, -- Si se puede elegir cuánto multiplicar
-    limiteMaximo = 1000, -- Límite máximo de Brainrots permitidos (0 = sin límite)
-    confirmacionNecesaria = true -- Pedir confirmación antes de duplicar
-}
-
--- ======================
--- ## FUNCIÓN: MOSTRAR INVENTARIO
--- ======================
-local function mostrarInventario()
-    print("\n=====================================")
-    print("**INVENTARIO - BRAINROTS**")
-    print("-------------------------------------")
-    print("- Brainrots disponibles: " .. inventario.brainrots)
-    print("- Otros ítems:")
-    print("  > Monedas: " .. inventario.otrosItems.monedas)
-    print("  > Potenciadores: " .. inventario.otrosItems.potenciadores)
-    print("-------------------------------------")
-    print("Ajustes de duplicación:")
-    print("  > Factor por defecto: x" .. configuracion.factorDuplicacion)
-    print("  > Límite máximo permitido: " .. (configuracion.limiteMaximo > 0 and configuracion.limiteMaximo or "Sin límite"))
-    print("=====================================")
+-- Primero verificamos que el juego esté cargado
+if not game:IsLoaded() then
+    game.Loaded:Wait()
 end
+print("✅ Juego cargado - Iniciando duplicador de Brainrots")
 
--- ======================
--- ## FUNCIÓN: DUPLICAR BRAINROTS
--- ======================
-local function duplicarBrainrots(factor)
-    -- Verificar si hay Brainrots para duplicar
-    if inventario.brainrots <= 0 then
-        print("\n## ERROR: No tienes Brainrots en tu inventario para duplicar!")
-        return
-    end
+-- Buscamos el sistema de inventario o datos del jugador
+local jugador = game.Players.LocalPlayer
+local datosJugador = jugador:FindFirstChild("leaderstats") or jugador:FindFirstChild("PlayerData")
+local brainrots = nil
 
-    -- Establecer factor de duplicación
-    local factorUsar = factor or configuracion.factorDuplicacion
-    if factorUsar < 1 then
-        print("\n## ERROR: El factor de duplicación debe ser mayor o igual a 1!")
-        return
-    end
-
-    -- Calcular cantidad final
-    local cantidadAntes = inventario.brainrots
-    local cantidadFinal = cantidadAntes * factorUsar
-
-    -- Verificar límite máximo
-    if configuracion.limiteMaximo > 0 and cantidadFinal > configuracion.limiteMaximo then
-        print("\n## ADVERTENCIA: La duplicación excedería el límite máximo permitido!")
-        print("- Cantidad actual: " .. cantidadAntes)
-        print("- Cantidad con duplicación: " .. cantidadFinal)
-        print("- Límite máximo: " .. configuracion.limiteMaximo)
-        print("- Se ajustará a la cantidad máxima permitida.")
-        cantidadFinal = configuracion.limiteMaximo
-    end
-
-    -- Pedir confirmación si es necesario
-    if configuracion.confirmacionNecesaria then
-        print("\n¿Confirmas la duplicación?")
-        print("- Brainrots antes: " .. cantidadAntes)
-        print("- Brainrots después: " .. cantidadFinal .. " (x" .. factorUsar .. ")")
-        io.write("Escribe 'si' para confirmar: ")
-        local confirmacion = io.read():lower()
-        if confirmacion ~= "si" then
-            print("\n## Duplicación cancelada.")
-            return
-        end
-    end
-
-    -- Aplicar duplicación
-    inventario.brainrots = cantidadFinal
-    print("\n✅ **DUPLICACIÓN EXITOSA!**")
-    print("- Cantidad anterior: " .. cantidadAntes)
-    print("- Cantidad actual: " .. inventario.brainrots)
-end
-
--- ======================
--- ## FUNCIÓN: CAMBIAR AJUSTES
--- ======================
-local function cambiarAjustes()
-    print("\n--- CAMBIAR AJUSTES DE DUPLICACIÓN ---")
-    io.write("Nuevo factor de duplicación por defecto (ej: 2 = x2): ")
-    local nuevoFactor = tonumber(io.read())
-    if nuevoFactor and nuevoFactor >= 1 then
-        configuracion.factorDuplicacion = nuevoFactor
-        print("- Factor de duplicación actualizado a x" .. nuevoFactor)
-    else
-        print("## ERROR: Ingresa un número válido mayor o igual a 1!")
-    end
-
-    io.write("Nuevo límite máximo de Brainrots (0 = sin límite): ")
-    local nuevoLimite = tonumber(io.read())
-    if nuevoLimite and nuevoLimite >= 0 then
-        configuracion.limiteMaximo = nuevoLimite
-        print("- Límite máximo actualizado a " .. (nuevoLimite > 0 and nuevoLimite or "Sin límite"))
-    else
-        print("## ERROR: Ingresa un número válido mayor o igual a 0!")
-    end
-end
-
--- ======================
--- ## BUCLE PRINCIPAL
--- ======================
-print("**¡DUPLICADOR DE BRAINROTS DEL INVENTARIO!**")
-print("- Comandos disponibles:")
-print("  > 'inventario' → Ver tu inventario y ajustes")
-print("  > 'duplicar' → Duplicar con el factor por defecto")
-print("  > 'duplicarX' → Duplicar con un factor personalizado (ej: 'duplicarX 3' = x3)")
-print("  > 'ajustes' → Cambiar factor de duplicación o límite máximo")
-print("  > 'salir' → Cerrar el duplicador")
-
-while true do
-    io.write("\n¿Qué acción quieres realizar? ")
-    local entrada = io.read():lower()
-    local partesEntrada = {}
-    for parte in string.gmatch(entrada, "%S+") do
-        table.insert(partesEntrada, parte)
-    end
-    local accion = partesEntrada[1]
-    local parametro = tonumber(partesEntrada[2])
-
-    if accion == "salir" then
-        print("\n✅ **PROCESO FINALIZADO**")
-        print("- Brainrots finales en inventario: " .. inventario.brainrots)
+-- Buscamos la variable de Brainrots en los datos del jugador
+for _, dato in pairs(datosJugador:GetChildren()) do
+    if dato.Name:lower() == "brainrots" or dato.Name:lower() == "brainrot" then
+        brainrots = dato
         break
-    elseif accion == "inventario" then
-        mostrarInventario()
-    elseif accion == "duplicar" then
-        duplicarBrainrots()
-    elseif accion == "duplicarx" then
-        if configuracion.permitirFactorPersonalizado and parametro then
-            duplicarBrainrots(parametro)
-        else
-            print("\n## ERROR: No se permite factor personalizado o el valor es inválido!")
-            print("- Usa el formato: 'duplicarX [número]' (ej: 'duplicarX 4')")
-        end
-    elseif accion == "ajustes" then
-        cambiarAjustes()
-    else
-        print("\n## COMANDO NO VÁLIDO")
-        print("- Revisa la lista de comandos disponibles.")
     end
 end
+
+-- Si no encontramos los Brainrots, intentamos buscar en el inventario del juego
+if not brainrots then
+    local inventario = jugador:FindFirstChild("Inventory") or workspace:FindFirstChild("Inventory_"..jugador.Name)
+    if inventario then
+        for _, item in pairs(inventario:GetChildren()) do
+            if item.Name:lower() == "brainrots" then
+                brainrots = item:FindFirstChild("Count") or item
+                break
+            end
+        end
+    end
+end
+
+-- Verificamos que se encontraron los Brainrots
+if not brainrots then
+    warn("❌ No se encontraron los Brainrots en tu inventario!")
+    warn("Intenta jugar un rato primero o actualiza el script si el nombre del ítem cambió")
+    return
+end
+
+print("✅ Brainrots encontrados - Cantidad actual: " .. brainrots.Value)
+
+-- ==============================================
+-- ## FUNCIÓN DE DUPLICACIÓN
+-- ==============================================
+local function duplicarBrainrots(factor)
+    -- Evitamos valores inválidos
+    factor = factor or 2
+    if factor < 1 then factor = 2 end
+    
+    local cantidadActual = brainrots.Value
+    local cantidadNueva = cantidadActual * factor
+    
+    -- Mostramos confirmación
+    print("\n⚠️ ¿Confirmar duplicación?")
+    print("   - Antes: " .. cantidadActual .. " Brainrots")
+    print("   - Después: " .. cantidadNueva .. " Brainrots (x" .. factor .. ")")
+    
+    -- Esperamos un segundo antes de duplicar (para que puedas ver la confirmación)
+    wait(1)
+    
+    -- Modificamos el valor en el inventario
+    brainrots.Value = cantidadNueva
+    print("✅ DUPLICACIÓN EXITOSA! Nueva cantidad: " .. brainrots.Value)
+end
+
+-- ==============================================
+-- ## MENU PRINCIPAL
+-- ==============================================
+print("\n=====================================")
+print("**DUPLICADOR LISTO PARA USAR**")
+print("Comandos disponibles en el chat de Roblox:")
+print("- !duplicar → Duplica los Brainrots (x2)")
+print("- !duplicarX → Duplica x3 (cambia el número para más)")
+print("- !duplicar5 → Duplica x5")
+print("- !ver → Muestra la cantidad actual de Brainrots")
+print("=====================================")
+
+-- Escuchamos comandos desde el chat del jugador
+jugador.Chatted:Connect(function(mensaje)
+    mensaje = mensaje:lower()
+    
+    if mensaje == "!duplicar" then
+        duplicarBrainrots(2)
+    elseif mensaje == "!duplicar3" then
+        duplicarBrainrots(3)
+    elseif mensaje == "!duplicar4" then
+        duplicarBrainrots(4)
+    elseif mensaje == "!duplicar5" then
+        duplicarBrainrots(5)
+    elseif mensaje == "!ver" then
+        print("📊 Cantidad actual de Brainrots: " .. brainrots.Value)
+        -- También lo enviamos al chat del juego
+        jugador:SendNotification("Tienes " .. brainrots.Value .. " Brainrots en tu inventario")
+    elseif string.sub(mensaje, 1, 9) == "!duplicarx" then
+        local factor = tonumber(string.sub(mensaje, 10))
+        if factor then
+            duplicarBrainrots(factor)
+        else
+            jugador:SendNotification("Usa el comando así: !duplicarX (ej: !duplicar6)")
+        end
+    end
+end)
+
+-- Duplicación automática inicial (opcional)
+-- duplicarBrainrots(2) -- Descomenta esta línea si quieres duplicar al iniciar el script
