@@ -12,6 +12,7 @@ local SlotText = Instance.new("TextLabel")
 local ListFrame = Instance.new("ScrollingFrame")
 local ListLayout = Instance.new("UIListLayout")
 local DupeButton = Instance.new("TextButton")
+local RefreshButton = Instance.new("TextButton") -- Botón Actualizar
 
 ScreenGui.Name = "BrainDupePRO"
 ScreenGui.Parent = PlayerGui
@@ -22,7 +23,7 @@ MainFrame.Name = "MainUI"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
 MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 280)
+MainFrame.Size = UDim2.new(0, 200, 0, 310) -- Un poco más alto
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -43,7 +44,7 @@ Title.TextSize = 16
 SlotDisplay.Name = "SlotDisplay"
 SlotDisplay.Parent = MainFrame
 SlotDisplay.BackgroundColor3 = Color3.fromRGB(225, 225, 225)
-SlotDisplay.Position = UDim2.new(0.5, -70, 0.14, 0)
+SlotDisplay.Position = UDim2.new(0.5, -70, 0.12, 0)
 SlotDisplay.Size = UDim2.new(0, 140, 0, 70)
 
 local SlotCorner = Instance.new("UICorner", SlotDisplay)
@@ -61,7 +62,7 @@ SlotText.TextSize = 12
 ListFrame.Name = "ItemList"
 ListFrame.Parent = MainFrame
 ListFrame.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
-ListFrame.Position = UDim2.new(0.05, 0, 0.43, 0)
+ListFrame.Position = UDim2.new(0.05, 0, 0.38, 0)
 ListFrame.Size = UDim2.new(0.9, 0, 0, 80)
 ListFrame.ScrollBarThickness = 4
 ListFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -80,11 +81,25 @@ ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ListFrame.CanvasSize = UDim2.new(0,0,0, ListLayout.AbsoluteContentSize.Y)
 end)
 
+-- BOTÓN ACTUALIZAR
+RefreshButton.Name = "RefreshButton"
+RefreshButton.Parent = MainFrame
+RefreshButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+RefreshButton.Position = UDim2.new(0.65, 0, 0.65, 0)
+RefreshButton.Size = UDim2.new(0.3, 0, 0, 30)
+RefreshButton.Font = Enum.Font.GothamBold
+RefreshButton.Text = "🔄 ACTUALIZAR"
+RefreshButton.TextColor3 = Color3.new(0, 0, 0)
+RefreshButton.TextSize = 10
+
+local RefCorner = Instance.new("UICorner", RefreshButton)
+RefCorner.CornerRadius = UDim.new(0,8)
+
 -- Botón Duplicar
 DupeButton.Name = "DupeButton"
 DupeButton.Parent = MainFrame
 DupeButton.BackgroundColor3 = Color3.fromRGB(255, 220, 0)
-DupeButton.Position = UDim2.new(0.1, 0, 0.76, 0)
+DupeButton.Position = UDim2.new(0.1, 0, 0.78, 0)
 DupeButton.Size = UDim2.new(0.8, 0, 0, 40)
 DupeButton.Font = Enum.Font.GothamBold
 DupeButton.Text = "✅ DUPLICAR"
@@ -105,10 +120,10 @@ local function crearBotonItem(nombre, esMutado)
     
     if esMutado then
         btn.BackgroundColor3 = Color3.fromRGB(255, 180, 255)
-        btn.Text = nombre .. "\n[MUTADO]"
+        btn.Text = nombre .. "\n✨ [MUTADO]"
     else
         btn.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
-        btn.Text = nombre .. "\n[NORMAL]"
+        btn.Text = nombre .. "\n📦 [NORMAL]"
     end
     
     btn.Font = Enum.Font.GothamBold
@@ -143,17 +158,34 @@ local function actualizarInventario()
     -- Buscar en MOCHILA y en MANO
     local contenedores = {}
     table.insert(contenedores, LocalPlayer:FindFirstChild("Backpack"))
-    table.insert(contenedores, LocalPlayer:FindFirstChild("Character") and LocalPlayer.Character:FindFirstChild("Tool")) -- Item equipado
+    if LocalPlayer.Character then
+        for _, child in pairs(LocalPlayer.Character:GetChildren()) do
+            if child:IsA("Tool") then
+                table.insert(contenedores, child)
+            end
+        end
+    end
     
     local encontrados = {}
     
     for _, contenedor in pairs(contenedores) do
         if contenedor then
-            for _, item in pairs(contenedor:GetChildren()) do
-                -- Buscar TODO lo que parezca Brainrot, no solo Tools
-                if string.find(item.Name:lower(), "brainrot") or string.find(item.Name:lower(), "tocino") or string.find(item.Name:lower(), "krupuk") then
+            -- Manejar caso si contenedor es un Tool directamente
+            local items = contenedor:IsA("Tool") and {contenedor} or contenedor:GetChildren()
+            
+            for _, item in pairs(items) do
+                -- Detectar cualquier Brainrot, Tocino, Krupuk, etc.
+                if string.find(item.Name:lower(), "brainrot") or string.find(item.Name:lower(), "tocino") or string.find(item.Name:lower(), "krupuk") or string.find(item.Name:lower(), "pagi") then
+                    
                     local nombreLimpio = item.Name
-                    local esMutado = string.find(item.Name:lower(), "mut") or string.find(item.Name:lower(), "shiny") or string.find(item.Name:lower(), "gold") or string.find(item.Name:lower(), "celestial") or false
+                    
+                    -- DETECTAR MUTACIONES MEJORADO
+                    local esMutado = false
+                    local nombreMin = item.Name:lower()
+                    
+                    if string.find(nombreMin, "mut") or string.find(nombreMin, "shiny") or string.find(nombreMin, "gold") or string.find(nombreMin, "celestial") or string.find(nombreMin, "rainbow") or string.find(nombreMin, "huevo") or string.find(nombreMin, "tocino") then
+                        esMutado = true
+                    end
                     
                     if not encontrados[nombreLimpio] then
                         encontrados[nombreLimpio] = true
@@ -174,7 +206,7 @@ local function duplicarYColocar()
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not backpack then return end
 
-    -- Buscar el original en TODOS lados
+    -- Buscar el original
     local original = nil
     
     -- Buscar en mochila
@@ -185,7 +217,7 @@ local function duplicarYColocar()
         end
     end
     
-    -- Si no está en mochila, buscar en personaje (equipado)
+    -- Buscar en personaje
     if not original and LocalPlayer.Character then
         for _, item in pairs(LocalPlayer.Character:GetChildren()) do
             if item.Name == SelectedName then
@@ -198,9 +230,16 @@ local function duplicarYColocar()
     if original then
         -- DUPLICAR
         local copia = original:Clone()
-        copia.Parent = backpack
         
-        -- Mensaje de éxito
+        -- IMPORTANTE: Hacer que se pueda equipar
+        if copia:IsA("Tool") then
+            copia.Parent = backpack
+        else
+            -- Si por alguna razón no es Tool, intentar convertir comportamiento
+            copia.Parent = backpack
+        end
+        
+        -- Mensaje
         SlotText.Text = "✅ DUPLICADO!"
         task.wait(1)
         SlotText.Text = SelectedName
@@ -211,9 +250,9 @@ local function duplicarYColocar()
     end
 end
 
+-- Conexiones
 DupeButton.MouseButton1Click:Connect(duplicarYColocar)
+RefreshButton.MouseButton1Click:Connect(actualizarInventario)
 
--- Actualizar lista cada 2 segundos
-while task.wait(2) do
-    actualizarInventario()
-end
+-- Actualizar al inicio
+actualizarInventario()
