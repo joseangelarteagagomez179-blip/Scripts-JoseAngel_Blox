@@ -12,7 +12,7 @@ local SlotText = Instance.new("TextLabel")
 local ListFrame = Instance.new("ScrollingFrame")
 local ListLayout = Instance.new("UIListLayout")
 local DupeButton = Instance.new("TextButton")
-local RefreshButton = Instance.new("TextButton") -- Botón Actualizar
+local RefreshButton = Instance.new("TextButton")
 
 ScreenGui.Name = "BrainDupePRO"
 ScreenGui.Parent = PlayerGui
@@ -23,7 +23,7 @@ MainFrame.Name = "MainUI"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
 MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 310) -- Un poco más alto
+MainFrame.Size = UDim2.new(0, 200, 0, 310)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -114,20 +114,20 @@ local SelectedName = ""
 local SelectedIsMutated = false
 
 -- Funciones
-local function crearBotonItem(nombre, esMutado)
+local function crearBotonItem(nombre, esRaro, tipoRareza)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 90, 0, 45)
     
-    if esMutado then
+    if esRaro then
         btn.BackgroundColor3 = Color3.fromRGB(255, 180, 255)
-        btn.Text = nombre .. "\n✨ [MUTADO]"
+        btn.Text = nombre .. "\n✨ " .. tipoRareza
     else
         btn.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
-        btn.Text = nombre .. "\n📦 [NORMAL]"
+        btn.Text = nombre .. "\n📦 NORMAL"
     end
     
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 10
+    btn.TextSize = 9
     btn.TextWrapped = true
     btn.TextColor3 = Color3.new(0, 0, 0)
     
@@ -138,10 +138,10 @@ local function crearBotonItem(nombre, esMutado)
     
     btn.MouseButton1Click:Connect(function()
         SelectedName = nombre
-        SelectedIsMutated = esMutado
+        SelectedIsMutated = esRaro
         SlotText.Text = nombre
         
-        if esMutado then
+        if esRaro then
             SlotDisplay.BackgroundColor3 = Color3.fromRGB(255, 180, 255)
         else
             SlotDisplay.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
@@ -149,48 +149,93 @@ local function crearBotonItem(nombre, esMutado)
     end)
 end
 
-local function actualizarInventario()
-    -- Limpiar lista anterior
+function actualizarInventario()
+    -- Limpiar lista
     for _,v in pairs(ListFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
     end
     
-    -- Buscar en MOCHILA y en MANO
-    local contenedores = {}
-    table.insert(contenedores, LocalPlayer:FindFirstChild("Backpack"))
-    if LocalPlayer.Character then
-        for _, child in pairs(LocalPlayer.Character:GetChildren()) do
-            if child:IsA("Tool") then
-                table.insert(contenedores, child)
+    local encontrados = {}
+    
+    -- BUSCAR EN MOCHILA
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    if backpack then
+        for _, item in pairs(backpack:GetChildren()) do
+            if item:IsA("Tool") then
+                local nombreLimpio = item.Name
+                local nombreMin = string.lower(nombreLimpio)
+                
+                -- DETECCION TOTAL DE RAREZAS Y MUTACIONES
+                local esRaro = false
+                local tipoRareza = "NORMAL"
+                
+                if string.find(nombreMin, "mut") or string.find(nombreMin, "shiny") then
+                    esRaro = true
+                    tipoRareza = "MUTADO"
+                elseif string.find(nombreMin, "gold") or string.find(nombreMin, "oro") then
+                    esRaro = true
+                    tipoRareza = "ORO"
+                elseif string.find(nombreMin, "diamond") or string.find(nombreMin, "diamante") then
+                    esRaro = true
+                    tipoRareza = "DIAMANTE"
+                elseif string.find(nombreMin, "crystal") or string.find(nombreMin, "cristal") then
+                    esRaro = true
+                    tipoRareza = "CRISTAL"
+                elseif string.find(nombreMin, "celestial") then
+                    esRaro = true
+                    tipoRareza = "CELESTIAL"
+                elseif string.find(nombreMin, "rainbow") or string.find(nombreMin, "arcoiris") then
+                    esRaro = true
+                    tipoRareza = "ARCOIRIS"
+                elseif string.find(nombreMin, "exclusivo") or string.find(nombreMin, "tocino") or string.find(nombreMin, "huevo") then
+                    esRaro = true
+                    tipoRareza = "EXCLUSIVO"
+                end
+                
+                if not encontrados[nombreLimpio] then
+                    encontrados[nombreLimpio] = true
+                    crearBotonItem(nombreLimpio, esRaro, tipoRareza)
+                end
             end
         end
     end
     
-    local encontrados = {}
-    
-    for _, contenedor in pairs(contenedores) do
-        if contenedor then
-            -- Manejar caso si contenedor es un Tool directamente
-            local items = contenedor:IsA("Tool") and {contenedor} or contenedor:GetChildren()
-            
-            for _, item in pairs(items) do
-                -- Detectar cualquier Brainrot, Tocino, Krupuk, etc.
-                if string.find(item.Name:lower(), "brainrot") or string.find(item.Name:lower(), "tocino") or string.find(item.Name:lower(), "krupuk") or string.find(item.Name:lower(), "pagi") then
-                    
-                    local nombreLimpio = item.Name
-                    
-                    -- DETECTAR MUTACIONES MEJORADO
-                    local esMutado = false
-                    local nombreMin = item.Name:lower()
-                    
-                    if string.find(nombreMin, "mut") or string.find(nombreMin, "shiny") or string.find(nombreMin, "gold") or string.find(nombreMin, "celestial") or string.find(nombreMin, "rainbow") or string.find(nombreMin, "huevo") or string.find(nombreMin, "tocino") then
-                        esMutado = true
-                    end
-                    
-                    if not encontrados[nombreLimpio] then
-                        encontrados[nombreLimpio] = true
-                        crearBotonItem(nombreLimpio, esMutado)
-                    end
+    -- BUSCAR EN MANO (EQUIPADO)
+    if LocalPlayer.Character then
+        for _, item in pairs(LocalPlayer.Character:GetChildren()) do
+            if item:IsA("Tool") then
+                local nombreLimpio = item.Name
+                local nombreMin = string.lower(nombreLimpio)
+                
+                local esRaro = false
+                local tipoRareza = "NORMAL"
+                
+                if string.find(nombreMin, "mut") or string.find(nombreMin, "shiny") then
+                    esRaro = true
+                    tipoRareza = "MUTADO"
+                elseif string.find(nombreMin, "gold") or string.find(nombreMin, "oro") then
+                    esRaro = true
+                    tipoRareza = "ORO"
+                elseif string.find(nombreMin, "diamond") or string.find(nombreMin, "diamante") then
+                    esRaro = true
+                    tipoRareza = "DIAMANTE"
+                elseif string.find(nombreMin, "crystal") or string.find(nombreMin, "cristal") then
+                    esRaro = true
+                    tipoRareza = "CRISTAL"
+                elseif string.find(nombreMin, "celestial") then
+                    esRaro = true
+                    tipoRareza = "CELESTIAL"
+                elseif string.find(nombreMin, "rainbow") or string.find(nombreMin, "arcoiris") then
+                    esRaro = true
+                    tipoRareza = "ARCOIRIS"
+                elseif string.find(nombreMin, "exclusivo") or string.find(nombreMin, "tocino") or string.find(nombreMin, "huevo") then
+                    esRaro = true
+                    tipoRareza = "EXCLUSIVO"
+                end
+                
+                if not encontrados[nombreLimpio] then
+                    encontrados[nombreLimpio] = true
+                    crearBotonItem(nombreLimpio, esRaro, tipoRareza)
                 end
             end
         end
@@ -206,10 +251,9 @@ local function duplicarYColocar()
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not backpack then return end
 
-    -- Buscar el original
     local original = nil
     
-    -- Buscar en mochila
+    -- Buscar original
     for _, item in pairs(backpack:GetChildren()) do
         if item.Name == SelectedName then
             original = item
@@ -217,7 +261,6 @@ local function duplicarYColocar()
         end
     end
     
-    -- Buscar en personaje
     if not original and LocalPlayer.Character then
         for _, item in pairs(LocalPlayer.Character:GetChildren()) do
             if item.Name == SelectedName then
@@ -228,20 +271,12 @@ local function duplicarYColocar()
     end
 
     if original then
-        -- DUPLICAR
+        -- CLONADO PERFECTO
         local copia = original:Clone()
+        copia.Parent = backpack
         
-        -- IMPORTANTE: Hacer que se pueda equipar
-        if copia:IsA("Tool") then
-            copia.Parent = backpack
-        else
-            -- Si por alguna razón no es Tool, intentar convertir comportamiento
-            copia.Parent = backpack
-        end
-        
-        -- Mensaje
         SlotText.Text = "✅ DUPLICADO!"
-        task.wait(1)
+        task.wait(0.5)
         SlotText.Text = SelectedName
     else
         SlotText.Text = "NO ENCONTRADO"
@@ -254,5 +289,5 @@ end
 DupeButton.MouseButton1Click:Connect(duplicarYColocar)
 RefreshButton.MouseButton1Click:Connect(actualizarInventario)
 
--- Actualizar al inicio
+-- Inicio
 actualizarInventario()
