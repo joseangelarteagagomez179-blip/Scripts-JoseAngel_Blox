@@ -1,293 +1,203 @@
--- Servicios
+--// SCRIPT: Brainrots Duplication
+--// Creador: JoseAngel_Blox
+--// Fecha: 22/06/2026
+--// Para: Delta Executor
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer.PlayerGui
+local RS = game:GetService("ReplicatedStorage")
 
--- Creación de la Interfaz
+--// CREACIÓN DE LA UI CON ESTILO CUADRADO Y ESQUINAS REDONDEADAS
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
 local Title = Instance.new("TextLabel")
-local SlotDisplay = Instance.new("Frame")
-local SlotText = Instance.new("TextLabel")
-local ListFrame = Instance.new("ScrollingFrame")
-local ListLayout = Instance.new("UIListLayout")
-local DupeButton = Instance.new("TextButton")
-local RefreshButton = Instance.new("TextButton")
+local Tab1 = Instance.new("TextButton")
+local Tab2 = Instance.new("TextButton")
+local Container = Instance.new("Frame")
+local UIListLayout = Instance.new("UIListLayout")
+local Reflection = Instance.new("ImageLabel")
 
-ScreenGui.Name = "BrainDupePRO"
-ScreenGui.Parent = PlayerGui
+--// Propiedades de la Ventana
+ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Marco Principal
-MainFrame.Name = "MainUI"
+MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
-MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 310)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BackgroundTransparency = 0.3 -- Fondo transparente
+MainFrame.Position = UDim2.new(0.03, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 320, 0, 420)
 MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.Draggable = true -- Para mover la ventana
 
-local MainCorner = Instance.new("UICorner", MainFrame)
-MainCorner.CornerRadius = UDim.new(0,14)
+--// Esquinas Redondeadas
+UICorner.CornerRadius = UDim.new(0, 14)
+UICorner.Parent = MainFrame
 
--- Título
+--// Efecto de Reflejo
+Reflection.Name = "Reflection"
+Reflection.Parent = MainFrame
+Reflection.BackgroundTransparency = 1
+Reflection.Position = UDim2.new(0, 0, 0, -50)
+Reflection.Size = UDim2.new(1, 0, 0, 150)
+Reflection.Image = "rbxassetid://13635549346" -- Efecto de brillo
+Reflection.ImageColor3 = Color3.fromRGB(255, 255, 255)
+Reflection.ImageTransparency = 0.6
+Reflection.ZIndex = 0
+
+--// Título
 Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "🧠 DUPE PRO"
-Title.TextColor3 = Color3.new(0, 0, 0)
-Title.TextSize = 16
+Title.Text = "Brainrots Duplication"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18
 
--- Cuadro Vacío
-SlotDisplay.Name = "SlotDisplay"
-SlotDisplay.Parent = MainFrame
-SlotDisplay.BackgroundColor3 = Color3.fromRGB(225, 225, 225)
-SlotDisplay.Position = UDim2.new(0.5, -70, 0.12, 0)
-SlotDisplay.Size = UDim2.new(0, 140, 0, 70)
+--// Tabs
+Tab1.Name = "Tab_Info"
+Tab1.Parent = MainFrame
+Tab1.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Tab1.Position = UDim2.new(0.02, 0, 0.12, 0)
+Tab1.Size = UDim2.new(0, 150, 0, 30)
+Tab1.Font = Enum.Font.Gotham
+Tab1.Text = "ℹ️ Info"
+Tab1.TextColor3 = Color3.fromRGB(255,255,255)
+Tab1.TextSize = 14
 
-local SlotCorner = Instance.new("UICorner", SlotDisplay)
-SlotCorner.CornerRadius = UDim.new(0,10)
+Tab2.Name = "Tab_Dupe"
+Tab2.Parent = MainFrame
+Tab2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Tab2.Position = UDim2.new(0.53, 0, 0.12, 0)
+Tab2.Size = UDim2.new(0, 150, 0, 30)
+Tab2.Font = Enum.Font.Gotham
+Tab2.Text = "🧬 Duplicar"
+Tab2.TextColor3 = Color3.fromRGB(255,255,255)
+Tab2.TextSize = 14
 
-SlotText.Parent = SlotDisplay
-SlotText.BackgroundTransparency = 1
-SlotText.Size = UDim2.new(1, -10, 1, -10)
-SlotText.Font = Enum.Font.GothamBold
-SlotText.Text = "SELECCIONA"
-SlotText.TextColor3 = Color3.new(0, 0, 0)
-SlotText.TextSize = 12
+--// Contenedor de contenido
+Container.Name = "Container"
+Container.Parent = MainFrame
+Container.BackgroundTransparency = 1
+Container.Position = UDim2.new(0.02, 0, 0.22, 0)
+Container.Size = UDim2.new(0.96, 0, 0.75, 0)
 
--- Lista de Items
-ListFrame.Name = "ItemList"
-ListFrame.Parent = MainFrame
-ListFrame.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
-ListFrame.Position = UDim2.new(0.05, 0, 0.38, 0)
-ListFrame.Size = UDim2.new(0.9, 0, 0, 80)
-ListFrame.ScrollBarThickness = 4
-ListFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-ListFrame.CanvasSize = UDim2.new(0,0,0,0)
+UIListLayout.Parent = Container
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-local ListCorner = Instance.new("UICorner", ListFrame)
-ListCorner.CornerRadius = UDim.new(0,8)
+--// FUNCIONES
 
-ListLayout.Parent = ListFrame
-ListLayout.FillDirection = Enum.FillDirection.Horizontal
-ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ListLayout.Padding = UDim.new(0, 6)
-
-ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    ListFrame.CanvasSize = UDim2.new(0,0,0, ListLayout.AbsoluteContentSize.Y)
-end)
-
--- BOTÓN ACTUALIZAR
-RefreshButton.Name = "RefreshButton"
-RefreshButton.Parent = MainFrame
-RefreshButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-RefreshButton.Position = UDim2.new(0.65, 0, 0.65, 0)
-RefreshButton.Size = UDim2.new(0.3, 0, 0, 30)
-RefreshButton.Font = Enum.Font.GothamBold
-RefreshButton.Text = "🔄 ACTUALIZAR"
-RefreshButton.TextColor3 = Color3.new(0, 0, 0)
-RefreshButton.TextSize = 10
-
-local RefCorner = Instance.new("UICorner", RefreshButton)
-RefCorner.CornerRadius = UDim.new(0,8)
-
--- Botón Duplicar
-DupeButton.Name = "DupeButton"
-DupeButton.Parent = MainFrame
-DupeButton.BackgroundColor3 = Color3.fromRGB(255, 220, 0)
-DupeButton.Position = UDim2.new(0.1, 0, 0.78, 0)
-DupeButton.Size = UDim2.new(0.8, 0, 0, 40)
-DupeButton.Font = Enum.Font.GothamBold
-DupeButton.Text = "✅ DUPLICAR"
-DupeButton.TextColor3 = Color3.new(0, 0, 0)
-DupeButton.TextSize = 15
-
-local BtnCorner = Instance.new("UICorner", DupeButton)
-BtnCorner.CornerRadius = UDim.new(0,10)
-
--- Variables
-local SelectedName = ""
-local SelectedIsMutated = false
-
--- Funciones
-local function crearBotonItem(nombre, esRaro, tipoRareza)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 90, 0, 45)
-    
-    if esRaro then
-        btn.BackgroundColor3 = Color3.fromRGB(255, 180, 255)
-        btn.Text = nombre .. "\n✨ " .. tipoRareza
-    else
-        btn.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
-        btn.Text = nombre .. "\n📦 NORMAL"
+-- Limpiar contenido
+local function ClearContainer()
+    for _, v in pairs(Container:GetChildren()) do
+        if v:IsA("GuiObject") then
+            v:Destroy()
+        end
     end
+end
+
+-- Pestaña INFO
+local function ShowInfo()
+    ClearContainer()
+    Tab1.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Tab2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 9
-    btn.TextWrapped = true
-    btn.TextColor3 = Color3.new(0, 0, 0)
-    
-    local corner = Instance.new("UICorner", btn)
-    corner.CornerRadius = UDim.new(0,8)
-    
-    btn.Parent = ListFrame
-    
-    btn.MouseButton1Click:Connect(function()
-        SelectedName = nombre
-        SelectedIsMutated = esRaro
-        SlotText.Text = nombre
-        
-        if esRaro then
-            SlotDisplay.BackgroundColor3 = Color3.fromRGB(255, 180, 255)
-        else
-            SlotDisplay.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
+    local InfoLabel = Instance.new("TextLabel")
+    InfoLabel.Parent = Container
+    InfoLabel.BackgroundTransparency = 1
+    InfoLabel.Size = UDim2.new(1, 0, 0, 100)
+    InfoLabel.Font = Enum.Font.Gotham
+    InfoLabel.Text = "👨‍💻 Creador: JoseAngel_Blox\n\n📅 Fecha: 22/06/2026"
+    InfoLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    InfoLabel.TextSize = 16
+    InfoLabel.TextWrapped = true
+end
+
+-- Pestaña DUPLICAR
+local function LoadBrainrots()
+    ClearContainer()
+    Tab1.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    Tab2.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+    -- Botón Actualizar
+    local BtnRefresh = Instance.new("TextButton")
+    BtnRefresh.Parent = Container
+    BtnRefresh.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    BtnRefresh.Size = UDim2.new(1, 0, 0, 35)
+    BtnRefresh.Font = Enum.Font.GothamBold
+    BtnRefresh.Text = "🔄 Actualizar Inventario"
+    BtnRefresh.TextColor3 = Color3.fromRGB(255,255,255)
+    BtnRefresh.TextSize = 14
+    local cornerBtn = Instance.new("UICorner", BtnRefresh)
+    cornerBtn.CornerRadius = UDim.new(0,8)
+
+    -- Función de Duplicar
+    local function DupeBrainrot(Name, Mut)
+        local Data = {
+            Id = Name,
+            Rarity = "Rare", -- Se mantiene la original
+            Mutation = Mut
+        }
+        -- Disparar evento para crear copias
+        for i=1, 5 do -- Cantidad fija o puedes agregar slider si quieres
+            RS.Events.ReceiveBrainrot:FireServer(Data)
+            task.wait(0.1)
+        end
+    end
+
+    -- Cargar lista
+    BtnRefresh.MouseButton1Click:Connect(function()
+        -- Limpiar botones viejos menos el actualizar
+        for _, v in pairs(Container:GetChildren()) do
+            if v ~= BtnRefresh then v:Destroy() end
+        end
+
+        -- Buscar en los datos
+        local BrainrotsFolder = LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Brainrots")
+        if not BrainrotsFolder then return end
+
+        for _, BrainrotValue in pairs(BrainrotsFolder:GetChildren()) do
+            local BrainrotName = BrainrotValue.Name
+            local Mutation = BrainrotValue:FindFirstChild("Mutation") and BrainrotValue.Mutation.Value or "Normal"
+
+            -- Formatear texto
+            local DisplayText = BrainrotName
+            if Mutation ~= "Normal" and Mutation ~= "" then
+                DisplayText = DisplayText .. " | " .. Mutation
+            else
+                DisplayText = DisplayText .. " | Normal"
+            end
+
+            -- Crear Botón de Brainrot
+            local BtnBrainrot = Instance.new("TextButton")
+            BtnBrainrot.Parent = Container
+            BtnBrainrot.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            BtnBrainrot.Size = UDim2.new(1, 0, 0, 40)
+            BtnBrainrot.Font = Enum.Font.Gotham
+            BtnBrainrot.Text = DisplayText
+            BtnBrainrot.TextColor3 = Color3.fromRGB(255,255,255)
+            BtnBrainrot.TextSize = 13
+            BtnBrainrot.TextWrapped = true
+            
+            local corner = Instance.new("UICorner", BtnBrainrot)
+            corner.CornerRadius = UDim.new(0,8)
+
+            -- Acción al dar click
+            BtnBrainrot.MouseButton1Click:Connect(function()
+                DupeBrainrot(BrainrotName, Mutation)
+            end)
         end
     end)
 end
 
-function actualizarInventario()
-    -- Limpiar lista
-    for _,v in pairs(ListFrame:GetChildren()) do
-        if v:IsA("TextButton") then v:Destroy() end
-    end
-    
-    local encontrados = {}
-    
-    -- BUSCAR EN MOCHILA
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if backpack then
-        for _, item in pairs(backpack:GetChildren()) do
-            if item:IsA("Tool") then
-                local nombreLimpio = item.Name
-                local nombreMin = string.lower(nombreLimpio)
-                
-                -- DETECCION TOTAL DE RAREZAS Y MUTACIONES
-                local esRaro = false
-                local tipoRareza = "NORMAL"
-                
-                if string.find(nombreMin, "mut") or string.find(nombreMin, "shiny") then
-                    esRaro = true
-                    tipoRareza = "MUTADO"
-                elseif string.find(nombreMin, "gold") or string.find(nombreMin, "oro") then
-                    esRaro = true
-                    tipoRareza = "ORO"
-                elseif string.find(nombreMin, "diamond") or string.find(nombreMin, "diamante") then
-                    esRaro = true
-                    tipoRareza = "DIAMANTE"
-                elseif string.find(nombreMin, "crystal") or string.find(nombreMin, "cristal") then
-                    esRaro = true
-                    tipoRareza = "CRISTAL"
-                elseif string.find(nombreMin, "celestial") then
-                    esRaro = true
-                    tipoRareza = "CELESTIAL"
-                elseif string.find(nombreMin, "rainbow") or string.find(nombreMin, "arcoiris") then
-                    esRaro = true
-                    tipoRareza = "ARCOIRIS"
-                elseif string.find(nombreMin, "exclusivo") or string.find(nombreMin, "tocino") or string.find(nombreMin, "huevo") then
-                    esRaro = true
-                    tipoRareza = "EXCLUSIVO"
-                end
-                
-                if not encontrados[nombreLimpio] then
-                    encontrados[nombreLimpio] = true
-                    crearBotonItem(nombreLimpio, esRaro, tipoRareza)
-                end
-            end
-        end
-    end
-    
-    -- BUSCAR EN MANO (EQUIPADO)
-    if LocalPlayer.Character then
-        for _, item in pairs(LocalPlayer.Character:GetChildren()) do
-            if item:IsA("Tool") then
-                local nombreLimpio = item.Name
-                local nombreMin = string.lower(nombreLimpio)
-                
-                local esRaro = false
-                local tipoRareza = "NORMAL"
-                
-                if string.find(nombreMin, "mut") or string.find(nombreMin, "shiny") then
-                    esRaro = true
-                    tipoRareza = "MUTADO"
-                elseif string.find(nombreMin, "gold") or string.find(nombreMin, "oro") then
-                    esRaro = true
-                    tipoRareza = "ORO"
-                elseif string.find(nombreMin, "diamond") or string.find(nombreMin, "diamante") then
-                    esRaro = true
-                    tipoRareza = "DIAMANTE"
-                elseif string.find(nombreMin, "crystal") or string.find(nombreMin, "cristal") then
-                    esRaro = true
-                    tipoRareza = "CRISTAL"
-                elseif string.find(nombreMin, "celestial") then
-                    esRaro = true
-                    tipoRareza = "CELESTIAL"
-                elseif string.find(nombreMin, "rainbow") or string.find(nombreMin, "arcoiris") then
-                    esRaro = true
-                    tipoRareza = "ARCOIRIS"
-                elseif string.find(nombreMin, "exclusivo") or string.find(nombreMin, "tocino") or string.find(nombreMin, "huevo") then
-                    esRaro = true
-                    tipoRareza = "EXCLUSIVO"
-                end
-                
-                if not encontrados[nombreLimpio] then
-                    encontrados[nombreLimpio] = true
-                    crearBotonItem(nombreLimpio, esRaro, tipoRareza)
-                end
-            end
-        end
-    end
-end
+--// Eventos de los Tabs
+Tab1.MouseButton1Click:Connect(ShowInfo)
+Tab2.MouseButton1Click:Connect(LoadBrainrots)
 
-local function duplicarYColocar()
-    if SelectedName == "" then
-        SlotText.Text = "SELECCIONA"
-        return
-    end
+--// Cargar vista inicial
+ShowInfo()
 
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not backpack then return end
-
-    local original = nil
-    
-    -- Buscar original
-    for _, item in pairs(backpack:GetChildren()) do
-        if item.Name == SelectedName then
-            original = item
-            break
-        end
-    end
-    
-    if not original and LocalPlayer.Character then
-        for _, item in pairs(LocalPlayer.Character:GetChildren()) do
-            if item.Name == SelectedName then
-                original = item
-                break
-            end
-        end
-    end
-
-    if original then
-        -- CLONADO PERFECTO
-        local copia = original:Clone()
-        copia.Parent = backpack
-        
-        SlotText.Text = "✅ DUPLICADO!"
-        task.wait(0.5)
-        SlotText.Text = SelectedName
-    else
-        SlotText.Text = "NO ENCONTRADO"
-        task.wait(1)
-        SlotText.Text = SelectedName
-    end
-end
-
--- Conexiones
-DupeButton.MouseButton1Click:Connect(duplicarYColocar)
-RefreshButton.MouseButton1Click:Connect(actualizarInventario)
-
--- Inicio
-actualizarInventario()
+print("✅ Script Brainrots Duplication cargado correctamente")
