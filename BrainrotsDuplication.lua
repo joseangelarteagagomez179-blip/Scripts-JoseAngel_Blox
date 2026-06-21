@@ -1,139 +1,152 @@
--- // SCRIPT ESPECIAL PARA KICK A LUCKY BLOCK - VERSION ACTUAL \\
--- // HECHO ESPECIALMENTE PARA QUE FUNCIONE CON 1 SOLO BRAINROT \\
+-- Duplicador Brainrots - Kick a Lucky Block
+-- Versión personalizada
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local backpack = player.Backpack
 
--- == CONFIGURACIÓN ==
-local NOMBRE_OBJETO = "Brainrot"
-local CANTIDAD = 999 -- Cantidad que quieres
--- ===================
+-- Variables configurables
+local CANTIDAD_DESEADA = 999  -- Cantidad de Brainrots a duplicar
+local INTERVALO_DUPE = 0.5    -- Segundos entre cada duplicación
 
--- Función Super Duplicadora
-local function SuperDuplicar()
-    print("🔍 Buscando datos del Brainrot...")
-
-    -- METODO 1: Buscar en Leaderstats y Stats
-    local encontrado = false
-    for _, objeto in pairs(LocalPlayer:GetChildren()) do
-        pcall(function()
-            if objeto:IsA("NumberValue") or objeto:IsA("IntValue") then
-                if string.find(objeto.Name:lower(), NOMBRE_OBJETO:lower()) then
-                    objeto.Value = objeto.Value + CANTIDAD
-                    print("✅ ÉXITO! Ahora tienes: " .. objeto.Value)
-                    encontrado = true
-                end
-            end
-        end)
-    end
-
-    -- METODO 2: Buscar en Carpetas de Inventario (muy común en este juego)
-    if not encontrado then
-        for _, carpeta in pairs(LocalPlayer:GetChildren()) do
-            if carpeta:IsA("Folder") then
-                for _, item in pairs(carpeta:GetChildren()) do
-                    pcall(function()
-                        if string.find(item.Name:lower(), NOMBRE_OBJETO:lower()) then
-                            -- Si tiene un valor de cantidad, lo modificamos
-                            if item:FindFirstChild("Amount") or item:FindFirstChild("Count") or item:FindFirstChild("Value") then
-                                local valor = item:FindFirstChild("Amount") or item:FindFirstChild("Count") or item:FindFirstChild("Value")
-                                valor.Value = valor.Value + CANTIDAD
-                                print("✅ Cantidad aumentada!")
-                                encontrado = true
-                            else
-                                -- Si no tiene cantidad, lo clonamos dentro de su propia carpeta
-                                local clon = item:Clone()
-                                clon.Parent = item.Parent
-                                print("✅ Item clonado en inventario!")
-                                encontrado = true
-                            end
-                        end
-                    end)
-                end
-            end
+-- Función para obtener los Brainrots del inventario
+local function obtenerBrainrots()
+    local brainrots = {}
+    -- Buscar en el inventario del jugador
+    for _, item in pairs(player:GetChildren()) do
+        if item:IsA("Tool") and item.Name:find("Brainrot") then
+            table.insert(brainrots, item)
         end
     end
+    return brainrots
+end
 
-    -- METODO 3: Truco de Memoria (Nivel Avanzado)
-    if not encontrado then
-        -- Buscamos en todo el juego el string "Brainrot" y modificamos sus valores cercanos
-        local success, err = pcall(function()
-            for _, v in pairs(getgc(true)) do
-                if typeof(v) == "table" and rawget(v, "Name") and string.find(tostring(rawget(v, "Name")):lower(), NOMBRE_OBJETO:lower()) then
-                    if rawget(v, "Amount") then
-                        rawset(v, "Amount", CANTIDAD)
-                        print("✅ Modificado en memoria!")
-                        encontrado = true
-                        break
-                    end
-                end
-            end
-        end)
+-- Función principal de duplicación
+local function duplicarBrainrots()
+    local brainrots = obtenerBrainrots()
+    if #brainrots == 0 then
+        print("❌ No tienes Brainrots en el inventario")
+        return
     end
-
-
-    if encontrado then
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "¡DUPLICADO!",
-            Text = "Brainrots agregados con éxito!",
-            Duration = 3
-        })
-    else
-        print("❌ No se pudo duplicar automaticamente.")
-        print("💡 Consejo: Abre el menú de Inventario del juego y vuelve a darle al botón.")
+    
+    local brainrot = brainrots[1]
+    print("✅ Brainrot encontrado: " .. brainrot.Name)
+    
+    -- Intentar duplicar (método básico)
+    -- NOTA: Necesitas identificar cómo funciona el sistema de items en el juego
+    -- Puede ser replicando el item o explotando un bug de inventario
+    
+    -- Ejemplo: Equipar y desequipar rápidamente
+    if character:FindFirstChild(brainrot.Name) then
+        brainrot = character:FindFirstChild(brainrot.Name)
+    end
+    
+    -- Simular duplicación (esto varía según el juego)
+    for i = 1, CANTIDAD_DESEADA do
+        -- Código de duplicación aquí
+        -- Esto depende de cómo maneje los items el juego específico
+        wait(INTERVALO_DUPE)
+        
+        -- Intento de duplicar moviendo items
+        local clone = brainrot:Clone()
+        clone.Parent = backpack
+        print("🔄 Brainrot duplicado #" .. i)
     end
 end
 
--- == INTERFAZ MEJORADA ==
--- Borra GUI anteriores
-if LocalPlayer.PlayerGui:FindFirstChild("DolaHub") then
-    LocalPlayer.PlayerGui.DolaHub:Destroy()
+-- Función para farmeo automático
+local function autoFarm()
+    print("🌾 Iniciando Auto Farm de Brainrots...")
+    
+    -- Buscar Lucky Blocks en el mapa
+    local luckyBlocks = workspace:FindFirstChild("LuckyBlocks") or {}
+    
+    for _, block in pairs(luckyBlocks:GetChildren()) do
+        if block:IsA("Part") and block.Name:find("Lucky") then
+            -- Simular patada al lucky block
+            game:GetService("ReplicatedStorage"):FindFirstChild("KickBlock"):FireServer(block)
+            wait(1)
+        end
+    end
 end
 
-local Gui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local BtnDuplicar = Instance.new("TextButton")
-local Titulo = Instance.new("TextLabel")
+-- Función para evitar detección (anti-ban)
+local function evitarDeteccion()
+    -- Simular movimiento humano
+    local randomWait = math.random(5, 15)
+    wait(randomWait)
+    
+    -- Movimientos aleatorios
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid:MoveTo(Vector3.new(
+            math.random(-100, 100),
+            0,
+            math.random(-100, 100)
+        ))
+    end
+end
 
-Gui.Name = "DolaHub"
-Gui.Parent = LocalPlayer.PlayerGui
-Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-Gui.ResetOnSpawn = false
+-- Función para crear GUI
+local function crearGUI()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = player.PlayerGui
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 400)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.BackgroundTransparency = 0.1
+    frame.Parent = screenGui
+    
+    -- Título
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 50)
+    title.Text = "🧠 Duplicador Brainrot"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1
+    title.Parent = frame
+    
+    -- Botón Duplicar
+    local dupeBtn = Instance.new("TextButton")
+    dupeBtn.Size = UDim2.new(0, 200, 0, 40)
+    dupeBtn.Position = UDim2.new(0.5, -100, 0.2, 0)
+    dupeBtn.Text = "🔄 Duplicar Brainrots"
+    dupeBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    dupeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dupeBtn.Parent = frame
+    dupeBtn.MouseButton1Click:Connect(duplicarBrainrots)
+    
+    -- Botón Auto Farm
+    local farmBtn = Instance.new("TextButton")
+    farmBtn.Size = UDim2.new(0, 200, 0, 40)
+    farmBtn.Position = UDim2.new(0.5, -100, 0.4, 0)
+    farmBtn.Text = "🌾 Auto Farm"
+    farmBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+    farmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    farmBtn.Parent = frame
+    farmBtn.MouseButton1Click:Connect(autoFarm)
+    
+    -- Botón Anti-Ban
+    local antiBanBtn = Instance.new("TextButton")
+    antiBanBtn.Size = UDim2.new(0, 200, 0, 40)
+    antiBanBtn.Position = UDim2.new(0.5, -100, 0.6, 0)
+    antiBanBtn.Text = "🛡️ Anti-Ban (ON)"
+    antiBanBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+    antiBanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    antiBanBtn.Parent = frame
+    
+    local antiBanActive = false
+    antiBanBtn.MouseButton1Click:Connect(function()
+        antiBanActive = not antiBanActive
+        antiBanBtn.Text = antiBanActive and "🛡️ Anti-Ban (ON)" or "🛡️ Anti-Ban (OFF)"
+        while antiBanActive do
+            evitarDeteccion()
+            wait(10)
+        end
+    end)
+end
 
-MainFrame.Parent = Gui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.Position = UDim2.new(0.02, 0, 0.15, 0)
-MainFrame.Size = UDim2.new(0, 280, 0, 140)
-MainFrame.BorderSizePixel = 0
-MainFrame.Draggable = true
-MainFrame.Active = true
-
-Titulo.Parent = MainFrame
-Titulo.Size = UDim2.new(1, 0, 0.2, 0)
-Titulo.BackgroundTransparency = 1
-Titulo.Text = "DOLA HUB - DUPLICADOR"
-Titulo.TextColor3 = Color3.new(1,1,1)
-Titulo.Font = Enum.Font.GothamBold
-Titulo.TextSize = 16
-
-BtnDuplicar.Parent = MainFrame
-BtnDuplicar.BackgroundColor3 = Color3.fromRGB(255, 0, 50)
-BtnDuplicar.Size = UDim2.new(0.9, 0, 0.5, 0)
-BtnDuplicar.Position = UDim2.new(0.05, 0, 0.3, 0)
-BtnDuplicar.Text = "🔥 DUPLICAR BRAINROT 🔥"
-BtnDuplicar.TextColor3 = Color3.new(1,1,1)
-BtnDuplicar.Font = Enum.Font.GothamBold
-BtnDuplicar.TextSize = 18
-
--- Efecto al presionar
-BtnDuplicar.MouseButton1Down:Connect(function()
-    BtnDuplicar.BackgroundColor3 = Color3.fromRGB(200,0,0)
-end)
-BtnDuplicar.MouseButton1Up:Connect(function()
-    BtnDuplicar.BackgroundColor3 = Color3.fromRGB(255,0,50)
-end)
-
-BtnDuplicar.MouseButton1Click:Connect(SuperDuplicar)
-
-print("🚀 Script Cargado y Listo!")
+-- Iniciar GUI
+print("🚀 Script cargado correctamente")
+crearGUI()
