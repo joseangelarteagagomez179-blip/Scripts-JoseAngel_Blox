@@ -105,14 +105,15 @@ local function crearBotonItem(nombre, esMutado)
     
     if esMutado then
         btn.BackgroundColor3 = Color3.fromRGB(255, 180, 255)
+        btn.Text = nombre .. "\n[MUTADO]"
     else
         btn.BackgroundColor3 = Color3.fromRGB(200, 200, 255)
+        btn.Text = nombre .. "\n[NORMAL]"
     end
     
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 11
+    btn.TextSize = 10
     btn.TextWrapped = true
-    btn.Text = nombre
     btn.TextColor3 = Color3.new(0, 0, 0)
     
     local corner = Instance.new("UICorner", btn)
@@ -134,23 +135,31 @@ local function crearBotonItem(nombre, esMutado)
 end
 
 local function actualizarInventario()
+    -- Limpiar lista anterior
     for _,v in pairs(ListFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
     end
     
-    local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not backpack then return end
+    -- Buscar en MOCHILA y en MANO
+    local contenedores = {}
+    table.insert(contenedores, LocalPlayer:FindFirstChild("Backpack"))
+    table.insert(contenedores, LocalPlayer:FindFirstChild("Character") and LocalPlayer.Character:FindFirstChild("Tool")) -- Item equipado
     
     local encontrados = {}
     
-    for _, item in pairs(backpack:GetChildren()) do
-        if item:IsA("Tool") and item.Name:lower():find("brainrot") then
-            local nombreLimpio = item.Name
-            local esMutado = string.find(item.Name:lower(), "mut") or string.find(item.Name:lower(), "shiny") or string.find(item.Name:lower(), "gold") or false
-            
-            if not encontrados[nombreLimpio] then
-                encontrados[nombreLimpio] = true
-                crearBotonItem(nombreLimpio, esMutado)
+    for _, contenedor in pairs(contenedores) do
+        if contenedor then
+            for _, item in pairs(contenedor:GetChildren()) do
+                -- Buscar TODO lo que parezca Brainrot, no solo Tools
+                if string.find(item.Name:lower(), "brainrot") or string.find(item.Name:lower(), "tocino") or string.find(item.Name:lower(), "krupuk") then
+                    local nombreLimpio = item.Name
+                    local esMutado = string.find(item.Name:lower(), "mut") or string.find(item.Name:lower(), "shiny") or string.find(item.Name:lower(), "gold") or string.find(item.Name:lower(), "celestial") or false
+                    
+                    if not encontrados[nombreLimpio] then
+                        encontrados[nombreLimpio] = true
+                        crearBotonItem(nombreLimpio, esMutado)
+                    end
+                end
             end
         end
     end
@@ -165,25 +174,38 @@ local function duplicarYColocar()
     local backpack = LocalPlayer:FindFirstChild("Backpack")
     if not backpack then return end
 
+    -- Buscar el original en TODOS lados
     local original = nil
+    
+    -- Buscar en mochila
     for _, item in pairs(backpack:GetChildren()) do
         if item.Name == SelectedName then
             original = item
             break
         end
     end
+    
+    -- Si no está en mochila, buscar en personaje (equipado)
+    if not original and LocalPlayer.Character then
+        for _, item in pairs(LocalPlayer.Character:GetChildren()) do
+            if item.Name == SelectedName then
+                original = item
+                break
+            end
+        end
+    end
 
     if original then
+        -- DUPLICAR
         local copia = original:Clone()
         copia.Parent = backpack
-
-        local base = workspace:FindFirstChild(LocalPlayer.Name .. "'s Base") or workspace:FindFirstChild("Base_"..LocalPlayer.UserId)
-        if base then
-            local objetoEnBase = copia:Clone()
-            objetoEnBase.Parent = base
-        end
-
-        SlotText.Text = "✅ DUPLICADO"
+        
+        -- Mensaje de éxito
+        SlotText.Text = "✅ DUPLICADO!"
+        task.wait(1)
+        SlotText.Text = SelectedName
+    else
+        SlotText.Text = "NO ENCONTRADO"
         task.wait(1)
         SlotText.Text = SelectedName
     end
@@ -191,6 +213,7 @@ end
 
 DupeButton.MouseButton1Click:Connect(duplicarYColocar)
 
+-- Actualizar lista cada 2 segundos
 while task.wait(2) do
     actualizarInventario()
 end
