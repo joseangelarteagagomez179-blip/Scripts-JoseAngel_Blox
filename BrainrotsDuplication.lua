@@ -138,11 +138,11 @@ local function LoadBrainrots()
     local function DupeBrainrot(Name, Mut)
         local Data = {
             Id = Name,
-            Rarity = "Rare", -- Se mantiene la original
+            Rarity = "Rare",
             Mutation = Mut
         }
         -- Disparar evento para crear copias
-        for i=1, 5 do -- Cantidad fija o puedes agregar slider si quieres
+        for i=1, 5 do
             RS.Events.ReceiveBrainrot:FireServer(Data)
             task.wait(0.1)
         end
@@ -155,17 +155,52 @@ local function LoadBrainrots()
             if v ~= BtnRefresh then v:Destroy() end
         end
 
-        -- Buscar en los datos
-        local BrainrotsFolder = LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Brainrots")
-        if not BrainrotsFolder then return end
+        -- 🔧 BUSQUEDA MEJORADA DE DATOS
+        local BrainrotsFolder = nil
+        
+        -- Buscar en todas las carpetas posibles
+        if LocalPlayer:FindFirstChild("Data") then
+            BrainrotsFolder = LocalPlayer.Data:FindFirstChild("Brainrots")
+        elseif LocalPlayer:FindFirstChild("leaderstats") then
+            BrainrotsFolder = LocalPlayer.leaderstats:FindFirstChild("Brainrots")
+        else
+            -- Si no encuentra, buscar en todo el jugador
+            for _, child in pairs(LocalPlayer:GetChildren()) do
+                if child.Name:lower():find("brain") then
+                    BrainrotsFolder = child
+                    break
+                end
+            end
+        end
 
+        if not BrainrotsFolder then
+            local Warn = Instance.new("TextLabel")
+            Warn.Parent = Container
+            Warn.BackgroundTransparency = 1
+            Warn.Size = UDim2.new(1, 0, 0, 30)
+            Warn.Text = "⚠️ No se encontraron Brainrots"
+            Warn.TextColor3 = Color3.fromRGB(255,100,100)
+            Warn.Font = Enum.Font.Gotham
+            return
+        end
+
+        -- Recorrer los brainrots encontrados
         for _, BrainrotValue in pairs(BrainrotsFolder:GetChildren()) do
             local BrainrotName = BrainrotValue.Name
-            local Mutation = BrainrotValue:FindFirstChild("Mutation") and BrainrotValue.Mutation.Value or "Normal"
+            local Mutation = "Normal"
+            
+            -- Buscar valor de mutación
+            if BrainrotValue:FindFirstChild("Mutation") then
+                Mutation = BrainrotValue.Mutation.Value
+                if Mutation == "" then Mutation = "Normal" end
+            elseif BrainrotValue:FindFirstChild("Mut") then
+                Mutation = BrainrotValue.Mut.Value
+                if Mutation == "" then Mutation = "Normal" end
+            end
 
             -- Formatear texto
             local DisplayText = BrainrotName
-            if Mutation ~= "Normal" and Mutation ~= "" then
+            if Mutation ~= "Normal" then
                 DisplayText = DisplayText .. " | " .. Mutation
             else
                 DisplayText = DisplayText .. " | Normal"
