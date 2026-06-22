@@ -19,6 +19,7 @@ local ScrollingFrame = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
 local InputCantidad = Instance.new("TextBox")
 local TextoCantidad = Instance.new("TextLabel")
+local Notificacion = Instance.new("TextLabel") -- NUEVO: AVISO
 
 -- PROPIEDADES
 ScreenGui.Parent = game.CoreGui
@@ -35,7 +36,7 @@ MainFrame.Position = UDim2.new(0.02, 0, 0.1, 0)
 MainFrame.Size = UDim2.new(0, 280, 0, 420)
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
-MainFrame.Draggable = true -- ✨ DESLIZABLE ✨
+MainFrame.Draggable = true
 
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 16)
@@ -91,6 +92,11 @@ InputCantidad.TextColor3 = Color3.fromRGB(255, 255, 255)
 InputCantidad.TextSize = 14
 InputCantidad.ClearTextOnFocus = false
 
+-- 🔒 SÓLO PERMITIR NÚMEROS
+InputCantidad:GetPropertyChangedSignal("Text"):Connect(function()
+    InputCantidad.Text = InputCantidad.Text:gsub("%D", "")
+end)
+
 local UICornerInput = Instance.new("UICorner")
 UICornerInput.CornerRadius = UDim.new(0, 8)
 UICornerInput.Parent = InputCantidad
@@ -133,11 +139,23 @@ InfoText.BackgroundTransparency = 1
 InfoText.Position = UDim2.new(0.05, 0, 0.75, 0)
 InfoText.Size = UDim2.new(0.9, 0, 0, 60)
 InfoText.Font = Enum.Font.Gotham
-InfoText.Text = "Creador: JoseAngel_Blox\nFecha: 22/06/2026"
+InfoText.Text = "Creador: JoseAngel_Blox\nFecha: 22/06/2026\nPara: Kick a Lucky Block"
 InfoText.TextColor3 = Color3.fromRGB(200, 200, 200)
 InfoText.TextSize = 12
 InfoText.TextWrapped = true
 InfoText.Visible = false
+
+-- ✨ NOTIFICACIÓN FLOTANTE
+Notificacion.Name = "Notificacion"
+Notificacion.Parent = MainFrame
+Notificacion.BackgroundTransparency = 1
+Notificacion.Position = UDim2.new(0, 0, 0, -30)
+Notificacion.Size = UDim2.new(1, 0, 0, 30)
+Notificacion.Font = Enum.Font.GothamBold
+Notificacion.Text = "✅ ¡Duplicados con exito!"
+Notificacion.TextColor3 = Color3.fromRGB(0, 255, 0)
+Notificacion.TextSize = 14
+Notificacion.ZIndex = 10
 
 local InfoVisible = false
 ButtonInfo.MouseButton1Click:Connect(function()
@@ -150,40 +168,33 @@ end)
 -- =============================================
 local ItemSeleccionado = nil
 
--- Función para detectar la mutación CORRECTAMENTE
+-- Función para detectar la mutación
 local function ObtenerMutacionReal(item)
     local mutacion = "Normal"
     local emoji = "🧠"
 
-    -- Buscar en TODO el objeto y sus hijos
     for _, hijo in pairs(item:GetDescendants()) do
         local nombre = hijo.Name:lower()
         local valor = ""
         if hijo:IsA("StringValue") then valor = hijo.Value:lower() end
 
-        -- Detectar ALIENÍGENA
         if string.find(nombre, "alien") or string.find(valor, "alien") or string.find(nombre, "extraterrestre") then
             mutacion = "Alienígena"
             emoji = "👽"
-        -- Detectar SOMBRA
         elseif string.find(nombre, "shadow") or string.find(valor, "shadow") or string.find(nombre, "sombra") then
             mutacion = "Sombra"
             emoji = "🌑"
-        -- Detectar RADIOACTIVO
         elseif string.find(nombre, "radioactive") or string.find(valor, "radioactive") then
             mutacion = "Radioactivo"
             emoji = "☢️"
-        -- Detectar OG
         elseif string.find(nombre, "og") or string.find(valor, "og") then
             mutacion = "OG"
             emoji = "💎"
-        -- Detectar CELESTIAL
         elseif string.find(nombre, "celestial") or string.find(valor, "celestial") then
             mutacion = "Celestial"
             emoji = "✨"
         end
     end
-
     return mutacion, emoji
 end
 
@@ -211,11 +222,13 @@ local function ActualizarLista()
             corner.Parent = Btn
             
             Btn.MouseButton1Click:Connect(function()
-                ItemSeleccionado = Item
-                for _, c in pairs(ScrollingFrame:GetChildren()) do
-                    if c:IsA("TextButton") then c.BackgroundColor3 = Color3.fromRGB(40,40,40) end
+                if Item.Parent then -- ✅ Seguridad
+                    ItemSeleccionado = Item
+                    for _, c in pairs(ScrollingFrame:GetChildren()) do
+                        if c:IsA("TextButton") then c.BackgroundColor3 = Color3.fromRGB(40,40,40) end
+                    end
+                    Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 120)
                 end
-                Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 120)
             end)
         end
     end
@@ -226,40 +239,39 @@ end
 local function DuplicarExacto()
     if not ItemSeleccionado then return end
     
-    local Cantidad = tonumber(InputCantidad.Text) or 1
+    local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 50) -- ✅ Limite de seguridad
     
     for i = 1, Cantidad do
-        -- ✨ CLONADO TOTAL (copia absolutamente TODO, incluidas mutaciones)
         local Clon = ItemSeleccionado:Clone()
-        
-        -- 🔧 CONFIGURACIÓN ESPECIAL PARA QUE SE PUEDA COLOCAR
         Clon.Parent = Backpack
         Clon.Enabled = true
         Clon.CanBeDropped = true
         
-        -- Asegurar que todas las partes físicas estén bien
         for _, parte in pairs(Clon:GetDescendants()) do
             if parte:IsA("BasePart") then
                 parte.CanCollide = true
                 parte.Anchored = false
             end
         end
-        
-        wait(0.05)
+        task.wait(0.05)
     end
     
-    print("✅ Duplicados: " .. Cantidad .. "x " .. ItemSeleccionado.Name)
+    -- ✨ ANIMACIÓN DE AVISO
+    Notificacion.Text = "✅ "..Cantidad.."x Brainrots duplicados!"
+    TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,0)}):Play()
+    task.wait(2)
+    TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,-30)}):Play()
 end
 
 -- Lógica botón
 local Activado = false
 ButtonDupe.MouseButton1Click:Connect(function()
-    Activado = not Activado
-    if Activado then
+    if not Activado then
+        Activado = true
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-        ButtonDupe.Text = "✅ HECHO!"
+        ButtonDupe.Text = "✅ PROCESANDO..."
         DuplicarExacto()
-        wait(0.5)
+        task.wait(0.5)
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
         ButtonDupe.Text = "🚀 Duplicar"
         Activado = false
@@ -267,8 +279,8 @@ ButtonDupe.MouseButton1Click:Connect(function()
 end)
 
 -- Actualizar lista
-spawn(function()
-    while wait(2) do
+task.spawn(function()
+    while task.wait(2) do
         ActualizarLista()
     end
 end)
@@ -298,4 +310,4 @@ end)
 
 -- INICIO
 ActualizarLista()
-print("✅ Script listo y perfecto!")
+print("✅ Script listo para Kick a Lucky Block!")
