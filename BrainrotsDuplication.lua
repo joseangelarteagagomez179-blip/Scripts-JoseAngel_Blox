@@ -87,7 +87,7 @@ InputCantidad.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 InputCantidad.Position = UDim2.new(0.05, 0, 0.50, 0)
 InputCantidad.Size = UDim2.new(0.9, 0, 0, 30)
 InputCantidad.Font = Enum.Font.GothamBold
-InputCantidad.Text = "5"
+InputCantidad.Text = "1"
 InputCantidad.TextColor3 = Color3.fromRGB(255, 255, 255)
 InputCantidad.TextSize = 14
 InputCantidad.ClearTextOnFocus = false
@@ -124,7 +124,7 @@ ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 ButtonDupe.Position = UDim2.new(0.53, 0, 0.60, 0)
 ButtonDupe.Size = UDim2.new(0.42, 0, 0.12, 0)
 ButtonDupe.Font = Enum.Font.GothamBold
-ButtonDupe.Text = "🚀 Duplicar"
+ButtonDupe.Text = "🚀 Duplicar (Cyraa)"
 ButtonDupe.TextColor3 = Color3.fromRGB(255, 255, 255)
 ButtonDupe.TextSize = 14
 
@@ -139,7 +139,7 @@ InfoText.BackgroundTransparency = 1
 InfoText.Position = UDim2.new(0.05, 0, 0.75, 0)
 InfoText.Size = UDim2.new(0.9, 0, 0, 60)
 InfoText.Font = Enum.Font.Gotham
-InfoText.Text = "Creador: JoseAngel_Blox\nFecha: 22/06/2026\nPara: Kick a Lucky Block"
+InfoText.Text = "Creador: JoseAngel_Blox\nModo: Cyraa Duplication\nPara: Kick a Lucky Block"
 InfoText.TextColor3 = Color3.fromRGB(200, 200, 200)
 InfoText.TextSize = 12
 InfoText.TextWrapped = true
@@ -235,48 +235,68 @@ local function ActualizarLista()
     ScrollingFrame.CanvasSize = UDim2.new(0,0,0, UIListLayout.AbsoluteContentSize.Y)
 end
 
--- Duplicar PERFECTAMENTE igual al original
-local function DuplicarExacto()
+-- 🚀 MÉTODO DE DUPLICACIÓN ESTILO CYRAA
+local function DuplicarCyraa()
     if not ItemSeleccionado then return end
     
     local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 50)
     
     for i = 1, Cantidad do
+        -- 🔮 EL SECRETO DEL CYRAA: Clonado profundo y restauración total
         local Clon = ItemSeleccionado:Clone()
         Clon.Parent = Backpack
         
-        -- ✅ CONFIGURACIÓN ESPECIAL PARA QUE SE PUEDA COLOCAR Y GENERE DINERO
+        -- ✅ CONFIGURACIÓN MAESTRA
         Clon.Enabled = true
         Clon.CanBeDropped = true
+        Clon.Archivable = true
         
-        -- Asegurar que tenga Handle
-        if not Clon:FindFirstChild("Handle") then
-            for _, parte in pairs(Clon:GetChildren()) do
-                if parte:IsA("BasePart") then
-                    parte.Name = "Handle"
-                    parte.CanCollide = false
-                    break
-                end
-            end
-        end
-        
-        -- Activar valores que el juego lee
+        -- 🔧 RESTAURAR CADA PARTE AL 100%
         for _, obj in pairs(Clon:GetDescendants()) do
             if obj:IsA("BasePart") then
-                parte.CanCollide = true
-                parte.Anchored = false
+                obj.Anchored = false
+                obj.CanCollide = true
+                obj.CastShadow = true
+                obj.Transparency = 0
+                obj.Locked = false
+                obj.BrickColor = obj.BrickColor -- Refrescar color
+                obj.Material = obj.Material -- Refrescar material
+                
+                -- Mango invisible
+                if obj.Name == "Handle" or string.find(obj.Name:lower(), "handle") then
+                    obj.Transparency = 1
+                    obj.CanCollide = false
+                end
+            elseif obj:IsA("Light") or obj:IsA("PointLight") or obj:IsA("SpotLight") then
+                obj.Enabled = true -- Luces encendidas
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                obj.Enabled = true -- Efectos activos
             elseif obj:IsA("BoolValue") then
-                if obj.Name == "IsBrainrot" or obj.Name == "IsUnit" or obj.Name == "CanPlace" then
+                -- Valores vitales para el juego
+                if obj.Name == "IsBrainrot" or obj.Name == "IsUnit" or obj.Name == "CanPlace" or obj.Name == "IsTool" or obj.Name == "Sellable" then
                     obj.Value = true
                 end
+            elseif obj:IsA("NumberValue") or obj:IsA("StringValue") or obj:IsA("IntValue") then
+                obj.Value = obj.Value -- Forzar lectura
             end
         end
         
-        task.wait(0.05)
+        -- ✅ CREAR HANDLE SI FALTA (IMPORTANTE)
+        if not Clon:FindFirstChildWhichIsA("Part", true) then
+            local Handle = Instance.new("Part")
+            Handle.Name = "Handle"
+            Handle.Size = Vector3.new(0.1, 0.1, 0.1)
+            Handle.Transparency = 1
+            Handle.CanCollide = false
+            Handle.Anchored = false
+            Handle.Parent = Clon
+        end
+        
+        task.wait(0.03) -- Velocidad estilo Cyraa
     end
     
     -- ✨ ANIMACIÓN DE AVISO
-    Notificacion.Text = "✅ "..Cantidad.."x Brainrots duplicados!"
+    Notificacion.Text = "✅ "..Cantidad.."x Duplicados (Modo Cyraa)"
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,0)}):Play()
     task.wait(2)
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,-30)}):Play()
@@ -289,10 +309,10 @@ ButtonDupe.MouseButton1Click:Connect(function()
         Activado = true
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
         ButtonDupe.Text = "✅ PROCESANDO..."
-        DuplicarExacto()
+        DuplicarCyraa()
         task.wait(0.5)
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        ButtonDupe.Text = "🚀 Duplicar"
+        ButtonDupe.Text = "🚀 Duplicar (Cyraa)"
         Activado = false
     end
 end)
@@ -329,4 +349,4 @@ end)
 
 -- INICIO
 ActualizarLista()
-print("✅ Script listo para Kick a Lucky Block!")
+print("✅ Script cargado con Modo Duplicación Cyraa!")
