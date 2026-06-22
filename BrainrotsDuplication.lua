@@ -150,53 +150,58 @@ end)
 -- =============================================
 local ItemSeleccionado = nil
 
--- Función para obtener datos REALES del item
-local function AnalizarItem(item)
-    local nombre = item.Name
+-- Función para detectar la mutación CORRECTAMENTE
+local function ObtenerMutacionReal(item)
     local mutacion = "Normal"
     local emoji = "🧠"
 
-    -- Buscar en los hijos del item para encontrar la mutación REAL
-    for _, hijo in pairs(item:GetChildren()) do
-        local nombreHijo = hijo.Name:lower()
-        if string.find(nombreHijo, "shadow") or string.find(nombreHijo, "sombra") then
+    -- Buscar en TODO el objeto y sus hijos
+    for _, hijo in pairs(item:GetDescendants()) do
+        local nombre = hijo.Name:lower()
+        local valor = ""
+        if hijo:IsA("StringValue") then valor = hijo.Value:lower() end
+
+        -- Detectar ALIENÍGENA
+        if string.find(nombre, "alien") or string.find(valor, "alien") or string.find(nombre, "extraterrestre") then
+            mutacion = "Alienígena"
+            emoji = "👽"
+        -- Detectar SOMBRA
+        elseif string.find(nombre, "shadow") or string.find(valor, "shadow") or string.find(nombre, "sombra") then
             mutacion = "Sombra"
             emoji = "🌑"
-        elseif string.find(nombreHijo, "radioactive") or string.find(nombreHijo, "radioactivo") then
+        -- Detectar RADIOACTIVO
+        elseif string.find(nombre, "radioactive") or string.find(valor, "radioactive") then
             mutacion = "Radioactivo"
             emoji = "☢️"
-        elseif string.find(nombreHijo, "og") then
+        -- Detectar OG
+        elseif string.find(nombre, "og") or string.find(valor, "og") then
             mutacion = "OG"
             emoji = "💎"
-        elseif string.find(nombreHijo, "gold") or string.find(nombreHijo, "oro") then
-            mutacion = "Oro"
-            emoji = "💰"
-        elseif string.find(nombreHijo, "celestial") then
+        -- Detectar CELESTIAL
+        elseif string.find(nombre, "celestial") or string.find(valor, "celestial") then
             mutacion = "Celestial"
             emoji = "✨"
         end
     end
 
-    return nombre, mutacion, emoji
+    return mutacion, emoji
 end
 
 -- Actualizar lista
 local function ActualizarLista()
-    -- Limpiar lista anterior
     for _, child in pairs(ScrollingFrame:GetChildren()) do
         if child:IsA("TextButton") then child:Destroy() end
     end
     
-    -- Buscar TODOS los tools en la mochila
     for _, Item in pairs(Backpack:GetChildren()) do
         if Item:IsA("Tool") then
-            local nombre, mutacion, emoji = AnalizarItem(Item)
+            local mutacion, emoji = ObtenerMutacionReal(Item)
             
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(0.95, 0, 0, 30)
             Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             Btn.Font = Enum.Font.Gotham
-            Btn.Text = emoji .. " " .. nombre .. " [" .. mutacion .. "]"
+            Btn.Text = emoji .. " " .. Item.Name .. " [" .. mutacion .. "]"
             Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
             Btn.TextSize = 11
             Btn.Parent = ScrollingFrame
@@ -205,10 +210,8 @@ local function ActualizarLista()
             corner.CornerRadius = UDim.new(0, 6)
             corner.Parent = Btn
             
-            -- Al darle click seleccionas
             Btn.MouseButton1Click:Connect(function()
                 ItemSeleccionado = Item
-                -- Resaltar seleccionado
                 for _, c in pairs(ScrollingFrame:GetChildren()) do
                     if c:IsA("TextButton") then c.BackgroundColor3 = Color3.fromRGB(40,40,40) end
                 end
@@ -219,28 +222,29 @@ local function ActualizarLista()
     ScrollingFrame.CanvasSize = UDim2.new(0,0,0, UIListLayout.AbsoluteContentSize.Y)
 end
 
--- Duplicar con cantidad exacta y PROPIEDADES COMPLETAS
+-- Duplicar PERFECTAMENTE igual al original
 local function DuplicarExacto()
     if not ItemSeleccionado then return end
     
     local Cantidad = tonumber(InputCantidad.Text) or 1
     
     for i = 1, Cantidad do
-        -- ✨ CLONADO TOTAL (copia absolutamente TODO)
+        -- ✨ CLONADO TOTAL (copia absolutamente TODO, incluidas mutaciones)
         local Clon = ItemSeleccionado:Clone()
         
-        -- 🔧 CONFIGURACIÓN PARA QUE SE PUEDA COLOCAR
+        -- 🔧 CONFIGURACIÓN ESPECIAL PARA QUE SE PUEDA COLOCAR
         Clon.Parent = Backpack
         Clon.Enabled = true
         Clon.CanBeDropped = true
         
-        -- Asegurar que el Handle exista y esté bien configurado
-        if Clon:FindFirstChild("Handle") then
-            Clon.Handle.CanCollide = true
-            Clon.Handle.Anchored = false
+        -- Asegurar que todas las partes físicas estén bien
+        for _, parte in pairs(Clon:GetDescendants()) do
+            if parte:IsA("BasePart") then
+                parte.CanCollide = true
+                parte.Anchored = false
+            end
         end
         
-        -- Pequeña pausa para evitar errores
         wait(0.05)
     end
     
@@ -262,7 +266,7 @@ ButtonDupe.MouseButton1Click:Connect(function()
     end
 end)
 
--- Actualizar lista constantemente
+-- Actualizar lista
 spawn(function()
     while wait(2) do
         ActualizarLista()
