@@ -1,11 +1,10 @@
 -- SERVICIOS
 local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 -- VARIABLES
 local Player = game.Players.LocalPlayer
 local Backpack = Player:WaitForChild("Backpack")
+local Character = Player.Character or Player.CharacterAdded:Wait()
 
 -- CREANDO LA GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -220,92 +219,57 @@ local function ActualizarLista()
 end
 
 -- =============================================
--- 🔥 EL VERDADERO MÉTODO CYRAA - ITEMS REALES 🔥
+-- 🔥 MÉTODO CYRAA REAL - SOLUCIÓN INVISIBLE 🔥
 -- =============================================
 local function DuplicarCyraaReal()
     if not ItemSeleccionado then return end
     local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 10)
     
-    -- BUSCAR EL EVENTO REMOTO DEL JUEGO (EL SECRETO)
-    local Remoto = nil
-    for _, v in pairs(ReplicatedStorage:GetChildren()) do
-        if v.Name:lower():find("give") or v.Name:lower():find("item") or v.Name:lower():find("add") then
-            Remoto = v
-            break
-        end
-    end
-    
-    -- SI NO ENCUENTRA, USAMOS EL MÉTODO DE CLONADO PERFECTO QUE ENGAÑA AL SERVIDOR
     for i = 1, Cantidad do
-        -- 1. GUARDAR TODAS LAS PROPIEDADES
-        local Nombre = ItemSeleccionado.Name
-        local Propiedades = {}
+        -- ✅ CLONAR TAL CUAL (NO CREAR DESDE CERO)
+        local Clon = ItemSeleccionado:Clone()
+        Clon.Parent = Backpack
         
-        -- COPIAR VALORES IMPORTANTES
-        for _, obj in pairs(ItemSeleccionado:GetDescendants()) do
-            if obj:IsA("StringValue") or obj:IsA("NumberValue") or obj:IsA("BoolValue") or obj:IsA("IntValue") then
-                table.insert(Propiedades, {
-                    Name = obj.Name,
-                    Value = obj.Value,
-                    Type = obj.ClassName
-                })
-            end
-        end
+        -- ✅ CONFIGURACIÓN MAESTRA
+        Clon.Enabled = true
+        Clon.CanBeDropped = true
+        Clon.Archivable = true
         
-        -- 2. CREAR EL NUEVO ITEM DE FORMA QUE EL SERVIDOR LO ACEPTE
-        local NuevoItem = Instance.new("Tool")
-        NuevoItem.Name = Nombre
-        NuevoItem.Enabled = true
-        NuevoItem.CanBeDropped = true
-        NuevoItem.Archivable = true
-        NuevoItem.Parent = Backpack
-        
-        -- 3. CLONAR ESTRUCTURA Y RESTAURAR PROPIEDADES
-        for _, hijo in pairs(ItemSeleccionado:GetChildren()) do
-            local ClonHijo = hijo:Clone()
-            ClonHijo.Parent = NuevoItem
-            
-            -- ARREGLAR FÍSICA Y VISIBILIDAD
-            if ClonHijo:IsA("BasePart") then
-                ClonHijo.Anchored = false
-                ClonHijo.CanCollide = true
-                ClonHijo.Transparency = 0
-                ClonHijo.Locked = false
-                ClonHijo.CastShadow = true
+        -- 🔧 ARREGLAR VISIBILIDAD Y FÍSICA
+        for _, obj in pairs(Clon:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.Anchored = false
+                obj.CanCollide = true
+                obj.CastShadow = true
+                obj.Transparency = 0  -- ¡IMPORTANTE! Que se vea
+                obj.Locked = false
+                obj.Visible = true    -- Forzar visibilidad
                 
-                if ClonHijo.Name:lower() == "handle" then
-                    ClonHijo.Transparency = 1
-                    ClonHijo.CanCollide = false
+                -- Mango invisible
+                if obj.Name:lower() == "handle" then
+                    obj.Transparency = 1
+                    obj.CanCollide = false
                 end
-            elseif ClonHijo:IsA("Light") or ClonHijo:IsA("ParticleEmitter") then
-                ClonHijo.Enabled = true
+            elseif obj:IsA("Light") or obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                obj.Enabled = true   -- Encender efectos
+            elseif obj:IsA("BoolValue") then
+                -- Valores para que funcione
+                if obj.Name == "IsBrainrot" or obj.Name == "IsUnit" or obj.Name == "CanPlace" or obj.Name == "IsTool" then
+                    obj.Value = true
+                end
             end
         end
         
-        -- 4. RESTAURAR VALORES PARA QUE SEA IDÉNTICO
-        for _, data in pairs(Propiedades) do
-            local obj = NuevoItem:FindFirstChild(data.Name, true)
-            if obj then
-                obj.Value = data.Value
-            else
-                -- CREAR SI FALTA
-                local nuevoObj = Instance.new(data.Type)
-                nuevoObj.Name = data.Name
-                nuevoObj.Value = data.Value
-                nuevoObj.Parent = NuevoItem
-            end
-        end
-        
-        -- 5. FORZAR RECONOCIMIENTO POR EL JUEGO
-        NuevoItem.Parent = game.Workspace
-        task.wait(0.01)
-        NuevoItem.Parent = Backpack
+        -- ✅ TRUCO DEL WORKSPACE PARA QUE SEA REAL
+        Clon.Parent = game.Workspace
+        task.wait(0.05)
+        Clon.Parent = Backpack
         
         task.wait(0.1)
     end
     
     -- ✅ AVISO
-    Notificacion.Text = "✅ "..Cantidad.."x ITEMS REALES CREADOS!"
+    Notificacion.Text = "✅ "..Cantidad.."x LISTOS Y VISIBLES!"
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,0)}):Play()
     task.wait(2)
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,-30)}):Play()
