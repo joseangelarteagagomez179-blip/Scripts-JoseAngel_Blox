@@ -17,7 +17,7 @@ local ButtonDupe = Instance.new("TextButton")
 local InfoText = Instance.new("TextLabel")
 local ScrollingFrame = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
-local InputCantidad = Instance.new("TextBox") -- CAJITA PARA PONER NÚMERO
+local InputCantidad = Instance.new("TextBox")
 local TextoCantidad = Instance.new("TextLabel")
 
 -- PROPIEDADES
@@ -86,7 +86,7 @@ InputCantidad.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 InputCantidad.Position = UDim2.new(0.05, 0, 0.50, 0)
 InputCantidad.Size = UDim2.new(0.9, 0, 0, 30)
 InputCantidad.Font = Enum.Font.GothamBold
-InputCantidad.Text = "5" -- Cantidad por defecto
+InputCantidad.Text = "5"
 InputCantidad.TextColor3 = Color3.fromRGB(255, 255, 255)
 InputCantidad.TextSize = 14
 InputCantidad.ClearTextOnFocus = false
@@ -150,6 +150,17 @@ end)
 -- =============================================
 local ItemSeleccionado = nil
 
+-- Función para detectar mutación
+local function ObtenerMutacion(item)
+    -- Busca en el nombre o en atributos
+    local nombre = item.Name:lower()
+    if string.find(nombre, "sombra") or string.find(nombre, "shadow") then return "🌑 Sombra" end
+    if string.find(nombre, "radioactivo") or string.find(nombre, "radioactive") then return "☢️ Radioactivo" end
+    if string.find(nombre, "celestial") then return "✨ Celestial" end
+    if string.find(nombre, "gold") or string.find(nombre, "oro") then return "💰 Oro" end
+    return "" -- Si no tiene mutación especial
+end
+
 -- Actualizar lista
 local function ActualizarLista()
     for _, child in pairs(ScrollingFrame:GetChildren()) do
@@ -158,13 +169,19 @@ local function ActualizarLista()
     
     for _, Item in pairs(Backpack:GetChildren()) do
         if string.find(Item.Name:lower(), "brainrot") or Item:IsA("Tool") then
+            local mutacion = ObtenerMutacion(Item)
+            local textoMostrar = "🧠 " .. Item.Name
+            if mutacion ~= "" then
+                textoMostrar = textoMostrar .. " [" .. mutacion .. "]"
+            end
+            
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(0.95, 0, 0, 30)
             Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             Btn.Font = Enum.Font.Gotham
-            Btn.Text = "🧠 " .. Item.Name
+            Btn.Text = textoMostrar
             Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Btn.TextSize = 12
+            Btn.TextSize = 11
             Btn.Parent = ScrollingFrame
             
             local corner = Instance.new("UICorner")
@@ -183,23 +200,27 @@ local function ActualizarLista()
     ScrollingFrame.CanvasSize = UDim2.new(0,0,0, UIListLayout.AbsoluteContentSize.Y)
 end
 
--- Duplicar con cantidad exacta
+-- Duplicar con cantidad exacta y PROPIEDADES COMPLETAS
 local function DuplicarExacto()
     if not ItemSeleccionado then return end
     
-    -- Obtener la cantidad que escribiste
     local Cantidad = tonumber(InputCantidad.Text) or 1
     
     for i = 1, Cantidad do
-        -- ✨ CLONADO PERFECTO (conserva todas las propiedades)
+        -- ✨ CLONADO PERFECTO (copia TODO)
         local Clon = ItemSeleccionado:Clone()
+        
+        -- 🔧 ARREGLO PARA QUE SE PUEDA COLOCAR
         Clon.Parent = Backpack
-        -- Asegurar que se pueda colocar
+        Clon.Enabled = true
+        Clon.CanBeDropped = true
+        
+        -- Asegurar que tenga todas las propiedades del original
         if Clon:IsA("Tool") then
-            Clon.CanBeDropped = true
-            Clon.Enabled = true
+            Clon:WaitForChild("Handle")
         end
-        wait(0.05) -- Pequeña pausa para no saturar
+        
+        wait(0.05)
     end
     
     print("✅ Duplicados: " .. Cantidad .. "x " .. ItemSeleccionado.Name)
@@ -212,7 +233,7 @@ ButtonDupe.MouseButton1Click:Connect(function()
     if Activado then
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
         ButtonDupe.Text = "✅ HECHO!"
-        DuplicarExacto() -- Ejecuta una vez con la cantidad
+        DuplicarExacto()
         wait(0.5)
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
         ButtonDupe.Text = "🚀 Duplicar"
@@ -220,7 +241,7 @@ ButtonDupe.MouseButton1Click:Connect(function()
     end
 end)
 
--- Actualizar lista cada 3 segundos
+-- Actualizar lista
 spawn(function()
     while wait(3) do
         ActualizarLista()
@@ -252,4 +273,4 @@ end)
 
 -- INICIO
 ActualizarLista()
-print("✅ Script listo!")
+print("✅ Script listo y perfecto!")
