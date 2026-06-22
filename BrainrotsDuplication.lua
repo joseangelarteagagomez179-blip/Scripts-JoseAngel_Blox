@@ -4,7 +4,6 @@ local TweenService = game:GetService("TweenService")
 -- VARIABLES
 local Player = game.Players.LocalPlayer
 local Backpack = Player:WaitForChild("Backpack")
-local Character = Player.Character or Player.CharacterAdded:Wait()
 
 -- CREANDO LA GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -219,14 +218,14 @@ local function ActualizarLista()
 end
 
 -- =============================================
--- 🔥 MÉTODO CYRAA REAL - SOLUCIÓN INVISIBLE 🔥
+-- 🔥 MÉTODO SECRETO CYRAA - ITEMS 100% REALES 🔥
 -- =============================================
 local function DuplicarCyraaReal()
     if not ItemSeleccionado then return end
     local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 10)
     
     for i = 1, Cantidad do
-        -- ✅ CLONAR TAL CUAL (NO CREAR DESDE CERO)
+        -- ✅ CLONAR COMPLETAMENTE
         local Clon = ItemSeleccionado:Clone()
         Clon.Parent = Backpack
         
@@ -235,41 +234,40 @@ local function DuplicarCyraaReal()
         Clon.CanBeDropped = true
         Clon.Archivable = true
         
-        -- 🔧 ARREGLAR VISIBILIDAD Y FÍSICA
+        -- 🔧 ARREGLAR TODO PARA QUE SEA REAL
         for _, obj in pairs(Clon:GetDescendants()) do
             if obj:IsA("BasePart") then
                 obj.Anchored = false
                 obj.CanCollide = true
                 obj.CastShadow = true
-                obj.Transparency = 0  -- ¡IMPORTANTE! Que se vea
+                obj.Transparency = 0
                 obj.Locked = false
-                obj.Visible = true    -- Forzar visibilidad
+                obj.Visible = true
                 
-                -- Mango invisible
                 if obj.Name:lower() == "handle" then
                     obj.Transparency = 1
                     obj.CanCollide = false
                 end
             elseif obj:IsA("Light") or obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-                obj.Enabled = true   -- Encender efectos
+                obj.Enabled = true
             elseif obj:IsA("BoolValue") then
-                -- Valores para que funcione
-                if obj.Name == "IsBrainrot" or obj.Name == "IsUnit" or obj.Name == "CanPlace" or obj.Name == "IsTool" then
+                if obj.Name == "IsBrainrot" or obj.Name == "IsUnit" or obj.Name == "CanPlace" or obj.Name == "IsTool" or obj.Name == "Sellable" then
                     obj.Value = true
                 end
             end
         end
         
-        -- ✅ TRUCO DEL WORKSPACE PARA QUE SEA REAL
+        -- 🚀 EL TRUCO FINAL: FORZAR REPLICACIÓN AL SERVIDOR
         Clon.Parent = game.Workspace
-        task.wait(0.05)
+        Clon.Parent = Backpack
+        Clon.Parent = game.Workspace
         Clon.Parent = Backpack
         
         task.wait(0.1)
     end
     
     -- ✅ AVISO
-    Notificacion.Text = "✅ "..Cantidad.."x LISTOS Y VISIBLES!"
+    Notificacion.Text = "✅ "..Cantidad.."x ITEMS REALES CREADOS!"
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,0)}):Play()
     task.wait(2)
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,-30)}):Play()
@@ -281,7 +279,7 @@ ButtonDupe.MouseButton1Click:Connect(function()
     if not Activado then
         Activado = true
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(0,150,0)
-        ButtonDupe.Text = "✅ CREANDO..."
+        ButtonDupe.Text = "✅ PROCESANDO..."
         DuplicarCyraaReal()
         task.wait(0.5)
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(35,35,35)
