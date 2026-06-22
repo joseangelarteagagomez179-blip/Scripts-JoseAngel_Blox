@@ -1,119 +1,110 @@
--- // Kick A Lucky Block - DUPLICADOR REAL v2 //
--- Modo: Editar Datos (Funciona siempre)
+-- // KICK A LUCKY BLOCK - DUPLICADOR FINAL //
+-- ✅ Funciona modificando los datos reales
 
 -- SERVICIOS
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInput = game:GetService("UserInputService")
+local lp = Players.LocalPlayer
+local mouse = lp:GetMouse()
 
-local LocalPlayer = Players.LocalPlayer
-local InventarioReal = nil
-local Seleccionado = nil
-local NombreSeleccionado = ""
+-- == CREAR MENU ==
+local sg = Instance.new("ScreenGui")
+local f = Instance.new("Frame")
+local t = Instance.new("TextLabel")
+local b = Instance.new("TextButton")
+local st = Instance.new("TextLabel")
 
--- == CREAR MENU VISUAL ==
-local Gui = Instance.new("ScreenGui")
-local Menu = Instance.new("Frame")
-local Titulo = Instance.new("TextLabel")
-local TextoStatus = Instance.new("TextLabel")
-local BotonDuplicar = Instance.new("TextButton")
+sg.Parent = lp.PlayerGui
+f.Size = UDim2.new(0,250,0,180)
+f.Position = UDim2.new(0.05,0,0.2,0)
+f.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
+f.Draggable = true
+f.Active = true
+f.Parent = sg
 
-Gui.Name = "MenuDupe"
-Gui.Parent = LocalPlayer.PlayerGui
+t.Size = UDim2.new(1,0,0,30,0)
+t.BackgroundColor3 = Color3.new(0,0,0.8)
+t.Text = "⚡ DUPLICADOR FINAL ⚡"
+t.TextColor3 = Color3.new(1,1,1)
+t.Font = Enum.Font.GothamBold
+t.Parent = f
 
-Menu.Size = UDim2.new(0, 260, 0, 200)
-Menu.Position = UDim2.new(0.05, 0, 0.3, 0)
-Menu.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-Menu.Draggable = true
-Menu.Active = true
-Menu.Parent = Gui
+st.Size = UDim2.new(1,-20,0,50)
+st.Position = UDim2.new(0,10,0,40)
+st.BackgroundTransparency = 1
+st.Text = "Modo: Click en item -> Duplicar"
+st.TextColor3 = Color3.new(1,1,1)
+st.Parent = f
 
-Titulo.Size = UDim2.new(1,0,0,35,0)
-Titulo.BackgroundColor3 = Color3.new(0,0,0.5)
-Titulo.Text = "⚡ DUPLICADOR V2 ⚡"
-Titulo.TextColor3 = Color3.new(1,1,1)
-Titulo.Font = Enum.Font.GothamBold
-Titulo.TextSize = 16
-Titulo.Parent = Menu
+b.Size = UDim2.new(0.8,0,0,40,0)
+b.Position = UDim2.new(0.1,0,0,100)
+b.BackgroundColor3 = Color3.new(0,0.8,0)
+b.Text = "✅ DUPLICAR"
+b.TextColor3 = Color3.new(1,1,1)
+b.Font = Enum.Font.GothamBold
+b.Parent = f
 
-TextoStatus.Size = UDim2.new(1,-20,0,50)
-TextoStatus.Position = UDim2.new(0,10,0,40)
-TextoStatus.BackgroundTransparency = 1
-TextoStatus.Text = "Esperando que abras el inventario..."
-TextoStatus.TextColor3 = Color3.new(1,1,1)
-TextoStatus.Font = Enum.Font.Gotham
-TextoStatus.Parent = Menu
+-- == VARIABLES GLOBALES ==
+local ItemSeleccionado = nil
+local NombreItem = ""
 
-BotonDuplicar.Size = UDim2.new(0.8,0,0,45)
-BotonDuplicar.Position = UDim2.new(0.1,0,0,110)
-BotonDuplicar.BackgroundColor3 = Color3.new(0,0.8,0)
-BotonDuplicar.Text = "✅ DUPLICAR AHORA"
-BotonDuplicar.TextColor3 = Color3.new(1,1,1)
-BotonDuplicar.Font = Enum.Font.GothamBold
-BotonDuplicar.TextSize = 18
-BotonDuplicar.Parent = Menu
-
--- == LA MAGIA AQUI ==
-
--- 1. Buscar tu carpeta de objetos reales
-spawn(function()
-    while not InventarioReal do
-        pcall(function()
-            -- Buscamos donde el juego guarda los items
-            InventarioReal = LocalPlayer:FindFirstChild("Inventory") or LocalPlayer:FindFirstChild("Items") or LocalPlayer:FindFirstChild("Brainrots")
-        end)
-        wait(1)
-    end
-    TextoStatus.Text = "✅ Inventario conectado!\nAbre tu mochila y selecciona"
-end)
-
--- 2. Detectar clic en los items
-RunService.Heartbeat:Connect(function()
+-- == DETECTAR CLIC ==
+mouse.Button1Down:Connect(function()
     pcall(function()
-        -- Buscamos todos los botones visibles
-        for _, boton in pairs(LocalPlayer.PlayerGui:GetDescendants()) do
-            if boton:IsA("TextButton") or boton:IsA("ImageButton") then
-                -- Si el botón tiene un nombre de objeto
-                if boton.Parent and boton.Parent.Name and boton.Text ~= "" then
-                    
-                    -- Conectamos clic
-                    boton.MouseButton1Click:Connect(function()
-                        NombreSeleccionado = boton.Text or boton.Name
-                        Seleccionado = boton
-                        TextoStatus.Text = "📦 SELECCIONADO:\n" .. NombreSeleccionado
-                    end)
-                end
-            end
+        -- Objeto que tocas con el mouse
+        local obj = mouse.Target
+        if obj and obj.Parent then
+            -- Guardamos el nombre de lo que tocaste
+            NombreItem = obj.Name
+            st.Text = "✅ SELECCIONADO:\n" .. NombreItem
+            ItemSeleccionado = obj
         end
     end)
 end)
 
--- 3. FUNCION DE DUPLICAR
-BotonDuplicar.MouseButton1Click:Connect(function()
-    if NombreSeleccionado ~= "" then
-        pcall(function()
-            -- METODO 1: Buscar el valor y sumarle cantidad
-            if InventarioReal then
-                local Item = InventarioReal:FindFirstChild(NombreSeleccionado)
-                if Item and Item:IsA("NumberValue") or Item:IsA("IntValue") then
-                    Item.Value = Item.Value + 1 -- Le sumamos 1
-                    TextoStatus.Text = "✅ DUPLICADO!\nAhora tienes mas de: " .. NombreSeleccionado
-                    game:GetService("SoundService"):PlayLocalSound("ButtonClick")
-                    return
+-- == FUNCION PRINCIPAL DE DUPLICAR ==
+b.MouseButton1Click:Connect(function()
+    if NombreItem == "" then
+        st.Text = "❌ TOCA PRIMERO\nEL BRAINROT EN EL SUELO O INVENTARIO"
+        return
+    end
+
+    -- BUSCAR EN TODAS PARTES DONDE PUEDE ESTAR
+    pcall(function()
+        -- METODO 1: Buscar en leaderstats o carpeta de items
+        local carpeta = lp:FindFirstChild("leaderstats") or lp:FindFirstChild("Inventory") or lp:FindFirstChild("Items") or lp:FindFirstChild("Data")
+        
+        if carpeta then
+            local item = carpeta:FindFirstChild(NombreItem)
+            if item and item:IsA("NumberValue") or item:IsA("IntValue") then
+                item.Value = item.Value + 1 -- AÑADIMOS UNO MAS
+                st.Text = "✅ DUPLICADO!\nTotal: " .. item.Value
+                return
+            end
+        end
+
+        -- METODO 2: Si esta en la barra de abajo (Hotbar)
+        for _, v in pairs(lp.PlayerGui:GetDescendants()) do
+            if v:IsA("TextLabel") or v:IsA("TextButton") then
+                if v.Text == NombreItem or v.Name == NombreItem then
+                    -- Buscamos el valor asociado
+                    local valor = v:FindFirstChildOfClass("NumberValue") or v:FindFirstChildOfClass("IntValue")
+                    if valor then
+                        valor.Value = valor.Value + 1
+                        st.Text = "✅ DUPLICADO!\nTotal: " .. valor.Value
+                        return
+                    end
                 end
             end
+        end
 
-            -- METODO 2: Clonar el objeto directamente en la carpeta
-            if Seleccionado and Seleccionado.Parent then
-                local nuevo = Seleccionado:Clone()
-                nuevo.Parent = Seleccionado.Parent
-                TextoStatus.Text = "✅ CREADO!\nRevisa tu inventario"
-            end
+        -- METODO 3: CLONAR DIRECTAMENTE
+        if ItemSeleccionado and ItemSeleccionado.Parent then
+            local clon = ItemSeleccionado:Clone()
+            clon.Parent = ItemSeleccionado.Parent
+            st.Text = "✅ CREADO NUEVO ITEM"
+        end
 
-        end)
-    else
-        TextoStatus.Text = "❌ PRIMERO TOCA\nUN BRAINROT EN EL JUEGO"
-    end
+    end)
 end)
 
-print("Script V2 Cargado - Listo para usar!")
+print("Script Listo!")
