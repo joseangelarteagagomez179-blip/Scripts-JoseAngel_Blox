@@ -19,7 +19,7 @@ local ScrollingFrame = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
 local InputCantidad = Instance.new("TextBox")
 local TextoCantidad = Instance.new("TextLabel")
-local Notificacion = Instance.new("TextLabel") -- NUEVO: AVISO
+local Notificacion = Instance.new("TextLabel")
 
 -- PROPIEDADES
 ScreenGui.Parent = game.CoreGui
@@ -222,7 +222,7 @@ local function ActualizarLista()
             corner.Parent = Btn
             
             Btn.MouseButton1Click:Connect(function()
-                if Item.Parent then -- ✅ Seguridad
+                if Item.Parent then
                     ItemSeleccionado = Item
                     for _, c in pairs(ScrollingFrame:GetChildren()) do
                         if c:IsA("TextButton") then c.BackgroundColor3 = Color3.fromRGB(40,40,40) end
@@ -239,20 +239,39 @@ end
 local function DuplicarExacto()
     if not ItemSeleccionado then return end
     
-    local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 50) -- ✅ Limite de seguridad
+    local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 50)
     
     for i = 1, Cantidad do
         local Clon = ItemSeleccionado:Clone()
         Clon.Parent = Backpack
+        
+        -- ✅ CONFIGURACIÓN ESPECIAL PARA QUE SE PUEDA COLOCAR Y GENERE DINERO
         Clon.Enabled = true
         Clon.CanBeDropped = true
         
-        for _, parte in pairs(Clon:GetDescendants()) do
-            if parte:IsA("BasePart") then
-                parte.CanCollide = true
-                parte.Anchored = false
+        -- Asegurar que tenga Handle
+        if not Clon:FindFirstChild("Handle") then
+            for _, parte in pairs(Clon:GetChildren()) do
+                if parte:IsA("BasePart") then
+                    parte.Name = "Handle"
+                    parte.CanCollide = false
+                    break
+                end
             end
         end
+        
+        -- Activar valores que el juego lee
+        for _, obj in pairs(Clon:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                parte.CanCollide = true
+                parte.Anchored = false
+            elseif obj:IsA("BoolValue") then
+                if obj.Name == "IsBrainrot" or obj.Name == "IsUnit" or obj.Name == "CanPlace" then
+                    obj.Value = true
+                end
+            end
+        end
+        
         task.wait(0.05)
     end
     
