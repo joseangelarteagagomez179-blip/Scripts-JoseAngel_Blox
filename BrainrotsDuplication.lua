@@ -150,36 +150,53 @@ end)
 -- =============================================
 local ItemSeleccionado = nil
 
--- Función para detectar mutación
-local function ObtenerMutacion(item)
-    -- Busca en el nombre o en atributos
-    local nombre = item.Name:lower()
-    if string.find(nombre, "sombra") or string.find(nombre, "shadow") then return "🌑 Sombra" end
-    if string.find(nombre, "radioactivo") or string.find(nombre, "radioactive") then return "☢️ Radioactivo" end
-    if string.find(nombre, "celestial") then return "✨ Celestial" end
-    if string.find(nombre, "gold") or string.find(nombre, "oro") then return "💰 Oro" end
-    return "" -- Si no tiene mutación especial
+-- Función para obtener datos REALES del item
+local function AnalizarItem(item)
+    local nombre = item.Name
+    local mutacion = "Normal"
+    local emoji = "🧠"
+
+    -- Buscar en los hijos del item para encontrar la mutación REAL
+    for _, hijo in pairs(item:GetChildren()) do
+        local nombreHijo = hijo.Name:lower()
+        if string.find(nombreHijo, "shadow") or string.find(nombreHijo, "sombra") then
+            mutacion = "Sombra"
+            emoji = "🌑"
+        elseif string.find(nombreHijo, "radioactive") or string.find(nombreHijo, "radioactivo") then
+            mutacion = "Radioactivo"
+            emoji = "☢️"
+        elseif string.find(nombreHijo, "og") then
+            mutacion = "OG"
+            emoji = "💎"
+        elseif string.find(nombreHijo, "gold") or string.find(nombreHijo, "oro") then
+            mutacion = "Oro"
+            emoji = "💰"
+        elseif string.find(nombreHijo, "celestial") then
+            mutacion = "Celestial"
+            emoji = "✨"
+        end
+    end
+
+    return nombre, mutacion, emoji
 end
 
 -- Actualizar lista
 local function ActualizarLista()
+    -- Limpiar lista anterior
     for _, child in pairs(ScrollingFrame:GetChildren()) do
         if child:IsA("TextButton") then child:Destroy() end
     end
     
+    -- Buscar TODOS los tools en la mochila
     for _, Item in pairs(Backpack:GetChildren()) do
-        if string.find(Item.Name:lower(), "brainrot") or Item:IsA("Tool") then
-            local mutacion = ObtenerMutacion(Item)
-            local textoMostrar = "🧠 " .. Item.Name
-            if mutacion ~= "" then
-                textoMostrar = textoMostrar .. " [" .. mutacion .. "]"
-            end
+        if Item:IsA("Tool") then
+            local nombre, mutacion, emoji = AnalizarItem(Item)
             
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(0.95, 0, 0, 30)
             Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             Btn.Font = Enum.Font.Gotham
-            Btn.Text = textoMostrar
+            Btn.Text = emoji .. " " .. nombre .. " [" .. mutacion .. "]"
             Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
             Btn.TextSize = 11
             Btn.Parent = ScrollingFrame
@@ -188,8 +205,10 @@ local function ActualizarLista()
             corner.CornerRadius = UDim.new(0, 6)
             corner.Parent = Btn
             
+            -- Al darle click seleccionas
             Btn.MouseButton1Click:Connect(function()
                 ItemSeleccionado = Item
+                -- Resaltar seleccionado
                 for _, c in pairs(ScrollingFrame:GetChildren()) do
                     if c:IsA("TextButton") then c.BackgroundColor3 = Color3.fromRGB(40,40,40) end
                 end
@@ -207,19 +226,21 @@ local function DuplicarExacto()
     local Cantidad = tonumber(InputCantidad.Text) or 1
     
     for i = 1, Cantidad do
-        -- ✨ CLONADO PERFECTO (copia TODO)
+        -- ✨ CLONADO TOTAL (copia absolutamente TODO)
         local Clon = ItemSeleccionado:Clone()
         
-        -- 🔧 ARREGLO PARA QUE SE PUEDA COLOCAR
+        -- 🔧 CONFIGURACIÓN PARA QUE SE PUEDA COLOCAR
         Clon.Parent = Backpack
         Clon.Enabled = true
         Clon.CanBeDropped = true
         
-        -- Asegurar que tenga todas las propiedades del original
-        if Clon:IsA("Tool") then
-            Clon:WaitForChild("Handle")
+        -- Asegurar que el Handle exista y esté bien configurado
+        if Clon:FindFirstChild("Handle") then
+            Clon.Handle.CanCollide = true
+            Clon.Handle.Anchored = false
         end
         
+        -- Pequeña pausa para evitar errores
         wait(0.05)
     end
     
@@ -241,9 +262,9 @@ ButtonDupe.MouseButton1Click:Connect(function()
     end
 end)
 
--- Actualizar lista
+-- Actualizar lista constantemente
 spawn(function()
-    while wait(3) do
+    while wait(2) do
         ActualizarLista()
     end
 end)
