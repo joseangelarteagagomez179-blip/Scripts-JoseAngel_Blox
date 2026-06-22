@@ -3,7 +3,6 @@
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer.PlayerGui
-local UserInputService = game:GetService("UserInputService")
 
 -- Destruir GUI anterior si existe
 if PlayerGui:FindFirstChild("BrainrotsDuplication") then
@@ -17,34 +16,35 @@ ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.ResetOnSpawn = false
 
--- == MARCO PRINCIPAL (MÁS PEQUEÑO) ==
+-- == MARCO PRINCIPAL ==
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
-MainFrame.Size = UDim2.new(0, 280, 0, 400) -- ✅ Tamaño más chico
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 15)
+MainFrame.Size = UDim2.new(0, 280, 0, 400)
 MainFrame.Position = UDim2.new(0.5, -140, 0.5, -200)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.ClipsDescendants = true
 MainFrame.BorderSizePixel = 0
-MainFrame.Active = true -- ✅ Necesario para arrastrar
-MainFrame.Draggable = true -- ✅ AQUÍ ESTÁ LO DE MOVERLO
+MainFrame.Active = true
+MainFrame.Draggable = true -- ✅ SE PUEDE MOVER
 
 -- ESQUINAS REDONDEADAS
 local UICorner = Instance.new("UICorner")
 UICorner.Parent = MainFrame
 UICorner.CornerRadius = UDim.new(0, 15)
 
--- == FONDO DE ESTRELLAS (CORREGIDO) ==
+-- == FONDO DE ESTRELLAS (TU IMAGEN) ==
 local StarsBackground = Instance.new("ImageLabel")
 StarsBackground.Name = "StarsBackground"
 StarsBackground.Parent = MainFrame
 StarsBackground.Size = UDim2.new(1, 0, 1, 0)
 StarsBackground.Position = UDim2.new(0, 0, 0, 0)
 StarsBackground.BackgroundTransparency = 1
-StarsBackground.Image = "rbxassetid://100053576493758"
+-- ✅ ID CORRECTO DE TU IMAGEN ✅
+StarsBackground.Image = "rbxassetid://120999595778887"
 StarsBackground.ImageColor3 = Color3.fromRGB(255, 255, 255)
-StarsBackground.ScaleType = Enum.ScaleType.Fit -- ✅ Cambié para que se vea mejor
+StarsBackground.ScaleType = Enum.ScaleType.Crop
 StarsBackground.ZIndex = 0
 
 -- == TÍTULO DEL SCRIPT ==
@@ -110,4 +110,4 @@ InfoText.TextWrapped = true
 InfoText.ZIndex = 3
 InfoText.TextXAlignment = Enum.TextXAlignment.Left
 
-print("✅ Interfaz lista y funcional!")
+print("✅ Todo listo y corregido!")
