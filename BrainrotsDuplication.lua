@@ -1,6 +1,5 @@
 -- SERVICIOS
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 -- VARIABLES
@@ -12,31 +11,32 @@ local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 
--- BOTONES Y ELEMENTOS
+-- ELEMENTOS
 local ButtonInfo = Instance.new("TextButton")
 local ButtonDupe = Instance.new("TextButton")
 local InfoText = Instance.new("TextLabel")
-local ScrollingFrame = Instance.new("ScrollingFrame") -- Para la lista
+local ScrollingFrame = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
+local InputCantidad = Instance.new("TextBox") -- CAJITA PARA PONER NÚMERO
+local TextoCantidad = Instance.new("TextLabel")
 
 -- PROPIEDADES
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- =============================================
--- ✨ VENTANA PRINCIPAL (MÁS PEQUEÑA Y MOVIBLE)
+-- ✨ VENTANA PRINCIPAL
 -- =============================================
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Position = UDim2.new(0.02, 0, 0.1, 0)
-MainFrame.Size = UDim2.new(0, 280, 0, 380) -- Tamaño más pequeño
+MainFrame.Size = UDim2.new(0, 280, 0, 420)
 MainFrame.ClipsDescendants = true
-MainFrame.Active = true -- Hace que se pueda mover
-MainFrame.Draggable = true -- ✨ DESLIZABLE POR TODA LA PANTALLA ✨
+MainFrame.Active = true
+MainFrame.Draggable = true -- ✨ DESLIZABLE ✨
 
--- ESQUINAS REDONDEADAS
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 16)
 UICorner.Parent = MainFrame
@@ -51,13 +51,13 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
 
 -- =============================================
--- 📜 LISTA DONDE SALEN LOS BRAINROTS
+-- 📜 LISTA DE BRAINROTS
 -- =============================================
 ScrollingFrame.Parent = MainFrame
 ScrollingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.Position = UDim2.new(0.05, 0, 0.18, 0)
-ScrollingFrame.Size = UDim2.new(0.9, 0, 0.35, 0)
+ScrollingFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+ScrollingFrame.Size = UDim2.new(0.9, 0, 0.28, 0)
 ScrollingFrame.CanvasSize = UDim2.new(0,0,0,0)
 ScrollingFrame.ScrollBarThickness = 4
 
@@ -70,13 +70,39 @@ UIListLayout.Padding = UDim.new(0, 5)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- =============================================
--- ℹ️ BOTÓN INFO
+-- 🔢 SELECCIONAR CANTIDAD
+-- =============================================
+TextoCantidad.Parent = MainFrame
+TextoCantidad.BackgroundTransparency = 1
+TextoCantidad.Position = UDim2.new(0.05, 0, 0.45, 0)
+TextoCantidad.Size = UDim2.new(1, -10, 0, 20)
+TextoCantidad.Font = Enum.Font.Gotham
+TextoCantidad.Text = "🔢 Cantidad a duplicar:"
+TextoCantidad.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextoCantidad.TextSize = 12
+
+InputCantidad.Parent = MainFrame
+InputCantidad.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+InputCantidad.Position = UDim2.new(0.05, 0, 0.50, 0)
+InputCantidad.Size = UDim2.new(0.9, 0, 0, 30)
+InputCantidad.Font = Enum.Font.GothamBold
+InputCantidad.Text = "5" -- Cantidad por defecto
+InputCantidad.TextColor3 = Color3.fromRGB(255, 255, 255)
+InputCantidad.TextSize = 14
+InputCantidad.ClearTextOnFocus = false
+
+local UICornerInput = Instance.new("UICorner")
+UICornerInput.CornerRadius = UDim.new(0, 8)
+UICornerInput.Parent = InputCantidad
+
+-- =============================================
+-- 🎛️ BOTONES
 -- =============================================
 ButtonInfo.Name = "ButtonInfo"
 ButtonInfo.Parent = MainFrame
 ButtonInfo.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-ButtonInfo.Position = UDim2.new(0.05, 0, 0.58, 0)
-ButtonInfo.Size = UDim2.new(0.42, 0, 0.12, 0) -- Tamaño perfecto
+ButtonInfo.Position = UDim2.new(0.05, 0, 0.60, 0)
+ButtonInfo.Size = UDim2.new(0.42, 0, 0.12, 0)
 ButtonInfo.Font = Enum.Font.GothamBold
 ButtonInfo.Text = "ℹ️ Info"
 ButtonInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -86,11 +112,25 @@ local UICornerInfo = Instance.new("UICorner")
 UICornerInfo.CornerRadius = UDim.new(0, 10)
 UICornerInfo.Parent = ButtonInfo
 
--- TEXTO DE INFO
+ButtonDupe.Name = "ButtonDupe"
+ButtonDupe.Parent = MainFrame
+ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+ButtonDupe.Position = UDim2.new(0.53, 0, 0.60, 0)
+ButtonDupe.Size = UDim2.new(0.42, 0, 0.12, 0)
+ButtonDupe.Font = Enum.Font.GothamBold
+ButtonDupe.Text = "🚀 Duplicar"
+ButtonDupe.TextColor3 = Color3.fromRGB(255, 255, 255)
+ButtonDupe.TextSize = 14
+
+local UICornerDupe = Instance.new("UICorner")
+UICornerDupe.CornerRadius = UDim.new(0, 10)
+UICornerDupe.Parent = ButtonDupe
+
+-- TEXTO INFO
 InfoText.Name = "InfoText"
 InfoText.Parent = MainFrame
 InfoText.BackgroundTransparency = 1
-InfoText.Position = UDim2.new(0.05, 0, 0.72, 0)
+InfoText.Position = UDim2.new(0.05, 0, 0.75, 0)
 InfoText.Size = UDim2.new(0.9, 0, 0, 60)
 InfoText.Font = Enum.Font.Gotham
 InfoText.Text = "Creador: JoseAngel_Blox\nFecha: 22/06/2026"
@@ -106,46 +146,23 @@ ButtonInfo.MouseButton1Click:Connect(function()
 end)
 
 -- =============================================
--- 🚀 BOTÓN DUPLICAR
+-- ⚡ FUNCIONES PRINCIPALES
 -- =============================================
-ButtonDupe.Name = "ButtonDupe"
-ButtonDupe.Parent = MainFrame
-ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-ButtonDupe.Position = UDim2.new(0.53, 0, 0.58, 0) -- A un lado del otro
-ButtonDupe.Size = UDim2.new(0.42, 0, 0.12, 0)
-ButtonDupe.Font = Enum.Font.GothamBold
-ButtonDupe.Text = "🚀 Duplicar"
-ButtonDupe.TextColor3 = Color3.fromRGB(255, 255, 255)
-ButtonDupe.TextSize = 14
-
-local UICornerDupe = Instance.new("UICorner")
-UICornerDupe.CornerRadius = UDim.new(0, 10)
-UICornerDupe.Parent = ButtonDupe
-
--- =============================================
--- ⚡ FUNCIONES MEJORADAS
--- =============================================
-local Activado = false
-local Bucle = nil
 local ItemSeleccionado = nil
 
--- Función para actualizar la lista
+-- Actualizar lista
 local function ActualizarLista()
-    -- Limpiar lista anterior
     for _, child in pairs(ScrollingFrame:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
+        if child:IsA("TextButton") then child:Destroy() end
     end
     
-    -- Buscar Brainrots
     for _, Item in pairs(Backpack:GetChildren()) do
         if string.find(Item.Name:lower(), "brainrot") or Item:IsA("Tool") then
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(0.95, 0, 0, 30)
             Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             Btn.Font = Enum.Font.Gotham
-            Btn.Text = "🧠 " .. Item.Name -- Muestra nombre y mutación
+            Btn.Text = "🧠 " .. Item.Name
             Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
             Btn.TextSize = 12
             Btn.Parent = ScrollingFrame
@@ -154,48 +171,59 @@ local function ActualizarLista()
             corner.CornerRadius = UDim.new(0, 6)
             corner.Parent = Btn
             
-            -- Al darle click seleccionas cual duplicar
             Btn.MouseButton1Click:Connect(function()
                 ItemSeleccionado = Item
-                -- Cambiar color para marcar seleccionado
                 for _, c in pairs(ScrollingFrame:GetChildren()) do
                     if c:IsA("TextButton") then c.BackgroundColor3 = Color3.fromRGB(40,40,40) end
                 end
                 Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 120)
-                print("Seleccionado: " .. Item.Name)
             end)
         end
     end
     ScrollingFrame.CanvasSize = UDim2.new(0,0,0, UIListLayout.AbsoluteContentSize.Y)
 end
 
--- Duplicar el item seleccionado
-local function DuplicarSeleccionado()
-    if ItemSeleccionado then
+-- Duplicar con cantidad exacta
+local function DuplicarExacto()
+    if not ItemSeleccionado then return end
+    
+    -- Obtener la cantidad que escribiste
+    local Cantidad = tonumber(InputCantidad.Text) or 1
+    
+    for i = 1, Cantidad do
+        -- ✨ CLONADO PERFECTO (conserva todas las propiedades)
         local Clon = ItemSeleccionado:Clone()
         Clon.Parent = Backpack
-        print("Duplicado: " .. ItemSeleccionado.Name)
+        -- Asegurar que se pueda colocar
+        if Clon:IsA("Tool") then
+            Clon.CanBeDropped = true
+            Clon.Enabled = true
+        end
+        wait(0.05) -- Pequeña pausa para no saturar
     end
+    
+    print("✅ Duplicados: " .. Cantidad .. "x " .. ItemSeleccionado.Name)
 end
 
--- Actualizar lista cada 2 segundos
-spawn(function()
-    while wait(2) do
-        ActualizarLista()
-    end
-end)
-
--- Lógica del botón
+-- Lógica botón
+local Activado = false
 ButtonDupe.MouseButton1Click:Connect(function()
     Activado = not Activado
     if Activado then
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-        ButtonDupe.Text = "✅ ACTIVADO"
-        Bucle = RunService.Heartbeat:Connect(DuplicarSeleccionado)
-    else
+        ButtonDupe.Text = "✅ HECHO!"
+        DuplicarExacto() -- Ejecuta una vez con la cantidad
+        wait(0.5)
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
         ButtonDupe.Text = "🚀 Duplicar"
-        if Bucle then Bucle:Disconnect() end
+        Activado = false
+    end
+end)
+
+-- Actualizar lista cada 3 segundos
+spawn(function()
+    while wait(3) do
+        ActualizarLista()
     end
 end)
 
@@ -222,6 +250,6 @@ ButtonDupe.MouseLeave:Connect(function()
     end
 end)
 
--- Cargar lista al inicio
+-- INICIO
 ActualizarLista()
-print("✅ Script cargado correctamente!")
+print("✅ Script listo!")
