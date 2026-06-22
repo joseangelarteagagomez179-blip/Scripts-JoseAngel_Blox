@@ -218,23 +218,29 @@ local function ActualizarLista()
 end
 
 -- =============================================
--- 🔥 MÉTODO SECRETO CYRAA - ITEMS 100% REALES 🔥
+-- 🔥 MÉTODO CYRAA - ARREGLADO 🔥
 -- =============================================
 local function DuplicarCyraaReal()
-    if not ItemSeleccionado then return end
+    if not ItemSeleccionado then 
+        -- SI NO SELECCIONASTE NADA, QUE SE QUITE EL BOTON
+        ButtonDupe.BackgroundColor3 = Color3.fromRGB(35,35,35)
+        ButtonDupe.Text = "🚀 DUPLICAR REAL"
+        Activado = false
+        return 
+    end
+    
     local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 10)
     
     for i = 1, Cantidad do
-        -- ✅ CLONAR COMPLETAMENTE
         local Clon = ItemSeleccionado:Clone()
         Clon.Parent = Backpack
         
-        -- ✅ CONFIGURACIÓN MAESTRA
+        -- CONFIGURACIÓN
         Clon.Enabled = true
         Clon.CanBeDropped = true
         Clon.Archivable = true
         
-        -- 🔧 ARREGLAR TODO PARA QUE SEA REAL
+        -- ARREGLAR PROPIEDADES
         for _, obj in pairs(Clon:GetDescendants()) do
             if obj:IsA("BasePart") then
                 obj.Anchored = false
@@ -243,7 +249,6 @@ local function DuplicarCyraaReal()
                 obj.Transparency = 0
                 obj.Locked = false
                 obj.Visible = true
-                
                 if obj.Name:lower() == "handle" then
                     obj.Transparency = 1
                     obj.CanCollide = false
@@ -257,17 +262,16 @@ local function DuplicarCyraaReal()
             end
         end
         
-        -- 🚀 EL TRUCO FINAL: FORZAR REPLICACIÓN AL SERVIDOR
+        -- TRUCO PARA QUE SEA REAL
         Clon.Parent = game.Workspace
-        Clon.Parent = Backpack
-        Clon.Parent = game.Workspace
+        task.wait(0.05)
         Clon.Parent = Backpack
         
         task.wait(0.1)
     end
     
-    -- ✅ AVISO
-    Notificacion.Text = "✅ "..Cantidad.."x ITEMS REALES CREADOS!"
+    -- AVISO
+    Notificacion.Text = "✅ "..Cantidad.."x LISTOS!"
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,0)}):Play()
     task.wait(2)
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,-30)}):Play()
@@ -280,11 +284,13 @@ ButtonDupe.MouseButton1Click:Connect(function()
         Activado = true
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(0,150,0)
         ButtonDupe.Text = "✅ PROCESANDO..."
-        DuplicarCyraaReal()
-        task.wait(0.5)
-        ButtonDupe.BackgroundColor3 = Color3.fromRGB(35,35,35)
-        ButtonDupe.Text = "🚀 DUPLICAR REAL"
-        Activado = false
+        spawn(function() -- PARA QUE NO SE TRAVE
+            DuplicarCyraaReal()
+            task.wait(0.5)
+            ButtonDupe.BackgroundColor3 = Color3.fromRGB(35,35,35)
+            ButtonDupe.Text = "🚀 DUPLICAR REAL"
+            Activado = false
+        end)
     end
 end)
 
@@ -317,4 +323,4 @@ end)
 
 -- INICIO
 ActualizarLista()
-print("✅ Script Cyraa Real Duplicator Cargado!")
+print("✅ Script Cyraa ARREGLADO Cargado!")
