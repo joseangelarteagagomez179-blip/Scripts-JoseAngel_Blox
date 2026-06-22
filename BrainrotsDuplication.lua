@@ -3,6 +3,7 @@
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer.PlayerGui
+local UserInputService = game:GetService("UserInputService")
 
 -- Destruir GUI anterior si existe
 if PlayerGui:FindFirstChild("BrainrotsDuplication") then
@@ -14,24 +15,27 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "BrainrotsDuplication"
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
 
--- == MARCO PRINCIPAL ==
+-- == MARCO PRINCIPAL (MÁS PEQUEÑO) ==
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
-MainFrame.Size = UDim2.new(0, 320, 0, 450) -- Aumenté un poco el tamaño
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -225)
+MainFrame.Size = UDim2.new(0, 280, 0, 400) -- ✅ Tamaño más chico
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -200)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.ClipsDescendants = true
 MainFrame.BorderSizePixel = 0
+MainFrame.Active = true -- ✅ Necesario para arrastrar
+MainFrame.Draggable = true -- ✅ AQUÍ ESTÁ LO DE MOVERLO
 
 -- ESQUINAS REDONDEADAS
 local UICorner = Instance.new("UICorner")
 UICorner.Parent = MainFrame
-UICorner.CornerRadius = UDim.new(0, 18)
+UICorner.CornerRadius = UDim.new(0, 15)
 
--- == FONDO DE ESTRELLAS (TU IMAGEN) ==
+-- == FONDO DE ESTRELLAS (CORREGIDO) ==
 local StarsBackground = Instance.new("ImageLabel")
 StarsBackground.Name = "StarsBackground"
 StarsBackground.Parent = MainFrame
@@ -40,7 +44,7 @@ StarsBackground.Position = UDim2.new(0, 0, 0, 0)
 StarsBackground.BackgroundTransparency = 1
 StarsBackground.Image = "rbxassetid://100053576493758"
 StarsBackground.ImageColor3 = Color3.fromRGB(255, 255, 255)
-StarsBackground.ScaleType = Enum.ScaleType.Crop
+StarsBackground.ScaleType = Enum.ScaleType.Fit -- ✅ Cambié para que se vea mejor
 StarsBackground.ZIndex = 0
 
 -- == TÍTULO DEL SCRIPT ==
@@ -48,12 +52,12 @@ local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, -20, 0, 50)
-Title.Position = UDim2.new(0, 10, 0, 15)
+Title.Size = UDim2.new(1, -20, 0, 40)
+Title.Position = UDim2.new(0, 10, 0, 10)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "Brainrots duplications"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 24
+Title.TextSize = 20
 Title.ZIndex = 2
 
 -- == EFECTO DE LUZ BRILLANDO ==
@@ -81,28 +85,29 @@ local InfoFrame = Instance.new("Frame")
 InfoFrame.Name = "InfoFrame"
 InfoFrame.Parent = MainFrame
 InfoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 45)
-InfoFrame.Size = UDim2.new(0, 280, 0, 100)
-InfoFrame.Position = UDim2.new(0.5, -140, 0, 80)
+InfoFrame.Size = UDim2.new(0, 250, 0, 90)
+InfoFrame.Position = UDim2.new(0.5, -125, 0, 60)
 InfoFrame.AnchorPoint = Vector2.new(0.5, 0)
 InfoFrame.ZIndex = 2
 
 -- Esquinas redondeadas al info
 local UICornerInfo = Instance.new("UICorner")
 UICornerInfo.Parent = InfoFrame
-UICornerInfo.CornerRadius = UDim.new(0, 12)
+UICornerInfo.CornerRadius = UDim.new(0, 10)
 
 -- Texto de la información
 local InfoText = Instance.new("TextLabel")
 InfoText.Name = "InfoText"
 InfoText.Parent = InfoFrame
 InfoText.BackgroundTransparency = 1
-InfoText.Size = UDim2.new(1, -10, 1, -10)
-InfoText.Position = UDim2.new(0, 5, 0, 5)
-InfoText.Font = Enum.Font.Gotham
-InfoText.Text = "📄 INFO\n\n👤 Creador: JoseAngel_Blox\n📅 Fecha: 22/06/2026"
+InfoText.Size = UDim2.new(1, -15, 1, -15)
+InfoText.Position = UDim2.new(0, 7, 0, 7)
+InfoText.Font = Enum.Font.GothamBold
+InfoText.Text = "📄 INFORMACIÓN\n\n👤 Creador: JoseAngel_Blox\n📅 Fecha: 22/06/2026"
 InfoText.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfoText.TextSize = 16
+InfoText.TextSize = 14
 InfoText.TextWrapped = true
 InfoText.ZIndex = 3
+InfoText.TextXAlignment = Enum.TextXAlignment.Left
 
-print("✅ Info agregada correctamente!")
+print("✅ Interfaz lista y funcional!")
