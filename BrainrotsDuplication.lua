@@ -1,110 +1,108 @@
--- // KICK A LUCKY BLOCK - DUPLICADOR FINAL //
--- ✅ Funciona modificando los datos reales
-
--- SERVICIOS
+-- == PARTE 1: INTERFAZ VISUAL ==
+-- Servicios necesarios
+local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
-local mouse = lp:GetMouse()
+local PlayerGui = Players.LocalPlayer.PlayerGui
 
--- == CREAR MENU ==
-local sg = Instance.new("ScreenGui")
-local f = Instance.new("Frame")
-local t = Instance.new("TextLabel")
-local b = Instance.new("TextButton")
-local st = Instance.new("TextLabel")
+-- Destruir GUI anterior si existe
+if PlayerGui:FindFirstChild("BrainrotsDuplication") then
+    PlayerGui.BrainrotsDuplication:Destroy()
+end
 
-sg.Parent = lp.PlayerGui
-f.Size = UDim2.new(0,250,0,180)
-f.Position = UDim2.new(0.05,0,0.2,0)
-f.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
-f.Draggable = true
-f.Active = true
-f.Parent = sg
+-- Crear la pantalla principal
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BrainrotsDuplication"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-t.Size = UDim2.new(1,0,0,30,0)
-t.BackgroundColor3 = Color3.new(0,0,0.8)
-t.Text = "⚡ DUPLICADOR FINAL ⚡"
-t.TextColor3 = Color3.new(1,1,1)
-t.Font = Enum.Font.GothamBold
-t.Parent = f
+-- == MARCO PRINCIPAL ==
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
+MainFrame.Size = UDim2.new(0, 320, 0, 450) -- Aumenté un poco el tamaño
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -225)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.ClipsDescendants = true
+MainFrame.BorderSizePixel = 0
 
-st.Size = UDim2.new(1,-20,0,50)
-st.Position = UDim2.new(0,10,0,40)
-st.BackgroundTransparency = 1
-st.Text = "Modo: Click en item -> Duplicar"
-st.TextColor3 = Color3.new(1,1,1)
-st.Parent = f
+-- ESQUINAS REDONDEADAS
+local UICorner = Instance.new("UICorner")
+UICorner.Parent = MainFrame
+UICorner.CornerRadius = UDim.new(0, 18)
 
-b.Size = UDim2.new(0.8,0,0,40,0)
-b.Position = UDim2.new(0.1,0,0,100)
-b.BackgroundColor3 = Color3.new(0,0.8,0)
-b.Text = "✅ DUPLICAR"
-b.TextColor3 = Color3.new(1,1,1)
-b.Font = Enum.Font.GothamBold
-b.Parent = f
+-- == FONDO DE ESTRELLAS (TU IMAGEN) ==
+local StarsBackground = Instance.new("ImageLabel")
+StarsBackground.Name = "StarsBackground"
+StarsBackground.Parent = MainFrame
+StarsBackground.Size = UDim2.new(1, 0, 1, 0)
+StarsBackground.Position = UDim2.new(0, 0, 0, 0)
+StarsBackground.BackgroundTransparency = 1
+StarsBackground.Image = "rbxassetid://100053576493758"
+StarsBackground.ImageColor3 = Color3.fromRGB(255, 255, 255)
+StarsBackground.ScaleType = Enum.ScaleType.Crop
+StarsBackground.ZIndex = 0
 
--- == VARIABLES GLOBALES ==
-local ItemSeleccionado = nil
-local NombreItem = ""
+-- == TÍTULO DEL SCRIPT ==
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, -20, 0, 50)
+Title.Position = UDim2.new(0, 10, 0, 15)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Brainrots duplications"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 24
+Title.ZIndex = 2
 
--- == DETECTAR CLIC ==
-mouse.Button1Down:Connect(function()
-    pcall(function()
-        -- Objeto que tocas con el mouse
-        local obj = mouse.Target
-        if obj and obj.Parent then
-            -- Guardamos el nombre de lo que tocaste
-            NombreItem = obj.Name
-            st.Text = "✅ SELECCIONADO:\n" .. NombreItem
-            ItemSeleccionado = obj
-        end
-    end)
-end)
+-- == EFECTO DE LUZ BRILLANDO ==
+local Glow = Instance.new("ImageLabel")
+Glow.Name = "GlowEffect"
+Glow.Parent = MainFrame
+Glow.BackgroundTransparency = 1
+Glow.Size = UDim2.new(1.5, 0, 1.5, 0)
+Glow.Position = UDim2.new(-0.25, 0, -0.25, 0)
+Glow.Image = "rbxassetid://9112847281"
+Glow.ImageColor3 = Color3.fromRGB(130, 130, 255)
+Glow.ImageTransparency = 0.6
+Glow.ZIndex = 1
 
--- == FUNCION PRINCIPAL DE DUPLICAR ==
-b.MouseButton1Click:Connect(function()
-    if NombreItem == "" then
-        st.Text = "❌ TOCA PRIMERO\nEL BRAINROT EN EL SUELO O INVENTARIO"
-        return
-    end
+-- Animación suave del brillo girando
+local TweenInfoSettings = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+local Tween = TweenService:Create(Glow, TweenInfoSettings, {Rotation = 360})
+Tween:Play()
 
-    -- BUSCAR EN TODAS PARTES DONDE PUEDE ESTAR
-    pcall(function()
-        -- METODO 1: Buscar en leaderstats o carpeta de items
-        local carpeta = lp:FindFirstChild("leaderstats") or lp:FindFirstChild("Inventory") or lp:FindFirstChild("Items") or lp:FindFirstChild("Data")
-        
-        if carpeta then
-            local item = carpeta:FindFirstChild(NombreItem)
-            if item and item:IsA("NumberValue") or item:IsA("IntValue") then
-                item.Value = item.Value + 1 -- AÑADIMOS UNO MAS
-                st.Text = "✅ DUPLICADO!\nTotal: " .. item.Value
-                return
-            end
-        end
+-- ==============================================
+-- ==            OPCIÓN 1: INFORMACIÓN        ==
+-- ==============================================
 
-        -- METODO 2: Si esta en la barra de abajo (Hotbar)
-        for _, v in pairs(lp.PlayerGui:GetDescendants()) do
-            if v:IsA("TextLabel") or v:IsA("TextButton") then
-                if v.Text == NombreItem or v.Name == NombreItem then
-                    -- Buscamos el valor asociado
-                    local valor = v:FindFirstChildOfClass("NumberValue") or v:FindFirstChildOfClass("IntValue")
-                    if valor then
-                        valor.Value = valor.Value + 1
-                        st.Text = "✅ DUPLICADO!\nTotal: " .. valor.Value
-                        return
-                    end
-                end
-            end
-        end
+local InfoFrame = Instance.new("Frame")
+InfoFrame.Name = "InfoFrame"
+InfoFrame.Parent = MainFrame
+InfoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 45)
+InfoFrame.Size = UDim2.new(0, 280, 0, 100)
+InfoFrame.Position = UDim2.new(0.5, -140, 0, 80)
+InfoFrame.AnchorPoint = Vector2.new(0.5, 0)
+InfoFrame.ZIndex = 2
 
-        -- METODO 3: CLONAR DIRECTAMENTE
-        if ItemSeleccionado and ItemSeleccionado.Parent then
-            local clon = ItemSeleccionado:Clone()
-            clon.Parent = ItemSeleccionado.Parent
-            st.Text = "✅ CREADO NUEVO ITEM"
-        end
+-- Esquinas redondeadas al info
+local UICornerInfo = Instance.new("UICorner")
+UICornerInfo.Parent = InfoFrame
+UICornerInfo.CornerRadius = UDim.new(0, 12)
 
-    end)
-end)
+-- Texto de la información
+local InfoText = Instance.new("TextLabel")
+InfoText.Name = "InfoText"
+InfoText.Parent = InfoFrame
+InfoText.BackgroundTransparency = 1
+InfoText.Size = UDim2.new(1, -10, 1, -10)
+InfoText.Position = UDim2.new(0, 5, 0, 5)
+InfoText.Font = Enum.Font.Gotham
+InfoText.Text = "📄 INFO\n\n👤 Creador: JoseAngel_Blox\n📅 Fecha: 22/06/2026"
+InfoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+InfoText.TextSize = 16
+InfoText.TextWrapped = true
+InfoText.ZIndex = 3
 
-print("Script Listo!")
+print("✅ Info agregada correctamente!")
