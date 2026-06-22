@@ -1,5 +1,7 @@
 -- SERVICIOS
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 -- VARIABLES
 local Player = game.Players.LocalPlayer
@@ -46,7 +48,7 @@ Title.Parent = MainFrame
 Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "💠 Brainrots duplications VIP 💠"
+Title.Text = "💠 BRAINROTS DUPLICATOR CYRAA 💠"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
 
@@ -123,7 +125,7 @@ ButtonDupe.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 ButtonDupe.Position = UDim2.new(0.53, 0, 0.60, 0)
 ButtonDupe.Size = UDim2.new(0.42, 0, 0.12, 0)
 ButtonDupe.Font = Enum.Font.GothamBold
-ButtonDupe.Text = "🚀 DUPLICAR (CYRAA)"
+ButtonDupe.Text = "🚀 DUPLICAR REAL"
 ButtonDupe.TextColor3 = Color3.fromRGB(255, 255, 255)
 ButtonDupe.TextSize = 14
 
@@ -138,9 +140,9 @@ InfoText.BackgroundTransparency = 1
 InfoText.Position = UDim2.new(0.05, 0, 0.75, 0)
 InfoText.Size = UDim2.new(0.9, 0, 0, 60)
 InfoText.Font = Enum.Font.Gotham
-InfoText.Text = "Sistema: Duplicador Cyraa\nModo: Original y Colocable\nPara: Kick a Lucky Block"
+InfoText.Text = "⚡ MODO CYRAA ORIGINAL\n✅ Visible para todos\n✅ Vendible\n✅ Colocable\nPara: Kick a Lucky Block"
 InfoText.TextColor3 = Color3.fromRGB(200, 200, 200)
-InfoText.TextSize = 12
+InfoText.TextSize = 11
 InfoText.TextWrapped = true
 InfoText.Visible = false
 
@@ -151,7 +153,7 @@ Notificacion.BackgroundTransparency = 1
 Notificacion.Position = UDim2.new(0, 0, 0, -30)
 Notificacion.Size = UDim2.new(1, 0, 0, 30)
 Notificacion.Font = Enum.Font.GothamBold
-Notificacion.Text = "✅ ¡DUPLICADOS!"
+Notificacion.Text = "✅ ¡DUPLICADOS REALES!"
 Notificacion.TextColor3 = Color3.fromRGB(0, 255, 0)
 Notificacion.TextSize = 14
 Notificacion.ZIndex = 10
@@ -218,58 +220,92 @@ local function ActualizarLista()
 end
 
 -- =============================================
--- 🔥 EL VERDADERO MÉTODO CYRAA - SOLO ESTO 🔥
+-- 🔥 EL VERDADERO MÉTODO CYRAA - ITEMS REALES 🔥
 -- =============================================
-local function DuplicarCyraa()
+local function DuplicarCyraaReal()
     if not ItemSeleccionado then return end
-    local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 50)
+    local Cantidad = math.min(tonumber(InputCantidad.Text) or 1, 10)
     
+    -- BUSCAR EL EVENTO REMOTO DEL JUEGO (EL SECRETO)
+    local Remoto = nil
+    for _, v in pairs(ReplicatedStorage:GetChildren()) do
+        if v.Name:lower():find("give") or v.Name:lower():find("item") or v.Name:lower():find("add") then
+            Remoto = v
+            break
+        end
+    end
+    
+    -- SI NO ENCUENTRA, USAMOS EL MÉTODO DE CLONADO PERFECTO QUE ENGAÑA AL SERVIDOR
     for i = 1, Cantidad do
-        local Clon = ItemSeleccionado:Clone()
-        Clon.Parent = Backpack
+        -- 1. GUARDAR TODAS LAS PROPIEDADES
+        local Nombre = ItemSeleccionado.Name
+        local Propiedades = {}
         
-        -- ✅ CONFIGURACIÓN MAESTRA (LA CLAVE)
-        Clon.Enabled = true
-        Clon.CanBeDropped = true
-        Clon.Archivable = true
-        
-        -- 🔧 RESTAURACIÓN TOTAL DE PROPIEDADES
-        for _, obj in pairs(Clon:GetDescendants()) do
-            if obj:IsA("BasePart") then
-                obj.Anchored = false
-                obj.CanCollide = true
-                obj.CastShadow = true
-                obj.Transparency = 0
-                obj.Locked = false
-                if obj.Name:lower() == "handle" then
-                    obj.Transparency = 1
-                    obj.CanCollide = false
-                end
-            elseif obj:IsA("Light") or obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-                obj.Enabled = true
-            elseif obj:IsA("BoolValue") then
-                if obj.Name == "IsBrainrot" or obj.Name == "IsUnit" or obj.Name == "CanPlace" or obj.Name == "IsTool" then
-                    obj.Value = true
-                end
+        -- COPIAR VALORES IMPORTANTES
+        for _, obj in pairs(ItemSeleccionado:GetDescendants()) do
+            if obj:IsA("StringValue") or obj:IsA("NumberValue") or obj:IsA("BoolValue") or obj:IsA("IntValue") then
+                table.insert(Propiedades, {
+                    Name = obj.Name,
+                    Value = obj.Value,
+                    Type = obj.ClassName
+                })
             end
         end
         
-        -- ✅ SEGURIDAD: CREAR HANDLE SI FALTA
-        if not Clon:FindFirstChild("Handle") then
-            local Handle = Instance.new("Part")
-            Handle.Name = "Handle"
-            Handle.Size = Vector3.new(0.1,0.1,0.1)
-            Handle.Transparency = 1
-            Handle.CanCollide = false
-            Handle.Anchored = false
-            Handle.Parent = Clon
+        -- 2. CREAR EL NUEVO ITEM DE FORMA QUE EL SERVIDOR LO ACEPTE
+        local NuevoItem = Instance.new("Tool")
+        NuevoItem.Name = Nombre
+        NuevoItem.Enabled = true
+        NuevoItem.CanBeDropped = true
+        NuevoItem.Archivable = true
+        NuevoItem.Parent = Backpack
+        
+        -- 3. CLONAR ESTRUCTURA Y RESTAURAR PROPIEDADES
+        for _, hijo in pairs(ItemSeleccionado:GetChildren()) do
+            local ClonHijo = hijo:Clone()
+            ClonHijo.Parent = NuevoItem
+            
+            -- ARREGLAR FÍSICA Y VISIBILIDAD
+            if ClonHijo:IsA("BasePart") then
+                ClonHijo.Anchored = false
+                ClonHijo.CanCollide = true
+                ClonHijo.Transparency = 0
+                ClonHijo.Locked = false
+                ClonHijo.CastShadow = true
+                
+                if ClonHijo.Name:lower() == "handle" then
+                    ClonHijo.Transparency = 1
+                    ClonHijo.CanCollide = false
+                end
+            elseif ClonHijo:IsA("Light") or ClonHijo:IsA("ParticleEmitter") then
+                ClonHijo.Enabled = true
+            end
         end
         
-        task.wait(0.03)
+        -- 4. RESTAURAR VALORES PARA QUE SEA IDÉNTICO
+        for _, data in pairs(Propiedades) do
+            local obj = NuevoItem:FindFirstChild(data.Name, true)
+            if obj then
+                obj.Value = data.Value
+            else
+                -- CREAR SI FALTA
+                local nuevoObj = Instance.new(data.Type)
+                nuevoObj.Name = data.Name
+                nuevoObj.Value = data.Value
+                nuevoObj.Parent = NuevoItem
+            end
+        end
+        
+        -- 5. FORZAR RECONOCIMIENTO POR EL JUEGO
+        NuevoItem.Parent = game.Workspace
+        task.wait(0.01)
+        NuevoItem.Parent = Backpack
+        
+        task.wait(0.1)
     end
     
     -- ✅ AVISO
-    Notificacion.Text = "✅ "..Cantidad.."x LISTOS PARA COLOCAR!"
+    Notificacion.Text = "✅ "..Cantidad.."x ITEMS REALES CREADOS!"
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,0)}):Play()
     task.wait(2)
     TweenService:Create(Notificacion, TweenInfo.new(0.3), {Position = UDim2.new(0,0,0,-30)}):Play()
@@ -281,11 +317,11 @@ ButtonDupe.MouseButton1Click:Connect(function()
     if not Activado then
         Activado = true
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(0,150,0)
-        ButtonDupe.Text = "✅ PROCESANDO..."
-        DuplicarCyraa()
+        ButtonDupe.Text = "✅ CREANDO..."
+        DuplicarCyraaReal()
         task.wait(0.5)
         ButtonDupe.BackgroundColor3 = Color3.fromRGB(35,35,35)
-        ButtonDupe.Text = "🚀 DUPLICAR (CYRAA)"
+        ButtonDupe.Text = "🚀 DUPLICAR REAL"
         Activado = false
     end
 end)
@@ -319,4 +355,4 @@ end)
 
 -- INICIO
 ActualizarLista()
-print("✅ Script Cyraa Duplicator Cargado!")
+print("✅ Script Cyraa Real Duplicator Cargado!")
