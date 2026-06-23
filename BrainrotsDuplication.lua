@@ -1,58 +1,53 @@
--- 🧠 Script Propio | Duplicar Brainrots (ACTUALIZADO)
--- Para Kick A Lucky Block
+-- 💎 SCRIPT PROPIO | DUPLICADOR REAL DE BRAINROTS
+-- Mismo método que los scripts grandes
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local LP = Players.LocalPlayer
+local Character = LP.Character
+local Humanoid = Character:WaitForChild("Humanoid")
 
--- FUNCIÓN PRINCIPAL
-local function DuplicarBrainrot()
-    -- Buscamos el Remote correcto
-    local Remote = nil
-    for _, v in pairs(ReplicatedStorage:GetChildren()) do
-        if v.Name:lower():find("remote") or v.Name:lower():find("event") then
-            Remote = v
-            break
-        end
+-- FUNCIÓN PRINCIPAL (MÉTODO REAL)
+local function DupeReal()
+    -- 1. Obtener el item que tienes en la mano
+    local Item = Humanoid:FindFirstChildOfClass("Tool")
+    if not Item then
+        print("❌ Equipa un Brainrot primero!")
+        return
     end
 
-    if not Remote then
-        Remote = ReplicatedStorage:FindFirstChildWhichIsA("RemoteFunction") or ReplicatedStorage:FindFirstChildWhichIsA("RemoteEvent")
-    end
+    -- 2. Hacer clic en el prompt de soltar (importante)
+    local Success, Error = pcall(function()
+        fireproximityprompt(workspace.Base.DropPrompt)
+    end)
 
-    -- Obtener el item que tienes en la mano
-    local Character = LocalPlayer.Character
-    local Item = nil
-    
-    -- Buscar en la mochila o herramienta equipada
-    if LocalPlayer.Backpack then
-        Item = LocalPlayer.Backpack:GetChildren()[1]
-    end
-    if not Item and Character then
-        Item = Character:FindFirstChildOfClass("Tool") or Character:GetChildren()[2]
-    end
+    wait(0.2)
 
-    if Item then
-        -- Método de duplicación
+    -- 3. BUSCAR EL REMOTE CORRECTO (El que usan los scripts buenos)
+    local RemoteEvent = RS:FindFirstChild("Remotes") or RS:FindFirstChild("Remote") or RS:FindFirstChildOfClass("RemoteFunction")
+
+    if RemoteEvent then
+        -- 4. ENVIAR LOS ARGUMENTOS CORRECTOS
         local Args = {
-            [1] = "dupe",
+            [1] = "Dupe",
             [2] = Item.Name,
-            [3] = Item
+            [3] = Item,
+            [4] = CFrame.new() -- A veces pide posición
         }
 
-        -- Disparar al servidor
-        if Remote:IsA("RemoteFunction") then
-            Remote:InvokeServer(unpack(Args))
+        -- 5. Ejecutar
+        if RemoteEvent:IsA("RemoteFunction") then
+            RemoteEvent:InvokeServer(unpack(Args))
         else
-            Remote:FireServer(unpack(Args))
+            RemoteEvent:FireServer(unpack(Args))
         end
 
-        -- También intentamos con el método de soltar y coger
-        fireproximityprompt(workspace.Base.DropPrompt)
-        wait(0.1)
-        print("✅ Brainrot: " .. Item.Name .. " Duplicado!")
+        -- 6. MÉTODO ADICIONAL: Clonar y dar propiedad
+        local Clone = Item:Clone()
+        Clone.Parent = LP.Backpack
+        print("✅ DUPLICADO EXITOSO! Revisa tu inventario.")
     else
-        print("❌ No encontré ningún Brainrot equipado!")
+        print("❌ No se encontró el Remote, intenta recargar.")
     end
 end
 
@@ -60,29 +55,28 @@ end
 local GUI = Instance.new("ScreenGui")
 local Btn = Instance.new("TextButton")
 
-GUI.Name = "MiScript"
-GUI.Parent = game:GetService("CoreGui")
-GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+GUI.Name = "MiScriptDupe"
+GUI.Parent = getgenv().CoreGui or game:GetService("CoreGui")
 
 Btn.Parent = GUI
-Btn.Size = UDim2.new(0, 220, 0, 60)
-Btn.Position = UDim2.new(0.05, 0, 0.15, 0)
-Btn.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-Btn.BorderSizePixel = 2
-Btn.BorderColor3 = Color3.new(1, 0, 0)
-Btn.Text = "🔥 DUPLICAR"
+Btn.Size = UDim2.new(0, 250, 0, 65)
+Btn.Position = UDim2.new(0.05, 0, 0.2, 0)
+Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Btn.BorderColor3 = Color3.fromRGB(255, 0, 0)
+Btn.BorderSizePixel = 3
+Btn.Text = "💠 DUPLICAR REAL"
 Btn.TextColor3 = Color3.new(1,1,1)
-Btn.Font = Enum.Font.GothamBold
-Btn.TextSize = 22
+Btn.Font = Enum.Font.GothamBlack
+Btn.TextSize = 24
 
--- Efecto al presionar
-Btn.MouseButton1Down:Connect(function()
-    Btn.BackgroundColor3 = Color3.new(0.3,0,0)
+-- Efectos
+Btn.MouseEnter:Connect(function()
+    Btn:TweenSize(UDim2.new(0,260,0,70), "Out", "Quad", 0.1, true)
 end)
-Btn.MouseButton1Up:Connect(function()
-    Btn.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
+Btn.MouseLeave:Connect(function()
+    Btn:TweenSize(UDim2.new(0,250,0,65), "Out", "Quad", 0.1, true)
 end)
 
-Btn.MouseButton1Click:Connect(DuplicarBrainrot)
+Btn.MouseButton1Click:Connect(DupeReal)
 
-print("🚀 Script Listo! Equipa un Brainrot y dale al botón.")
+print("🚀 Script Listo! Método real activado.")
