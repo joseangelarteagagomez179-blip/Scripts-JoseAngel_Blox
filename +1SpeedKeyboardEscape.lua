@@ -31,14 +31,14 @@ MainFrame.ClipsDescendants = true
 
 --// Esquinas Redondeadas
 UICorner.Parent = MainFrame
-UICorner.CornerRadius = UDim.new(0, 15) -- Aquí ajustas lo redondas que quieres las esquinas
+UICorner.CornerRadius = UDim.new(0, 15)
 
 --// Título
 Title.Parent = MainFrame
 Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, 0, 0.2, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "UNLOCKED WALKERS"  <-- 🇺🇸 TÍTULO EN INGLÉS
+Title.Text = "UNLOCKED WALKERS"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 20
 
@@ -66,7 +66,6 @@ UICorner:Clone().Parent = FarmBtn
 
 --// FUNCIONES
 
--- Función para desbloquear caminadoras
 local function UnlockAll()
     local Walkers = game:GetService("Workspace").Walkers
     for _, Walker in pairs(Walkers:GetChildren()) do
@@ -74,7 +73,6 @@ local function UnlockAll()
         if BuyPrompt then
             BuyPrompt:FireServer()
         end
-        -- Marcar como comprado
         local Owned = Walker:FindFirstChildOfClass("BoolValue")
         if Owned then
             Owned.Value = true
@@ -85,7 +83,6 @@ local function UnlockAll()
     UnlockBtn.Text = "🔓 Unlock All Walkers"
 end
 
--- Función Auto Farm
 local function ToggleAutoFarm()
     AutoFarmEnabled = not AutoFarmEnabled
     if AutoFarmEnabled then
@@ -93,28 +90,25 @@ local function ToggleAutoFarm()
         FarmBtn.BackgroundColor3 = Color3.fromRGB(80, 220, 100)
         AutoFarmLoop = spawn(function()
             while AutoFarmEnabled do
-                -- Aumentar velocidad al máximo
                 Humanoid.WalkSpeed = 1000
                 wait(0.1)
-                -- Si el juego tiene objetos para presionar o recolectar, aquí se automatizaría
-                -- Por ahora te da velocidad infinita
             end
         end)
     else
         FarmBtn.Text = "⚡ Auto Farm: OFF"
         FarmBtn.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
-        Humanoid.WalkSpeed = 16 -- Velocidad normal
+        Humanoid.WalkSpeed = 16
         if AutoFarmLoop then
             AutoFarmLoop:Disconnect()
         end
     end
 end
 
---// Eventos de los botones
+--// Eventos
 UnlockBtn.MouseButton1Click:Connect(UnlockAll)
 FarmBtn.MouseButton1Click:Connect(ToggleAutoFarm)
 
---// Animación de entrada
+--// Animación
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 local TweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local Goal = {Size = UDim2.new(0, 280, 0, 220)}
@@ -122,4 +116,3 @@ local Tween = TweenService:Create(MainFrame, TweenInfo, Goal)
 Tween:Play()
 
 print("✅ Script Cargado - Unlocked Walkers")
-
