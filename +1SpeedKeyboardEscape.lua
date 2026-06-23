@@ -1,327 +1,269 @@
 -- // SERVICES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local PlayerGui = Players.LocalPlayer.PlayerGui
-local UIS = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
--- // VARIABLES GLOBALES
+-- // VARIABLES
+local Player = Players.LocalPlayer
+local PlayerGui = Player.PlayerGui
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
 local ScriptEnabled = true
-local Functions = {}
-local SpeedValue = 100 -- Velocidad inicial
+local AutoFarmEnabled = false
+local SpeedValue = 100
 
--- // CREACIÓN DE LA INTERFAZ
-
+-- // CREAR INTERFAZ
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SpeedHubUI"
 ScreenGui.Parent = PlayerGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- ==================================================
---  MARCO PRINCIPAL
--- ==================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-MainFrame.BorderColor3 = Color3.new(0.5, 0, 0.8)
+MainFrame.BackgroundColor3 = Color3.new(0,0,0)
+MainFrame.BorderColor3 = Color3.new(0.6,0,1)
 MainFrame.BorderSizePixel = 2
-MainFrame.Size = UDim2.new(0, 680, 0, 520)
-MainFrame.Position = UDim2.new(0.5, -340, 0.5, -260)
+MainFrame.Size = UDim2.new(0, 600, 0, 420)
+MainFrame.Position = UDim2.new(0.5,-300,0.5,-210)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.CornerRadius = UDim.new(0,10)
 UICorner.Parent = MainFrame
 
--- ==================================================
---  EFECTO LED ANIMADO
--- ==================================================
+-- // EFECTO LED
 local LEDFrame = Instance.new("Frame")
-LEDFrame.Name = "LEDFrame"
 LEDFrame.Parent = MainFrame
 LEDFrame.BackgroundTransparency = 1
-LEDFrame.Size = UDim2.new(1, 12, 1, 12)
-LEDFrame.Position = UDim2.new(0, -6, 0, -6)
+LEDFrame.Size = UDim2.new(1,10,1,10)
+LEDFrame.Position = UDim2.new(0,-5,0,-5)
 LEDFrame.ZIndex = -1
 
 local LEDGradient = Instance.new("UIGradient")
-LEDGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.new(0.9, 0, 1)),
-    ColorSequenceKeypoint.new(0.5, Color3.new(0.3, 0, 0.6)),
-    ColorSequenceKeypoint.new(1, Color3.new(0.9, 0, 1))
-})
+LEDGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.new(1,0.2,1)),
+    ColorSequenceKeypoint.new(0.5, Color3.new(0.4,0,0.8)),
+    ColorSequenceKeypoint.new(1, Color3.new(1,0.2,1))
+}
 LEDGradient.Rotation = 90
 LEDGradient.Parent = LEDFrame
 
--- Animación LED
 spawn(function()
-    while wait(2.5) do
-        local tween = TweenService:Create(LEDGradient, TweenInfo.new(2.5, Enum.EasingStyle.Linear), {Rotation = 450})
-        tween:Play()
-        tween.Completed:Wait()
+    while wait(2) do
+        TweenService:Create(LEDGradient, TweenInfo.new(2), {Rotation=450}):Play()
+        wait(2)
         LEDGradient.Rotation = 90
     end
 end)
 
--- ==================================================
---  TÍTULO
--- ==================================================
+-- // TITULO
 local Title = Instance.new("TextLabel")
-Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, -20, 0, 50)
-Title.Position = UDim2.new(0, 10, 0, 10)
+Title.Size = UDim2.new(1,-20,0,40)
+Title.Position = UDim2.new(0,10,0,10)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "+1 Speed-Keyboard-Escape-Candy-Chocolate"
-Title.TextColor3 = Color3.new(1, 0.5, 1)
-Title.TextSize = 20
-Title.TextWrapped = true
+Title.TextColor3 = Color3.new(1,0.5,1)
+Title.TextSize = 18
 
--- ==================================================
---  SEPARADOR
--- ==================================================
-local Separator = Instance.new("Frame")
-Separator.Name = "Separator"
-Separator.Parent = MainFrame
-Separator.Size = UDim2.new(1, -40, 0, 2)
-Separator.Position = UDim2.new(0, 20, 0, 70)
-Separator.BackgroundColor3 = Color3.new(0.6, 0, 1)
+-- // BOTON REDONDO ON/OFF
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Parent = MainFrame
+ToggleBtn.BackgroundColor3 = Color3.new(0,0.8,0)
+ToggleBtn.Size = UDim2.new(0,50,0,50)
+ToggleBtn.Position = UDim2.new(0.92,0,0.02,0)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.Text = "ON"
+ToggleBtn.TextColor3 = Color3.new(1,1,1)
+ToggleBtn.TextSize = 14
 
--- ==================================================
---  BOTÓN MAESTRO (ON/OFF)
--- ==================================================
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = MainFrame
-ToggleButton.BackgroundColor3 = Color3.new(0.8, 0, 1)
-ToggleButton.Size = UDim2.new(0, 280, 0, 50)
-ToggleButton.Position = UDim2.new(0.5, -140, 0, 90)
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.Text = "✅ SCRIPT ACTIVO"
-ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-ToggleButton.TextSize = 18
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(1,0)
+BtnCorner.Parent = ToggleBtn
 
-local ButtonCornerMain = Instance.new("UICorner")
-ButtonCornerMain.CornerRadius = UDim.new(0, 8)
-ButtonCornerMain.Parent = ToggleButton
+-- // SECCIONES
+local Options = Instance.new("Frame")
+Options.Parent = MainFrame
+Options.BackgroundTransparency = 1
+Options.Size = UDim2.new(1,-40,0,300)
+Options.Position = UDim2.new(0,20,0,70)
 
--- ==================================================
---  ÁREA DE OPCIONES
--- ==================================================
-local OptionsFrame = Instance.new("Frame")
-OptionsFrame.Name = "OptionsFrame"
-OptionsFrame.Parent = MainFrame
-OptionsFrame.BackgroundTransparency = 1
-OptionsFrame.Size = UDim2.new(1, -40, 0, 340)
-OptionsFrame.Position = UDim2.new(0, 20, 0, 155)
+-- INFO
+local Info = Instance.new("TextLabel")
+Info.Parent = Options
+Info.BackgroundTransparency = 1
+Info.Size = UDim2.new(1,0,0,50)
+Info.Position = UDim2.new(0,0,0,0)
+Info.Font = Enum.Font.GothamBold
+Info.Text = "📄 INFO\nCreador: JoseAngel_Blox | 23/06/2026"
+Info.TextColor3 = Color3.new(1,0.7,1)
+Info.TextSize = 13
 
--- ==================================================
---  📄 SECCIÓN 1: INFO
--- ==================================================
-local SectionInfo = Instance.new("TextLabel")
-SectionInfo.Parent = OptionsFrame
-SectionInfo.BackgroundTransparency = 1
-SectionInfo.Size = UDim2.new(1, 0, 0, 70)
-SectionInfo.Position = UDim2.new(0, 0, 0, 0)
-SectionInfo.Font = Enum.Font.GothamBold
-SectionInfo.Text = "📄 INFO\nCreador: JoseAngel_Blox | Lanzamiento: 23/06/2026"
-SectionInfo.TextColor3 = Color3.new(1, 0.7, 1)
-SectionInfo.TextSize = 14
+-- MAIN
+local MainTitle = Instance.new("TextLabel")
+MainTitle.Parent = Options
+MainTitle.BackgroundTransparency = 1
+MainTitle.Size = UDim2.new(1,0,0,25)
+MainTitle.Position = UDim2.new(0,0,0,55)
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.Text = "⚙️ MAIN"
+MainTitle.TextColor3 = Color3.new(1,0.5,1)
 
--- ==================================================
---  ⚙️ SECCIÓN 2: MAIN
--- ==================================================
-local SectionMainTitle = Instance.new("TextLabel")
-SectionMainTitle.Parent = OptionsFrame
-SectionMainTitle.BackgroundTransparency = 1
-SectionMainTitle.Size = UDim2.new(1, 0, 0, 25)
-SectionMainTitle.Position = UDim2.new(0, 0, 0, 75)
-SectionMainTitle.Font = Enum.Font.GothamBold
-SectionMainTitle.Text = "⚙️ MAIN"
-SectionMainTitle.TextColor3 = Color3.new(1, 0.5, 1)
-SectionMainTitle.TextSize = 16
-
--- Botón Auto Farm
+-- Auto Farm
 local AutoFarmBtn = Instance.new("TextButton")
-AutoFarmBtn.Name = "AutoFarmBtn"
-AutoFarmBtn.Parent = OptionsFrame
-AutoFarmBtn.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-AutoFarmBtn.Size = UDim2.new(0.48, 0, 0, 50)
-AutoFarmBtn.Position = UDim2.new(0.01, 0, 0, 105)
-AutoFarmBtn.Font = Enum.Font.GothamBold
+AutoFarmBtn.Parent = Options
+AutoFarmBtn.Size = UDim2.new(0.47,0,0,50)
+AutoFarmBtn.Position = UDim2.new(0.01,0,0,85)
+AutoFarmBtn.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
 AutoFarmBtn.Text = "❌ AUTO FARM"
-AutoFarmBtn.TextColor3 = Color3.new(1, 1, 1)
-AutoFarmBtn.TextSize = 15
-local cf1 = Instance.new("UICorner"); cf1.CornerRadius = UDim.new(0,6); cf1.Parent=AutoFarmBtn
+AutoFarmBtn.TextColor3 = Color3.new(1,1,1)
+AutoFarmBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", AutoFarmBtn)
 
--- Texto de Velocidad
+-- Velocidad
 local SpeedText = Instance.new("TextLabel")
-SpeedText.Parent = OptionsFrame
+SpeedText.Parent = Options
 SpeedText.BackgroundTransparency = 1
-SpeedText.Size = UDim2.new(0.48, 0, 0, 25)
-SpeedText.Position = UDim2.new(0.51, 0, 0, 105)
+SpeedText.Size = UDim2.new(0.47,0,0,25)
+SpeedText.Position = UDim2.new(0.52,0,0,85)
 SpeedText.Font = Enum.Font.GothamBold
 SpeedText.Text = "VELOCIDAD: "..SpeedValue
-SpeedText.TextColor3 = Color3.new(1, 0.8, 1)
-SpeedText.TextSize = 14
+SpeedText.TextColor3 = Color3.new(1,0.8,1)
 
--- Botón Aumentar Velocidad
-local SpeedUpBtn = Instance.new("TextButton")
-SpeedUpBtn.Name = "SpeedUpBtn"
-SpeedUpBtn.Parent = OptionsFrame
-SpeedUpBtn.BackgroundColor3 = Color3.new(0.2, 0, 0.3)
-SpeedUpBtn.Size = UDim2.new(0.23, 0, 0, 22)
-SpeedUpBtn.Position = UDim2.new(0.51, 0, 0, 132)
-SpeedUpBtn.Font = Enum.Font.GothamBold
-SpeedUpBtn.Text = "+"
-SpeedUpBtn.TextColor3 = Color3.new(1,1,1)
-SpeedUpBtn.TextSize = 14
-local cf2 = Instance.new("UICorner"); cf2.CornerRadius = UDim.new(0,4); cf2.Parent=SpeedUpBtn
+local PlusBtn = Instance.new("TextButton")
+PlusBtn.Parent = Options
+PlusBtn.Size = UDim2.new(0.22,0,0,22)
+PlusBtn.Position = UDim2.new(0.52,0,0,112)
+PlusBtn.Text = "+"
+PlusBtn.BackgroundColor3 = Color3.new(0.3,0,0.5)
+Instance.new("UICorner", PlusBtn)
 
--- Botón Bajar Velocidad
-local SpeedDownBtn = Instance.new("TextButton")
-SpeedDownBtn.Name = "SpeedDownBtn"
-SpeedDownBtn.Parent = OptionsFrame
-SpeedDownBtn.BackgroundColor3 = Color3.new(0.2, 0, 0.3)
-SpeedDownBtn.Size = UDim2.new(0.23, 0, 0, 22)
-SpeedDownBtn.Position = UDim2.new(0.75, 0, 0, 132)
-SpeedDownBtn.Font = Enum.Font.GothamBold
-SpeedDownBtn.Text = "-"
-SpeedDownBtn.TextColor3 = Color3.new(1,1,1)
-SpeedDownBtn.TextSize = 14
-local cf3 = Instance.new("UICorner"); cf3.CornerRadius = UDim.new(0,4); cf3.Parent=SpeedDownBtn
+local MinusBtn = Instance.new("TextButton")
+MinusBtn.Parent = Options
+MinusBtn.Size = UDim2.new(0.22,0,0,22)
+MinusBtn.Position = UDim2.new(0.76,0,0,112)
+MinusBtn.Text = "-"
+MinusBtn.BackgroundColor3 = Color3.new(0.3,0,0.5)
+Instance.new("UICorner", MinusBtn)
 
--- ==================================================
---  🛒 SECCIÓN 3: FREE SHOP ITEMS
--- ==================================================
-local SectionShopTitle = Instance.new("TextLabel")
-SectionShopTitle.Parent = OptionsFrame
-SectionShopTitle.BackgroundTransparency = 1
-SectionShopTitle.Size = UDim2.new(1, 0, 0, 25)
-SectionShopTitle.Position = UDim2.new(0, 0, 0, 165)
-SectionShopTitle.Font = Enum.Font.GothamBold
-SectionShopTitle.Text = "🛒 FREE SHOP ITEMS"
-SectionShopTitle.TextColor3 = Color3.new(1, 0.5, 1)
-SectionShopTitle.TextSize = 16
+-- SHOP
+local ShopTitle = Instance.new("TextLabel")
+ShopTitle.Parent = Options
+ShopTitle.BackgroundTransparency = 1
+ShopTitle.Size = UDim2.new(1,0,0,25)
+ShopTitle.Position = UDim2.new(0,0,0,145)
+ShopTitle.Font = Enum.Font.GothamBold
+ShopTitle.Text = "🛒 FREE SHOP"
+ShopTitle.TextColor3 = Color3.new(1,0.5,1)
 
--- Botón Caminadoras
-local TreadmillsBtn = Instance.new("TextButton")
-TreadmillsBtn.Name = "TreadmillsBtn"
-TreadmillsBtn.Parent = OptionsFrame
-TreadmillsBtn.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-TreadmillsBtn.Size = UDim2.new(0.32, 0, 0, 50)
-TreadmillsBtn.Position = UDim2.new(0.01, 0, 0, 195)
-TreadmillsBtn.Font = Enum.Font.GothamBold
-TreadmillsBtn.Text = "✅ CAMINADORAS"
-TreadmillsBtn.TextColor3 = Color3.new(1, 1, 1)
-TreadmillsBtn.TextSize = 14
-local cf4 = Instance.new("UICorner"); cf4.CornerRadius = UDim.new(0,6); cf4.Parent=TreadmillsBtn
+local TreadBtn = Instance.new("TextButton")
+TreadBtn.Parent = Options
+TreadBtn.Size = UDim2.new(0.31,0,0,50)
+TreadBtn.Position = UDim2.new(0.01,0,0,175)
+TreadBtn.Text = "✅ CAMINADORAS"
+TreadBtn.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
+Instance.new("UICorner", TreadBtn)
 
--- Botón Auras
-local AurasBtn = Instance.new("TextButton")
-AurasBtn.Name = "AurasBtn"
-AurasBtn.Parent = OptionsFrame
-AurasBtn.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-AurasBtn.Size = UDim2.new(0.32, 0, 0, 50)
-AurasBtn.Position = UDim2.new(0.34, 0, 0, 195)
-AurasBtn.Font = Enum.Font.GothamBold
-AurasBtn.Text = "✅ AURAS"
-AurasBtn.TextColor3 = Color3.new(1, 1, 1)
-AurasBtn.TextSize = 14
-local cf5 = Instance.new("UICorner"); cf5.CornerRadius = UDim.new(0,6); cf5.Parent=AurasBtn
+local AuraBtn = Instance.new("TextButton")
+AuraBtn.Parent = Options
+AuraBtn.Size = UDim2.new(0.31,0,0,50)
+AuraBtn.Position = UDim2.new(0.34,0,0,175)
+AuraBtn.Text = "✅ AURAS"
+AuraBtn.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
+Instance.new("UICorner", AuraBtn)
 
--- Botón Rastros
-local TrailsBtn = Instance.new("TextButton")
-TrailsBtn.Name = "TrailsBtn"
-TrailsBtn.Parent = OptionsFrame
-TrailsBtn.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-TrailsBtn.Size = UDim2.new(0.32, 0, 0, 50)
-TrailsBtn.Position = UDim2.new(0.67, 0, 0, 195)
-TrailsBtn.Font = Enum.Font.GothamBold
-TrailsBtn.Text = "✅ RASTROS"
-TrailsBtn.TextColor3 = Color3.new(1, 1, 1)
-TrailsBtn.TextSize = 14
-local cf6 = Instance.new("UICorner"); cf6.CornerRadius = UDim.new(0,6); cf6.Parent=TrailsBtn
+local TrailBtn = Instance.new("TextButton")
+TrailBtn.Parent = Options
+TrailBtn.Size = UDim2.new(0.31,0,0,50)
+TrailBtn.Position = UDim2.new(0.67,0,0,175)
+TrailBtn.Text = "✅ RASTROS"
+TrailBtn.BackgroundColor3 = Color3.new(0.1,0.1,0.1)
+Instance.new("UICorner", TrailBtn)
 
 -- ==================================================
---  LÓGICA DE FUNCIONES
+--  FUNCIONES
 -- ==================================================
 
--- Auto Farm Toggle
-local AutoFarmEnabled = false
-AutoFarmBtn.MouseButton1Click:Connect(function()
-    AutoFarmEnabled = not AutoFarmEnabled
-    if AutoFarmEnabled then
-        AutoFarmBtn.Text = "✅ AUTO FARM"
-        AutoFarmBtn.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
-    else
-        AutoFarmBtn.Text = "❌ AUTO FARM"
-        AutoFarmBtn.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-    end
-end)
-
--- Control de Velocidad
-SpeedUpBtn.MouseButton1Click:Connect(function()
-    SpeedValue = SpeedValue + 10
-    SpeedText.Text = "VELOCIDAD: "..SpeedValue
-end)
-
-SpeedDownBtn.MouseButton1Click:Connect(function()
-    SpeedValue = SpeedValue - 10
-    if SpeedValue < 10 then SpeedValue = 10 end
-    SpeedText.Text = "VELOCIDAD: "..SpeedValue
-end)
-
--- Aplicar velocidad en tiempo real
-RunService.Heartbeat:Connect(function()
-    if ScriptEnabled then
-        local char = Players.LocalPlayer.Character
-        if char and char.Humanoid then
-            char.Humanoid.WalkSpeed = SpeedValue
-        end
-    end
-end)
-
--- Free Shop Items (Simulación de desbloqueo)
-TreadmillsBtn.MouseButton1Click:Connect(function()
-    TreadmillsBtn.Text = "✅ DESBLOQUEADO"
-    TreadmillsBtn.BackgroundColor3 = Color3.new(0,0.5,0)
-    wait(1)
-    TreadmillsBtn.Text = "✅ CAMINADORAS"
-end)
-
-AurasBtn.MouseButton1Click:Connect(function()
-    AurasBtn.Text = "✅ DESBLOQUEADO"
-    AurasBtn.BackgroundColor3 = Color3.new(0,0.5,0)
-    wait(1)
-    AurasBtn.Text = "✅ AURAS"
-end)
-
-TrailsBtn.MouseButton1Click:Connect(function()
-    TrailsBtn.Text = "✅ DESBLOQUEADO"
-    TrailsBtn.BackgroundColor3 = Color3.new(0,0.5,0)
-    wait(1)
-    TrailsBtn.Text = "✅ RASTROS"
-end)
-
--- Botón Maestro ON/OFF
-ToggleButton.MouseButton1Click:Connect(function()
+-- BOTON REDONDO ON/OFF
+ToggleBtn.MouseButton1Click:Connect(function()
     ScriptEnabled = not ScriptEnabled
     if ScriptEnabled then
-        ToggleButton.BackgroundColor3 = Color3.new(0.8, 0, 1)
-        ToggleButton.Text = "✅ SCRIPT ACTIVO"
+        ToggleBtn.BackgroundColor3 = Color3.new(0,0.8,0)
+        ToggleBtn.Text = "ON"
+        Humanoid.WalkSpeed = SpeedValue
     else
-        ToggleButton.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-        ToggleButton.Text = "❌ SCRIPT DESACTIVADO"
-        -- Reset velocidad
-        local char = Players.LocalPlayer.Character
-        if char and char.Humanoid then
-            char.Humanoid.WalkSpeed = 16
-        end
+        ToggleBtn.BackgroundColor3 = Color3.new(0.8,0,0)
+        ToggleBtn.Text = "OFF"
+        Humanoid.WalkSpeed = 16
     end
 end)
 
-print("✅ Script Cargado - JoseAngel_Blox")
+-- AUTO FARM
+AutoFarmBtn.MouseButton1Click:Connect(function()
+    AutoFarmEnabled = not AutoFarmEnabled
+    AutoFarmBtn.Text = AutoFarmEnabled and "✅ AUTO FARM" or "❌ AUTO FARM"
+    AutoFarmBtn.BackgroundColor3 = AutoFarmEnabled and Color3.new(0,0.6,0) or Color3.new(0.1,0.1,0.1)
+end)
+
+-- VELOCIDAD
+PlusBtn.MouseButton1Click:Connect(function()
+    SpeedValue += 50
+    SpeedText.Text = "VELOCIDAD: "..SpeedValue
+end)
+
+MinusBtn.MouseButton1Click:Connect(function()
+    SpeedValue = SpeedValue > 16 and SpeedValue - 50 or 16
+    SpeedText.Text = "VELOCIDAD: "..SpeedValue
+end)
+
+RunService.Heartbeat:Connect(function()
+    if ScriptEnabled and Humanoid then
+        Humanoid.WalkSpeed = SpeedValue
+    end
+end)
+
+-- DESBLOQUEAR TODO
+local function UnlockAll()
+    pcall(function()
+        -- Dar dinero y stats
+        for _,v in pairs(Player:GetChildren()) do
+            if v:IsA("NumberValue") or v:IsA("IntValue") then v.Value = 9e9 end
+        end
+        -- Activar eventos
+        for _,v in pairs(ReplicatedStorage:GetDescendants()) do
+            if v:IsA("RemoteEvent") or v:IsA("BindableFunction") then
+                if string.find(string.lower(v.Name), "buy") or string.find(string.lower(v.Name), "unlock") or string.find(string.lower(v.Name), "equip") then
+                    v:FireServer()
+                end
+            end
+        end
+    end)
+end
+
+TreadBtn.MouseButton1Click:Connect(function()
+    UnlockAll()
+    TreadBtn.Text = "✅ LISTO"
+    wait(1)
+    TreadBtn.Text = "✅ CAMINADORAS"
+end)
+
+AuraBtn.MouseButton1Click:Connect(function()
+    UnlockAll()
+    AuraBtn.Text = "✅ LISTO"
+    wait(1)
+    AuraBtn.Text = "✅ AURAS"
+end)
+
+TrailBtn.MouseButton1Click:Connect(function()
+    UnlockAll()
+    TrailBtn.Text = "✅ LISTO"
+    wait(1)
+    TrailBtn.Text = "✅ RASTROS"
+end)
+
+print("✅ Script Listo - JoseAngel_Blox")
