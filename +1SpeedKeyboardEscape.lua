@@ -2,8 +2,6 @@
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
 
 --// Variables
 local AutoFarmEnabled = false
@@ -21,7 +19,7 @@ local UICorner = Instance.new("UICorner")
 ScreenGui.Parent = game:GetService("CoreGui")
 ScreenGui.Name = "WalkerScriptGUI"
 
---// Marco Principal (Cuadrado con esquinas redondeadas)
+--// Marco Principal
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 MainFrame.Size = UDim2.new(0, 280, 0, 220)
@@ -64,25 +62,40 @@ FarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FarmBtn.TextSize = 16
 UICorner:Clone().Parent = FarmBtn
 
---// FUNCIONES
-
+--// ✅ FUNCIÓN CORREGIDA: Desbloquear Caminadoras
 local function UnlockAll()
     local Walkers = game:GetService("Workspace").Walkers
-    for _, Walker in pairs(Walkers:GetChildren()) do
-        local BuyPrompt = Walker:FindFirstChild("BuyPrompt") or Walker:FindFirstChild("PurchasePrompt")
-        if BuyPrompt then
-            BuyPrompt:FireServer()
-        end
-        local Owned = Walker:FindFirstChildOfClass("BoolValue")
-        if Owned then
-            Owned.Value = true
-        end
+    if not Walkers then
+        -- Si no encuentra en Workspace, busca en otras partes
+        Walkers = game:GetService("Workspace"):FindFirstChild("Machines") or game:GetService("Workspace"):FindFirstChild("Items")
     end
-    UnlockBtn.Text = "✅ Done!"
-    wait(1)
-    UnlockBtn.Text = "🔓 Unlock All Walkers"
+
+    if Walkers then
+        for _, Walker in pairs(Walkers:GetChildren()) do
+            -- Buscar TODO tipo de botón de compra
+            local BuyPrompt = Walker:FindFirstChildWhichIsA("ProximityPrompt") or Walker:FindFirstChild("BuyPrompt") or Walker:FindFirstChild("PurchasePrompt")
+            if BuyPrompt and BuyPrompt:IsA("ProximityPrompt") then
+                BuyPrompt:FireServer()
+                wait(0.1) -- Pequeña espera para que no se buguee
+            end
+            -- Forzar que diga que ya la tienes
+            for _, v in pairs(Walker:GetChildren()) do
+                if v:IsA("BoolValue") and string.find(v.Name:lower(), "own") or string.find(v.Name:lower(), "unlock") then
+                    v.Value = true
+                end
+            end
+        end
+        UnlockBtn.Text = "✅ Done!"
+        wait(1)
+        UnlockBtn.Text = "🔓 Unlock All Walkers"
+    else
+        UnlockBtn.Text = "❌ Not Found"
+        wait(1)
+        UnlockBtn.Text = "🔓 Unlock All Walkers"
+    end
 end
 
+--// ✅ FUNCIÓN CORREGIDA: Auto Farm (Funciona aunque mueras)
 local function ToggleAutoFarm()
     AutoFarmEnabled = not AutoFarmEnabled
     if AutoFarmEnabled then
@@ -90,14 +103,28 @@ local function ToggleAutoFarm()
         FarmBtn.BackgroundColor3 = Color3.fromRGB(80, 220, 100)
         AutoFarmLoop = spawn(function()
             while AutoFarmEnabled do
-                Humanoid.WalkSpeed = 1000
+                -- Buscar el personaje SIEMPRE que se ejecute
+                local Character = Player.Character
+                if Character then
+                    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+                    if Humanoid then
+                        Humanoid.WalkSpeed = 1000 -- Velocidad
+                    end
+                end
                 wait(0.1)
             end
         end)
     else
         FarmBtn.Text = "⚡ Auto Farm: OFF"
         FarmBtn.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
-        Humanoid.WalkSpeed = 16
+        -- Resetear velocidad
+        local Character = Player.Character
+        if Character then
+            local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then
+                Humanoid.WalkSpeed = 16
+            end
+        end
         if AutoFarmLoop then
             AutoFarmLoop:Disconnect()
         end
@@ -108,11 +135,11 @@ end
 UnlockBtn.MouseButton1Click:Connect(UnlockAll)
 FarmBtn.MouseButton1Click:Connect(ToggleAutoFarm)
 
---// Animación
+--// Animación de entrada
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 local TweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local Goal = {Size = UDim2.new(0, 280, 0, 220)}
 local Tween = TweenService:Create(MainFrame, TweenInfo, Goal)
 Tween:Play()
 
-print("✅ Script Cargado - Unlocked Walkers")
+print("✅ Script Cargado - Unlocked Walkers v2")
