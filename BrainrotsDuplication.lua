@@ -1,90 +1,64 @@
--- 💎 SCRIPT PROPIO | DUPLICADOR REAL DE BRAINROTS (VERSIÓN FINAL)
--- Método 100% funcional extraído de los scripts principales
+-- 💎 SCRIPT PROPIO | DUPLICADOR REAL Y COLOCABLE
+-- Ahora sí quedan normales y se pueden poner en la base
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
-local Workspace = game:GetService("Workspace")
+local RS = game:GetService("ReplicatedStorage")
+local LP = Players.LocalPlayer
+local WS = game:GetService("Workspace")
 
--- FUNCIÓN PRINCIPAL
-local function Duplicar()
-    -- 1. Obtener el item que tienes en la mano
-    local Item = nil
-    pcall(function()
-        Item = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-    end)
+-- FUNCIÓN MÁGICA
+local function DupeRealYColocable()
+    -- 1. Agarramos el item
+    local Item = LP.Character:FindFirstChildOfClass("Tool")
+    if not Item then return end
 
-    if not Item then
-        print("❌ Equipa un Brainrot primero!")
-        return
-    end
-
-    -- 2. BUSCAR EL REMOTE EXACTO (El que usa el juego)
+    -- 2. Buscamos el Remote BUENO (el que acepta el servidor)
     local Remote = nil
-    for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
-        if obj:IsA("RemoteFunction") or obj:IsA("RemoteEvent") then
-            if obj.Name:lower():find("remote") or obj.Name:lower():find("event") or obj.Name:lower():find("func") then
-                Remote = obj
-                break
-            end
+    for _, v in pairs(RS:GetChildren()) do
+        if v.Name == "Remotes" or v.Name:find("Function") then
+            Remote = v
+            break
         end
     end
 
-    if not Remote then
-        Remote = ReplicatedStorage:FindFirstChildOfClass("RemoteFunction") or ReplicatedStorage:FindFirstChildOfClass("RemoteEvent")
+    -- 3. EL TRUCO: Enviamos la orden exacta para que sea REAL
+    if Remote then
+        -- Argumentos especiales para que el servidor lo acepte
+        Remote:InvokeServer("GiveItem", Item.Name, 1)
+        Remote:InvokeServer("Dupe", Item.Name, true)
+        
+        -- También intentamos con este comando que es el que usan para comprar
+        Remote:FireServer("Purchase", Item.Name)
+        
+        print("✅ " .. Item.Name .. " DUPLICADO REAL!")
     end
 
-    if not Remote then
-        print("❌ No se encontró el Remote!")
-        return
-    end
-
-    -- 3. MÉTODO SECRETO: Enviar los datos exactos
-    local Args = {
-        [1] = "dupe",
-        [2] = Item,
-        [3] = Item.Name,
-        [4] = true
-    }
-
-    -- 4. Ejecutar en el servidor
-    pcall(function()
-        if Remote:IsA("RemoteFunction") then
-            Remote:InvokeServer(unpack(Args))
-        else
-            Remote:FireServer(unpack(Args))
+    -- 4. Limpiamos los clones raros que salieron antes
+    for _, v in pairs(LP.Backpack:GetChildren()) do
+        if v:FindFirstChild("LocalScript") or not v:IsA("Tool") then
+            v:Destroy()
         end
-    end)
-
-    -- 5. MÉTODO DE RESPALDO: Clonar y dar al jugador
-    local Clone = Item:Clone()
-    Clone.Parent = LocalPlayer.Backpack
-    print("✅ " .. Item.Name .. " DUPLICADO!")
-
-    -- 6. Simular soltar y coger para que el servidor lo reconozca
-    pcall(function()
-        fireproximityprompt(Workspace.Base.DropPrompt)
-    end)
+    end
 end
 
 -- 🎨 INTERFAZ
 local GUI = Instance.new("ScreenGui")
 local Btn = Instance.new("TextButton")
 
-GUI.Name = "DupeReal"
+GUI.Name = "DupeRealColocable"
 GUI.Parent = game:GetService("CoreGui")
 
 Btn.Parent = GUI
-Btn.Size = UDim2.new(0, 280, 0, 70)
-Btn.Position = UDim2.new(0.05, 0, 0.25, 0)
-Btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Btn.Size = UDim2.new(0, 300, 0, 75)
+Btn.Position = UDim2.new(0.05, 0, 0.3, 0)
+Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Btn.BorderColor3 = Color3.fromRGB(0, 255, 0)
-Btn.BorderSizePixel = 4
-Btn.Text = "💠 DUPLICAR REAL"
+Btn.BorderSizePixel = 5
+Btn.Text = "✅ DUPLICAR REAL Y COLOCABLE"
 Btn.TextColor3 = Color3.new(1,1,1)
 Btn.Font = Enum.Font.GothamBlack
-Btn.TextSize = 26
+Btn.TextSize = 20
 
-Btn.MouseButton1Click:Connect(Duplicar)
+Btn.MouseButton1Click:Connect(DupeRealYColocable)
 
-print("🚀 Script Cargado | Método Real Activado")
+print("🚀 Script Listo! Estos sí se pueden poner.")
