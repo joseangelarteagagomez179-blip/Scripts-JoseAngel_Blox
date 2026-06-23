@@ -1,21 +1,125 @@
--- Script Creado por Ti: Desbloquear Todas las Caminadoras
--- Juego: +1 Speed Keyboard Escape
+--// Services
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
--- Obtenemos la carpeta donde están todas las caminadoras
-local Walkers = game:GetService("Workspace").Walkers
+--// Variables
+local AutoFarmEnabled = false
+local AutoFarmLoop = nil
 
--- Recorremos cada caminadora que existe
-for _, Walker in pairs(Walkers:GetChildren()) do
-    
-    -- Buscamos el botón o prompt que permite comprarla
-    local BuyButton = Walker:FindFirstChild("BuyPrompt") or Walker:FindFirstChild("PurchasePrompt")
+--// Crear GUI
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local UnlockBtn = Instance.new("TextButton")
+local FarmBtn = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
 
-    -- Si encontramos el botón...
-    if BuyButton then
-        -- Disparamos la señal al servidor para comprarla
-        BuyButton:FireServer()
-        print("Caminadora desbloqueada: " .. Walker.Name)
+--// Propiedades de la GUI
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Name = "WalkerScriptGUI"
+
+--// Marco Principal (Cuadrado con esquinas redondeadas)
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+MainFrame.Size = UDim2.new(0, 280, 0, 220)
+MainFrame.Position = UDim2.new(0.4, 0, 0.3, 0)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+
+--// Esquinas Redondeadas
+UICorner.Parent = MainFrame
+UICorner.CornerRadius = UDim.new(0, 15) -- Aquí ajustas lo redondas que quieres las esquinas
+
+--// Título
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 0.2, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "UNLOCKED WALKERS"  <-- 🇺🇸 TÍTULO EN INGLÉS
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+
+--// Botón 1: Desbloquear Todo
+UnlockBtn.Parent = MainFrame
+UnlockBtn.BackgroundColor3 = Color3.fromRGB(70, 150, 255)
+UnlockBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+UnlockBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
+UnlockBtn.Font = Enum.Font.GothamBold
+UnlockBtn.Text = "🔓 Unlock All Walkers"
+UnlockBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+UnlockBtn.TextSize = 16
+UICorner:Clone().Parent = UnlockBtn
+
+--// Botón 2: Auto Farm
+FarmBtn.Parent = MainFrame
+FarmBtn.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
+FarmBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+FarmBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+FarmBtn.Font = Enum.Font.GothamBold
+FarmBtn.Text = "⚡ Auto Farm: OFF"
+FarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FarmBtn.TextSize = 16
+UICorner:Clone().Parent = FarmBtn
+
+--// FUNCIONES
+
+-- Función para desbloquear caminadoras
+local function UnlockAll()
+    local Walkers = game:GetService("Workspace").Walkers
+    for _, Walker in pairs(Walkers:GetChildren()) do
+        local BuyPrompt = Walker:FindFirstChild("BuyPrompt") or Walker:FindFirstChild("PurchasePrompt")
+        if BuyPrompt then
+            BuyPrompt:FireServer()
+        end
+        -- Marcar como comprado
+        local Owned = Walker:FindFirstChildOfClass("BoolValue")
+        if Owned then
+            Owned.Value = true
+        end
+    end
+    UnlockBtn.Text = "✅ Done!"
+    wait(1)
+    UnlockBtn.Text = "🔓 Unlock All Walkers"
+end
+
+-- Función Auto Farm
+local function ToggleAutoFarm()
+    AutoFarmEnabled = not AutoFarmEnabled
+    if AutoFarmEnabled then
+        FarmBtn.Text = "⚡ Auto Farm: ON"
+        FarmBtn.BackgroundColor3 = Color3.fromRGB(80, 220, 100)
+        AutoFarmLoop = spawn(function()
+            while AutoFarmEnabled do
+                -- Aumentar velocidad al máximo
+                Humanoid.WalkSpeed = 1000
+                wait(0.1)
+                -- Si el juego tiene objetos para presionar o recolectar, aquí se automatizaría
+                -- Por ahora te da velocidad infinita
+            end
+        end)
+    else
+        FarmBtn.Text = "⚡ Auto Farm: OFF"
+        FarmBtn.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
+        Humanoid.WalkSpeed = 16 -- Velocidad normal
+        if AutoFarmLoop then
+            AutoFarmLoop:Disconnect()
+        end
     end
 end
 
-print("✅ Proceso terminado!")
+--// Eventos de los botones
+UnlockBtn.MouseButton1Click:Connect(UnlockAll)
+FarmBtn.MouseButton1Click:Connect(ToggleAutoFarm)
+
+--// Animación de entrada
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+local TweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local Goal = {Size = UDim2.new(0, 280, 0, 220)}
+local Tween = TweenService:Create(MainFrame, TweenInfo, Goal)
+Tween:Play()
+
+print("✅ Script Cargado - Unlocked Walkers")
+
