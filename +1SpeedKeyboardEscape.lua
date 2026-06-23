@@ -8,8 +8,37 @@ local PlayerGui = Player.PlayerGui
 if PlayerGui:FindFirstChild("MenuSpeed") then
     PlayerGui.MenuSpeed:Destroy()
 end
+if PlayerGui:FindFirstChild("BotonBurbuja") then
+    PlayerGui.BotonBurbuja:Destroy()
+end
 
--- === CREAR LA VENTANA ===
+-- === 🌟 BURBUJA FLOTANTE ===
+local Burbuja = Instance.new("TextButton")
+local BurbujaCorner = Instance.new("UICorner")
+local BurbujaGradient = Instance.new("UIGradient")
+
+Burbuja.Name = "BotonBurbuja"
+Burbuja.Parent = PlayerGui
+Burbuja.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Burbuja.Size = UDim2.new(0, 60, 0, 60)
+Burbuja.Position = UDim2.new(0.02, 0, 0.1, 0) -- Lado izquierdo
+Burbuja.Font = Enum.Font.GothamBold
+Burbuja.Text = "SCRIPT"
+Burbuja.TextColor3 = Color3.fromRGB(255, 255, 255)
+Burbuja.TextSize = 12
+Burbuja.AutoLocalize = false
+
+BurbujaCorner.CornerRadius = UDim.new(1, 0) -- Hace el botón redondo
+BurbujaCorner.Parent = Burbuja
+
+BurbujaGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 0, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 0, 90))
+}
+BurbujaGradient.Rotation = 45
+BurbujaGradient.Parent = Burbuja
+
+-- === CREAR LA VENTANA PRINCIPAL ===
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
@@ -18,22 +47,24 @@ local Title = Instance.new("TextLabel")
 
 ScreenGui.Name = "MenuSpeed"
 ScreenGui.Parent = PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.03, 0, 0.15, 0)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -210) -- CENTRADO
 MainFrame.Size = UDim2.new(0, 320, 0, 420)
+MainFrame.Visible = false -- EMPIEZA CERRADO
 
 -- Bordes redondos
-UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
 -- Borde color morado/neón
 UIGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 0, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 0, 90))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 0, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 0, 80))
 }
 UIGradient.Rotation = 45
 UIGradient.Parent = MainFrame
@@ -42,22 +73,23 @@ UIGradient.Parent = MainFrame
 Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 5)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "+1 Speed keyboard Escape-Candy-Chocolate"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
+Title.TextSize = 15
 Title.TextWrapped = true
-Title.TextStrokeTransparency = 0.5
+Title.TextStrokeTransparency = 0.6
 Title.TextStrokeColor3 = Color3.fromRGB(150, 0, 255)
 
--- === FUNCIÓN PARA CREAR OPCIONES ===
+-- === FUNCIÓN PARA CREAR OPCIONES CON LINEAS ===
 local function CrearOpcion(nombre, posY, tieneBoton)
     local Container = Instance.new("Frame")
     local Label = Instance.new("TextLabel")
     local Toggle = Instance.new("TextButton")
     local UICornerBtn = Instance.new("UICorner")
+    local Line = Instance.new("Frame")
 
     Container.Name = "Container"
     Container.Parent = MainFrame
@@ -72,14 +104,14 @@ local function CrearOpcion(nombre, posY, tieneBoton)
     Label.Position = UDim2.new(0, 5, 0, 0)
     Label.Font = Enum.Font.Gotham
     Label.Text = nombre
-    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.TextColor3 = Color3.fromRGB(230, 230, 230)
     Label.TextSize = 14
     Label.TextXAlignment = Enum.TextXAlignment.Left
 
     if tieneBoton then
         Toggle.Name = "Toggle"
         Toggle.Parent = Container
-        Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Toggle.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
         Toggle.Size = UDim2.new(0, 50, 0, 25)
         Toggle.Position = UDim2.new(0.8, 0, 0.5, -12)
         Toggle.Font = Enum.Font.GothamBold
@@ -94,7 +126,7 @@ local function CrearOpcion(nombre, posY, tieneBoton)
             if Toggle.Text == "OFF" then
                 Toggle.Text = "ON"
                 Toggle.TextColor3 = Color3.fromRGB(80, 255, 120)
-                Toggle.BackgroundColor3 = Color3.fromRGB(60, 100, 60)
+                Toggle.BackgroundColor3 = Color3.fromRGB(40, 80, 50)
             else
                 Toggle.Text = "OFF"
                 Toggle.TextColor3 = Color3.fromRGB(255, 80, 80)
@@ -102,6 +134,13 @@ local function CrearOpcion(nombre, posY, tieneBoton)
             end
         end)
     end
+
+    Line.Parent = Container
+    Line.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    Line.BorderSizePixel = 0
+    Line.Size = UDim2.new(1, 0, 0, 1)
+    Line.Position = UDim2.new(0, 0, 1, -1)
+
     return Container
 end
 
@@ -112,7 +151,7 @@ local InfoContent = Instance.new("Frame")
 InfoContent.Name = "InfoContent"
 InfoContent.Parent = MainFrame
 InfoContent.BackgroundTransparency = 1
-InfoContent.Size = UDim2.new(1, -40, 0, 180) -- Aumenté el tamaño para que entre todo
+InfoContent.Size = UDim2.new(1, -40, 0, 180)
 InfoContent.Position = UDim2.new(0, 20, 0, 85)
 InfoContent.Visible = false
 
@@ -192,7 +231,7 @@ InfoContainer.Label.MouseButton1Click:Connect(function()
 end)
 
 -- === 2) SECCION MAIN ===
-local MainContainer = CrearOpcion("Main ↓", 240, false) -- Bajé la posición
+local MainContainer = CrearOpcion("Main ↓", 240, false)
 
 local MainContent = Instance.new("Frame")
 MainContent.Name = "MainContent"
@@ -218,7 +257,7 @@ MainContainer.Label.MouseButton1Click:Connect(function()
 end)
 
 -- === 3) SECCION FREE SHOP ITEMS ===
-local ShopContainer = CrearOpcion("Free Shop Ítems ↓", 360, false) -- Bajé la posición
+local ShopContainer = CrearOpcion("Free Shop Ítems ↓", 360, false)
 
 local ShopContent = Instance.new("Frame")
 ShopContent.Name = "ShopContent"
@@ -248,6 +287,11 @@ ShopContainer.Label.MouseButton1Click:Connect(function()
     ShopContainer.Label.Text = ShopContent.Visible and "Free Shop Ítems ↑" or "Free Shop Ítems ↓"
 end)
 
+-- === FUNCION ABRIR / CERRAR MENU ===
+Burbuja.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
 -- === HACERLO ARRASTRABLE ===
 local Dragging = nil
 local DragStart = nil
@@ -274,4 +318,30 @@ game:GetService("UserInputService").InputEnded:Connect(function(input)
     end
 end)
 
-print("✅ Menu completo con Manual y Bienvenida!")
+-- === HACER BURBUJA TAMBIEN ARRASTRABLE ===
+local DraggingB = nil
+local DragStartB = nil
+local StartPosB = nil
+
+Burbuja.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingB = true
+        DragStartB = input.Position
+        StartPosB = Burbuja.Position
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if DraggingB then
+        local Delta = input.Position - DragStartB
+        Burbuja.Position = UDim2.new(StartPosB.X.Scale, StartPosB.X.Offset + Delta.X, StartPosB.Y.Scale, StartPosB.Y.Offset + Delta.Y)
+    end
+end)
+
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingB = false
+    end
+end)
+
+print("✅ Script Listo con Burbuja Flotante!")
