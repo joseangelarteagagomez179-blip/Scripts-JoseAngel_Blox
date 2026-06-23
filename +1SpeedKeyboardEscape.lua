@@ -2,6 +2,7 @@
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 --// Variables
 local AutoFarmEnabled = false
@@ -62,45 +63,36 @@ FarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FarmBtn.TextSize = 16
 UICorner:Clone().Parent = FarmBtn
 
---// ✅ FUNCIÓN MEJORADA: Búsqueda Total
+--// ✅ FUNCIÓN NUEVA: Para la Tienda
 local function UnlockAll()
-    -- BUSCAR EN TODOS LADOS
-    local Carpetas = {
-        game:GetService("Workspace"):FindFirstChild("Walkers"),
-        game:GetService("Workspace"):FindFirstChild("Treadmills"),
-        game:GetService("Workspace"):FindFirstChild("Machines"),
-        game:GetService("Workspace"):FindFirstChild("Gym"),
-        game:GetService("Workspace"):FindFirstChild("Items")
-    }
+    -- Buscamos el evento que usa el juego para comprar
+    local Event = ReplicatedStorage:FindFirstChildOfClass("RemoteEvent") or ReplicatedStorage:FindFirstChildOfClass("BindableFunction")
+    
+    if Event then
+        -- Intentamos comprar todas enviando los IDs o nombres
+        Event:FireServer("BuyTreadmill", 1)
+        Event:FireServer("BuyTreadmill", 2)
+        Event:FireServer("BuyTreadmill", 3)
+        Event:FireServer("BuyTreadmill", 4)
+        Event:FireServer("BuyItem", "Gold")
+        Event:FireServer("BuyItem", "Diamond")
+        Event:FireServer("BuyItem", "Candy")
+        Event:FireServer("BuyItem", "Admin")
+    end
 
-    local Encontrado = false
-
-    for _, Carpeta in pairs(Carpetas) do
-        if Carpeta then
-            for _, Objeto in pairs(Carpeta:GetChildren()) do
-                -- INTENTAR COMPRAR DE TODAS LAS FORMAS POSIBLES
-                fireproximityprompt(Objeto) -- Método directo y potente
-                if Objeto:FindFirstChild("BuyPrompt") then Objeto.BuyPrompt:FireServer() end
-                if Objeto:FindFirstChild("Purchase") then Objeto.Purchase:FireServer() end
-                if Objeto:FindFirstChild("Interact") then Objeto.Interact:FireServer() end
-
-                -- FORZAR QUE DIGA QUE ES TUYO
-                for _, Valor in pairs(Objeto:GetChildren()) do
-                    if Valor:IsA("BoolValue") or Valor:IsA("IntValue") then
-                        Valor.Value = true
-                    end
+    -- También intentamos forzar los datos del jugador
+    pcall(function()
+        local leaderstats = Player:FindFirstChild("leaderstats") or Player:FindFirstChild("Stats")
+        if leaderstats then
+            for _, stat in pairs(leaderstats:GetChildren()) do
+                if stat:IsA("NumberValue") or stat:IsA("IntValue") then
+                    stat.Value = 999999999 -- Le damos mucho dinero por si acaso
                 end
-                Encontrado = true
             end
         end
-    end
+    end)
 
-    if Encontrado then
-        UnlockBtn.Text = "✅ DESBLOQUEADO!"
-    else
-        UnlockBtn.Text = "❌ BUSCANDO..."
-    end
-
+    UnlockBtn.Text = "✅ HECHO!"
     wait(1)
     UnlockBtn.Text = "🔓 Unlock All Walkers"
 end
@@ -150,4 +142,4 @@ local Goal = {Size = UDim2.new(0, 280, 0, 220)}
 local Tween = TweenService:Create(MainFrame, TweenInfo, Goal)
 Tween:Play()
 
-print("✅ Script Cargado - Unlocked Walkers v3")
+print("✅ Script Cargado - Unlocked Walkers v4")
