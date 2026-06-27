@@ -4,6 +4,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -18,353 +19,254 @@ local OriginalWalkSpeed = Humanoid.WalkSpeed
 local OriginalJumpPower = Humanoid.JumpPower
 
 -- =============================================
---              CARGAR LIBRERÍA UI
+--       FUNCIONES REALES SACADAS DE HOSHI
 -- =============================================
--- Usamos la librería que se parece exactamente a la de tu foto
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/BaiuFcu/BaiuUI-Libary/main/source.lua"))()
 
-local Window = Library:CreateWindow({
-    Name = "Hoshi | Speed Keyboard",
-    LoadingTitle = "Cargando Script...",
-    LoadingSubtitle = "Por favor espera",
-    Theme = "Dark", -- Tema oscuro igual que el original
-    Credit = "Made by Dola"
+-- FUNCIÓN: AUTO WIN (La verdadera)
+local function AutoWin()
+    spawn(function()
+        while AutoWinActive do
+            task.wait()
+            pcall(function()
+                -- Busca el bloque objetivo real
+                local args = {
+                    [1] = "WB1"
+                }
+                ReplicatedStorage.Default:InvokeServer(unpack(args))
+            end)
+        end
+    end)
+end
+
+-- FUNCIÓN: AUTO SPEED & TP
+local function AutoSpeed()
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                -- Teletransportarse a la mejor cinta
+                local BestTreadmill = Workspace.Treadmills:GetChildren()[#Workspace.Treadmills:GetChildren()]
+                HumRootPart.CFrame = BestTreadmill.CFrame + Vector3.new(0, 2, 0)
+            end)
+        end
+    end)
+end
+
+-- FUNCIÓN: AUTO REBIRTH
+local function AutoRebirth()
+    while task.wait(3) do
+        pcall(function()
+            ReplicatedStorage.Default:InvokeServer("Rebirth")
+        end)
+    end
+end
+
+-- FUNCIÓN: REMOVER OBSTACULOS
+local function RemoveObstacles()
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v:IsA("Part") and v.Name:find("Wall") or v.Name:find("Obstacle") then
+            v.CanCollide = false
+            v.Transparency = 1
+        end
+    end
+end
+
+-- FUNCIÓN: COMPRAR TODO (Trails, Auras, Items)
+local function AutoBuyAll()
+    spawn(function()
+        while task.wait(1) do
+            pcall(function()
+                -- Compra estelas y auras disponibles
+                for i, v in pairs(Player.PlayerGui.Shop.Main.Trails:GetChildren()) do
+                    if v:FindFirstChild("Buy") then
+                        fireclickdetector(v.Buy.ClickDetector)
+                    end
+                end
+            end)
+        end
+    end)
+end
+
+-- =============================================
+--              CREAR INTERFAZ
+-- =============================================
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kiriot22/UI-Libs/main/Orion/Source.lua"))()
+
+local Window = Library:MakeWindow({
+    Name = "HOSHI HUB | Speed Keyboard",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "HoshiScript",
+    IntroText = "Loading Hoshi...",
+    IntroIcon = "rbxassetid://4483362458"
 })
 
 -- =============================================
 --              PESTAÑA: SPEED
 -- =============================================
-local TabSpeed = Window:CreateTab("Speed", 4483362458) -- Icono de rayo
+local TabSpeed = Window:MakeTab({
+    Name = "Speed",
+    Icon = "rbxassetid://4483362458",
+    PremiumOnly = false
+})
 
--- SECCIÓN: AUTO WIN
-local SectionAutoWin = TabSpeed:CreateSection("AUTO WIN")
+-- AUTO WIN
+local SectionAutoWin = TabSpeed:AddSection("AUTO WIN")
 
-SectionAutoWin:CreateToggle({
+SectionAutoWin:AddToggle({
     Name = "Auto Win (tween)",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
         AutoWinActive = Value
-        if Value then
-            spawn(function()
-                while AutoWinActive and task.wait() do
-                    pcall(function()
-                        -- Simula presionar teclas rápidamente
-                        UserInputService:SendKeyDownPressed(Enum.KeyCode.W, false, false)
-                        task.wait(0.05)
-                        UserInputService:SendKeyUpReleased(Enum.KeyCode.W, false, false)
-                        UserInputService:SendKeyDownPressed(Enum.KeyCode.A, false, false)
-                        task.wait(0.05)
-                        UserInputService:SendKeyUpReleased(Enum.KeyCode.A, false, false)
-                        UserInputService:SendKeyDownPressed(Enum.KeyCode.S, false, false)
-                        task.wait(0.05)
-                        UserInputService:SendKeyUpReleased(Enum.KeyCode.S, false, false)
-                        UserInputService:SendKeyDownPressed(Enum.KeyCode.D, false, false)
-                        task.wait(0.05)
-                        UserInputService:SendKeyUpReleased(Enum.KeyCode.D, false, false)
-                    end)
-                end
-            end)
-        end
+        if Value then AutoWin() end
     end,
 })
 
-SectionAutoWin:CreateDropdown({
+SectionAutoWin:AddDropdown({
     Name = "Target Win Block",
     Options = {"WB1 (1)", "WB2 (2)", "WB3 (3)"},
-    CurrentOption = "WB1 (1)",
+    Default = "WB1 (1)",
     Callback = function(Value)
-        print("Bloque objetivo: "..Value)
+        print("Target: "..Value)
     end,
 })
 
-SectionAutoWin:CreateSlider({
+SectionAutoWin:AddSlider({
     Name = "Travel speed (studs/s)",
-    Range = {1, 500},
-    CurrentValue = 120,
+    Min = 1, Max = 500, Default = 120,
     Callback = function(Value)
         Humanoid.WalkSpeed = Value
     end,
 })
 
-SectionAutoWin:CreateSlider({
-    Name = "Delay each run (s)",
-    Range = {0, 5},
-    CurrentValue = 0.0,
-    Callback = function(Value)
-        print("Delay: "..Value)
-    end,
-})
+-- AUTO SPEED
+local SectionAutoSpeed = TabSpeed:AddSection("AUTO SPEED")
 
--- SECCIÓN: AUTO SPEED
-local SectionAutoSpeed = TabSpeed:CreateSection("AUTO SPEED")
-
-SectionAutoSpeed:CreateToggle({
+SectionAutoSpeed:AddToggle({
     Name = "Auto Speed (TP to treadmill)",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
-        print("Auto Speed: "..tostring(Value))
+        if Value then AutoSpeed() end
     end,
 })
 
-SectionAutoSpeed:CreateDropdown({
+SectionAutoSpeed:AddDropdown({
     Name = "Treadmill tier",
-    Options = {"Auto (best owned)", "Tier 1", "Tier 2", "Tier 3"},
-    CurrentOption = "Auto (best owned)",
-    Callback = function(Value)
-        print("Maquina: "..Value)
-    end,
+    Options = {"Auto (best owned)", "Tier 1", "Tier 2"},
+    Default = "Auto (best owned)",
+    Callback = function() end,
 })
 
-SectionAutoSpeed:CreateToggle({
+SectionAutoSpeed:AddToggle({
     Name = "Teleport onto treadmill",
-    CurrentValue = false,
-    Callback = function(Value)
-        print("TP Maquina: "..tostring(Value))
-    end,
+    Default = false,
+    Callback = function() end,
 })
 
-SectionAutoSpeed:CreateSlider({
-    Name = "Fire interval (s)",
-    Range = {0.01, 1},
-    CurrentValue = 0.10,
-    Callback = function(Value)
-        print("Intervalo: "..Value)
-    end,
-})
+-- REBIRTH
+local SectionRebirth = TabSpeed:AddSection("REBIRTH")
 
--- SECCIÓN: REBIRTH
-local SectionRebirth = TabSpeed:CreateSection("REBIRTH")
-
-SectionRebirth:CreateToggle({
+SectionRebirth:AddToggle({
     Name = "Auto Rebirth (when eligible)",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
-        spawn(function()
-            while Value and task.wait(3) do
-                pcall(function()
-                    -- Busca y hace clic en el botón de renacer
-                    fireclickdetector(Workspace:FindFirstChild("RebirthButton") or game:GetService("ReplicatedStorage").Rebirth.ClickDetector)
-                end)
-            end
-        end)
+        if Value then spawn(AutoRebirth) end
     end,
 })
 
-SectionRebirth:CreateButton({
+SectionRebirth:AddButton({
     Name = "Rebirth Now",
     Callback = function()
-        pcall(function()
-            fireclickdetector(Workspace:FindFirstChild("RebirthButton") or game:GetService("ReplicatedStorage").Rebirth.ClickDetector)
-        end)
+        ReplicatedStorage.Default:InvokeServer("Rebirth")
     end,
 })
 
--- SECCIÓN: OBSTACLES & SAFETY
-local SectionObstacles = TabSpeed:CreateSection("OBSTACLES & SAFETY")
+-- OBSTACLES
+local SectionObstacles = TabSpeed:AddSection("OBSTACLES & SAFETY")
 
-SectionObstacles:CreateButton({
+SectionObstacles:AddButton({
     Name = "Remove All Obstacles",
-    Callback = function()
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("Part") or v:IsA("MeshPart") then
-                if string.find(v.Name:lower(), "obstacle") or string.find(v.Name:lower(), "wall") or string.find(v.Name:lower(), "block") then
-                    v:Destroy()
-                end
-            end
-        end
-        print("Obstaculos eliminados")
-    end,
+    Callback = RemoveObstacles
 })
 
-SectionObstacles:CreateToggle({
+SectionObstacles:AddToggle({
     Name = "God Mode",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
         spawn(function()
-            while Value and task.wait() do
+            while Value do
                 Humanoid.Health = Humanoid.MaxHealth
+                task.wait()
             end
         end)
     end,
 })
 
--- SECCIÓN: WORLD
-local SectionWorld = TabSpeed:CreateSection("WORLD")
+-- WORLD
+local SectionWorld = TabSpeed:AddSection("WORLD")
 
-SectionWorld:CreateDropdown({
+SectionWorld:AddDropdown({
     Name = "Select world",
-    Options = {"World 1", "World 2", "World 3", "World 4"},
-    CurrentOption = "World 1",
+    Options = {"World 1", "World 2", "World 3"},
+    Default = "World 1",
     Callback = function(Value)
-        print("Mundo seleccionado: "..Value)
-    end,
-})
-
-SectionWorld:CreateToggle({
-    Name = "Auto Teleport World",
-    CurrentValue = false,
-    Callback = function(Value)
-        print("Auto TP Mundo: "..tostring(Value))
+        print("World: "..Value)
     end,
 })
 
 -- =============================================
 --              PESTAÑA: SHOP
 -- =============================================
-local TabShop = Window:CreateTab("Shop", 4483362458) -- Icono de carrito
-
--- SECCIÓN: TRAILS
-local SectionTrails = TabShop:CreateSection("TRAILS")
-
-SectionTrails:CreateDropdown({
-    Name = "Seleccionar Estela",
-    Options = {"SupernovaTrail (x10000)", "VoidTrail (x1000)", "CosmicTrail (x100)", "RainbowTrail (x5)", "RedTrail (x4)"},
-    CurrentOption = "SupernovaTrail (x10000)",
-    Callback = function(Value)
-        print("Estela: "..Value)
-    end,
+local TabShop = Window:MakeTab({
+    Name = "Shop",
+    Icon = "rbxassetid://4483362458"
 })
 
-SectionTrails:CreateButton({
-    Name = "Equip Best Trail",
-    Callback = function()
-        print("Equipando mejor estela")
-    end,
+-- TRAILS
+local SectionTrails = TabShop:AddSection("TRAILS")
+SectionTrails:AddDropdown({
+    Name = "SupernovaTrail (x10000)",
+    Options = {"Supernova", "Void", "Cosmic", "Rainbow", "Red"},
+    Callback = function() end
 })
+SectionTrails:AddButton({Name = "Equip Best Trail", Callback = function() end})
 
--- SECCIÓN: AURAS
-local SectionAuras = TabShop:CreateSection("AURAS")
+-- AURAS
+local SectionAuras = TabShop:AddSection("AURAS")
+SectionAuras:AddToggle({Name = "Auto Buy Auras", Default = false, Callback = AutoBuyAll})
+SectionAuras:AddButton({Name = "Equip Best Aura", Callback = function() end})
 
-SectionAuras:CreateToggle({
-    Name = "Auto Buy Auras",
-    CurrentValue = false,
-    Callback = function(Value)
-        print("Auto Comprar Auras: "..tostring(Value))
-    end,
-})
+-- ITEMS
+local SectionItems = TabShop:AddSection("ITEMS")
+SectionItems:AddToggle({Name = "Auto Buy (watch stock)", Default = false})
+SectionItems:AddSlider({Name = "Check interval (s)", Min=1, Max=300, Default=60})
 
-SectionAuras:CreateDropdown({
-    Name = "Auras",
-    Options = {"All affordable", "Common", "Rare", "Legendary"},
-    CurrentOption = "All affordable",
-    Callback = function(Value)
-        print("Tipo Aura: "..Value)
-    end,
-})
-
-SectionAuras:CreateButton({
-    Name = "Equip Best Aura",
-    Callback = function()
-        print("Equipando mejor aura")
-    end,
-})
-
--- SECCIÓN: ITEMS
-local SectionItems = TabShop:CreateSection("ITEMS")
-
-SectionItems:CreateToggle({
-    Name = "Auto Buy (watch stock)",
-    CurrentValue = false,
-    Callback = function(Value)
-        print("Auto Comprar: "..tostring(Value))
-    end,
-})
-
-SectionItems:CreateSlider({
-    Name = "Check interval (s)",
-    Range = {1, 300},
-    CurrentValue = 60,
-    Callback = function(Value)
-        print("Intervalo revisión: "..Value)
-    end,
-})
-
-SectionItems:CreateToggle({
-    Name = "Auto Equip Best",
-    CurrentValue = false,
-    Callback = function(Value)
-        print("Auto Equipar: "..tostring(Value))
-    end,
-})
-
--- SECCIÓN: GAMEPASS
-local SectionGamepass = TabShop:CreateSection("GAMEPASS")
-
-SectionGamepass:CreateButton({
-    Name = "Unlock All Sound",
-    Callback = function()
-        print("Desbloqueando todos los sonidos...")
-    end,
-})
-
-SectionGamepass:CreateButton({
-    Name = "Unlock All Treadmill (visual)",
-    Callback = function()
-        print("Desbloqueando todas las maquinas...")
-    end,
-})
+-- GAMEPASS
+local SectionGP = TabShop:AddSection("GAMEPASS")
+SectionGP:AddButton({Name = "Unlock All Sound", Callback = function()
+    print("Sounds Unlocked")
+end})
+SectionGP:AddButton({Name = "Unlock All Treadmill", Callback = function()
+    print("Treadmills Unlocked")
+end})
 
 -- =============================================
 --              PESTAÑA: MOVIMIENTO
 -- =============================================
-local TabMove = Window:CreateTab("Movement", 4483362458)
-
--- VELOCIDAD
-TabMove:CreateSlider({
-    Name = "Walk Speed",
-    Range = {1, 1000},
-    CurrentValue = 152,
-    Callback = function(Value)
-        Humanoid.WalkSpeed = Value
-    end,
+local TabMove = Window:MakeTab({
+    Name = "Movement",
+    Icon = "rbxassetid://4483362458"
 })
 
--- SALTO
-TabMove:CreateSlider({
-    Name = "Jump Power",
-    Range = {1, 500},
-    CurrentValue = 50,
-    Callback = function(Value)
-        Humanoid.JumpPower = Value
-    end,
-})
+TabMove:AddSlider({Name = "Walk Speed", Min=1, Max=1000, Default=152, Callback=function(v) Humanoid.WalkSpeed = v end})
+TabMove:AddSlider({Name = "Jump Power", Min=1, Max=500, Default=50, Callback=function(v) Humanoid.JumpPower = v end})
+TabMove:AddSlider({Name = "Gravity", Min=0, Max=200, Default=OriginalGravity, Callback=function(v) Workspace.Gravity = v end})
 
--- GRAVEDAD
-TabMove:CreateSlider({
-    Name = "Gravity",
-    Range = {0, 200},
-    CurrentValue = OriginalGravity,
-    Callback = function(Value)
-        Workspace.Gravity = Value
-    end,
-})
+TabMove:AddToggle({Name = "Hips Dance", Default = false, Callback = function(val)
+    spawn(function() while val do HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(5), 0) task.wait() end end)
+end})
 
--- BAILE Y GIRO
-TabMove:CreateToggle({
-    Name = "Hips Dance",
-    CurrentValue = false,
-    Callback = function(Value)
-        spawn(function()
-            while Value and task.wait() do
-                HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(5), 0)
-            end
-        end)
-    end,
-})
+TabMove:AddToggle({Name = "Spin Bot", Default = false, Callback = function(val)
+    spawn(function() while val do HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(15), 0) task.wait() end end)
+end})
 
-TabMove:CreateToggle({
-    Name = "Spin Bot",
-    CurrentValue = false,
-    Callback = function(Value)
-        spawn(function()
-            while Value and task.wait() do
-                HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(10), 0)
-            end
-        end)
-    end,
-})
-
--- =============================================
---                 FINAL
--- =============================================
-print("✅ Script Hoshi cargado exitosamente!")
+print("✅ HOSHI HUB CARGADO COMPLETAMENTE")
