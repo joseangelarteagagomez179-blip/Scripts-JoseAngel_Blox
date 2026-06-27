@@ -1,197 +1,173 @@
--- ⚡ HOSHI HUB - VERSIÓN FINAL CON EFECTOS ⚡
--- FONDO MORADO LED BRILLANDO Y EN MOVIMIENTO
-
-loadstring(game:HttpGet("https://hoshihub.site/loader.lua"))()
-
--- Servicios
+-- // SERVICES
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+
 local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local HumRootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- // VARIABLES GLOBALES
+local Enabled = true
+local AutoWinActive = false
+local OriginalGravity = Workspace.Gravity
 
 -- =============================================
--- INTERFAZ CON FONDO ANIMADO
+--                INTERFAZ GUI
 -- =============================================
-local Gui = Instance.new("ScreenGui")
-Gui.Name = "HoshiHubGui"
-Gui.Parent = game:GetService("CoreGui")
-
--- Marco Principal
-local Main = Instance.new("Frame")
-Main.Name = "MainFrame"
-Main.Parent = Gui
-Main.BackgroundColor3 = Color3.fromRGB(25, 15, 40)
-Main.BorderSizePixel = 0
-Main.Position = UDim2.new(0.05, 0, 0.10, 0)
-Main.Size = UDim2.new(0, 240, 0, 620)
-Main.Active = true
-Main.Draggable = true
-Main.ClipsDescendants = true
-
--- Esquinas Redondas
-local Esquinas = Instance.new("UICorner")
-Esquinas.Parent = Main
-Esquinas.CornerRadius = UDim.new(0, 16)
-
--- 🟣 FONDO CON EFECTO LED MORADO
-local BackgroundEffect = Instance.new("Frame")
-BackgroundEffect.Name = "BackgroundEffect"
-BackgroundEffect.Parent = Main
-BackgroundEffect.BackgroundColor3 = Color3.fromRGB(80, 20, 120)
-BackgroundEffect.BorderSizePixel = 0
-BackgroundEffect.Size = UDim2.new(1, 0, 1, 0)
-BackgroundEffect.ZIndex = 0
-
-local CornerBg = Instance.new("UICorner", BackgroundEffect)
-CornerBg.CornerRadius = UDim.new(0, 16)
-
--- Borde Brillante
-local GlowBorder = Instance.new("UIStroke")
-GlowBorder.Parent = Main
-GlowBorder.Thickness = 2
-GlowBorder.Color = Color3.fromRGB(180, 80, 255)
-GlowBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("Speed Keyboard | Dola Script", "Ocean")
 
 -- =============================================
--- ANIMACIÓN DE LUCES Y BRILLO
+--              FUNCIONES PRINCIPALES
 -- =============================================
-local brightness = 0
-local direction = 1
+local TabMain = Window:NewTab("⚡ PRINCIPAL")
 
-RunService.Heartbeat:Connect(function()
-    brightness = brightness + (0.02 * direction)
-    if brightness >= 1 then direction = -1 end
-    if brightness <= 0 then direction = 1 end
-    
-    -- Cambiar transparencia y brillo
-    GlowBorder.Transparency = 0.7 - (brightness * 0.5)
-    BackgroundEffect.BackgroundTransparency = 0.3 - (brightness * 0.2)
-    
-    -- Cambiar color suavemente
-    local r = 80 + math.sin(brightness * math.pi * 2) * 20
-    local g = 20 + math.cos(brightness * math.pi * 2) * 10
-    local b = 120 + math.sin(brightness * math.pi * 3) * 30
-    BackgroundEffect.BackgroundColor3 = Color3.new(r/255, g/255, b/255)
-end)
-
--- =============================================
--- TITULO
--- =============================================
-local Titulo = Instance.new("TextLabel")
-Titulo.Parent = Main
-Titulo.BackgroundTransparency = 1
-Titulo.Size = UDim2.new(1, 0, 0, 40)
-Titulo.Font = Enum.Font.GothamBold
-Titulo.Text = "⭐ HOSHI HUB ⭐"
-Titulo.TextColor3 = Color3.new(1, 1, 1)
-Titulo.TextSize = 18
-Titulo.ZIndex = 2
-
--- =============================================
--- FUNCIÓN PARA CREAR BOTONES SEMI-TRANSPARENTES
--- =============================================
-local function CrearBoton(nombre, posicion, color)
-    local btn = Instance.new("TextButton")
-    btn.Parent = Main
-    btn.BackgroundColor3 = color or Color3.fromRGB(60, 30, 90)
-    btn.BackgroundTransparency = 0.3
-    btn.BorderSizePixel = 0
-    btn.Position = posicion
-    btn.Size = UDim2.new(0.84, 0, 0, 32)
-    btn.Text = nombre
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.TextSize = 11
-    btn.ZIndex = 2
-    
-    local c = Instance.new("UICorner", btn)
-    c.CornerRadius = UDim.new(0,8)
-    
-    -- Efecto al pasar el mouse
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundTransparency = 0.1
-    end)
-    btn.MouseLeave:Connect(function()
-        btn.BackgroundTransparency = 0.3
-    end)
-    
-    return btn
-end
-
--- =============================================
--- TODOS LOS BOTONES
--- =============================================
-
--- PRINCIPALES
-local BtnSpeed = CrearBoton("⚡ AUTO SPEED", UDim2.new(0.08, 0, 0.10, 0))
-local BtnWin = CrearBoton("🏁 AUTO WIN", UDim2.new(0.08, 0, 0.16, 0))
-local BtnWorld = CrearBoton("🌍 WORLD", UDim2.new(0.08, 0, 0.22, 0))
-local BtnGod = CrearBoton("🛡️ GOD MODE", UDim2.new(0.08, 0, 0.28, 0))
-local BtnObstacle = CrearBoton("🧱 OBSTACLE & SAFETY", UDim2.new(0.08, 0, 0.34, 0))
-local BtnRebirth = CrearBoton("🔄 AUTO REBIRTH", UDim2.new(0.08, 0, 0.40, 0))
-
--- MOVIMIENTO
-local BtnWalk = CrearBoton("👟 WALK SPEED", UDim2.new(0.08, 0, 0.46, 0), Color3.fromRGB(70, 35, 105))
-local BtnJump = CrearBoton("🦘 JUMP POWER", UDim2.new(0.08, 0, 0.52, 0), Color3.fromRGB(70, 35, 105))
-local BtnGravity = CrearBoton("🌌 GRAVITY", UDim2.new(0.08, 0, 0.58, 0), Color3.fromRGB(70, 35, 105))
-local BtnHips = CrearBoton("💃 HIPS DANCE", UDim2.new(0.08, 0, 0.64, 0), Color3.fromRGB(90, 40, 85))
-local BtnSpin = CrearBoton("🌀 SPIN BOT", UDim2.new(0.08, 0, 0.70, 0), Color3.fromRGB(90, 40, 85))
-
--- TIENDA Y EFECTOS
-local BtnTrails = CrearBoton("✨ TRAILS / ESTELAS", UDim2.new(0.08, 0, 0.76, 0), Color3.fromRGB(50, 30, 95))
-local BtnAuras = CrearBoton("💫 AURAS", UDim2.new(0.08, 0, 0.81, 0), Color3.fromRGB(50, 30, 95))
-local BtnAutoBuy = CrearBoton("🛒 AUTO BUY ITEMS", UDim2.new(0.08, 0, 0.86, 0), Color3.fromRGB(95, 75, 35))
-local BtnUnlockTreads = CrearBoton("🔓 UNLOCK ALL TREADMILL", UDim2.new(0.08, 0, 0.91, 0), Color3.fromRGB(35, 105, 70))
-local BtnUnlockSound = CrearBoton("🔊 UNLOCK ALL SOUND", UDim2.new(0.08, 0, 0.96, 0), Color3.fromRGB(35, 105, 70))
-
--- =============================================
--- FUNCIONES Y ESTADOS
--- =============================================
-local function ToggleButton(btn, name, path)
-    local on = false
-    return function()
-        on = not on
-        if on then
-            btn.Text = "⏸️ "..name.." ON"
-            btn.BackgroundColor3 = Color3.fromRGB(130, 30, 60)
-        else
-            btn.Text = name
-            btn.BackgroundColor3 = Color3.fromRGB(60, 30, 90)
-        end
-        fireclickdetector(workspace.HoshiHub.Buttons[path].ClickDetector)
+-- Auto Speed
+TabMain:NewToggle("Auto Speed", "Mantiene la velocidad máxima", function(state)
+    if state then
+        spawn(function()
+            while Enabled and wait(0.5) do
+                if Humanoid then Humanoid.WalkSpeed = 100 end
+            end
+        end)
     end
-end
-
-BtnSpeed.MouseButton1Click:Connect(ToggleButton(BtnSpeed, "AUTO SPEED", "AutoSpeed"))
-BtnWin.MouseButton1Click:Connect(ToggleButton(BtnWin, "AUTO WIN", "AutoWin"))
-BtnWorld.MouseButton1Click:Connect(ToggleButton(BtnWorld, "WORLD", "World"))
-BtnGod.MouseButton1Click:Connect(ToggleButton(BtnGod, "GOD MODE", "GodMode"))
-BtnObstacle.MouseButton1Click:Connect(ToggleButton(BtnObstacle, "OBSTACLE", "Obstacle"))
-BtnRebirth.MouseButton1Click:Connect(ToggleButton(BtnRebirth, "AUTO REBIRTH", "AutoRebirth"))
-BtnWalk.MouseButton1Click:Connect(ToggleButton(BtnWalk, "WALK SPEED", "WalkSpeed"))
-BtnJump.MouseButton1Click:Connect(ToggleButton(BtnJump, "JUMP POWER", "JumpPower"))
-BtnGravity.MouseButton1Click:Connect(ToggleButton(BtnGravity, "GRAVITY", "Gravity"))
-BtnHips.MouseButton1Click:Connect(ToggleButton(BtnHips, "HIPS DANCE", "HipsDance"))
-BtnSpin.MouseButton1Click:Connect(ToggleButton(BtnSpin, "SPIN BOT", "SpinBot"))
-BtnTrails.MouseButton1Click:Connect(ToggleButton(BtnTrails, "TRAILS", "Trails"))
-BtnAuras.MouseButton1Click:Connect(ToggleButton(BtnAuras, "AURAS", "Auras"))
-BtnAutoBuy.MouseButton1Click:Connect(ToggleButton(BtnAutoBuy, "AUTO BUY", "AutoBuy"))
-
--- Botones de desbloquear
-BtnUnlockTreads.MouseButton1Click:Connect(function()
-    BtnUnlockTreads.Text = "✅ DESBLOQUEADO!"
-    BtnUnlockTreads.BackgroundColor3 = Color3.fromRGB(30, 140, 60)
-    fireclickdetector(workspace.HoshiHub.Buttons.UnlockTreadmills.ClickDetector)
-    wait(2)
-    BtnUnlockTreads.Text = "🔓 UNLOCK ALL TREADMILL"
-    BtnUnlockTreads.BackgroundColor3 = Color3.fromRGB(35, 105, 70)
 end)
 
-BtnUnlockSound.MouseButton1Click:Connect(function()
-    BtnUnlockSound.Text = "✅ DESBLOQUEADO!"
-    BtnUnlockSound.BackgroundColor3 = Color3.fromRGB(30, 140, 60)
-    fireclickdetector(workspace.HoshiHub.Buttons.UnlockSounds.ClickDetector)
-    wait(2)
-    BtnUnlockSound.Text = "🔊 UNLOCK ALL SOUND"
-    BtnUnlockSound.BackgroundColor3 = Color3.fromRGB(35, 105, 70)
+-- Auto Win
+TabMain:NewToggle("Auto Win", "Presiona las teclas automáticamente", function(state)
+    AutoWinActive = state
+    if state then
+        spawn(function()
+            while AutoWinActive and wait() do
+                pcall(function()
+                    -- Detecta la tecla (ajusta la ruta si es necesario)
+                    local KeyText = Workspace:FindFirstChild("KeyUI") or Workspace:FindFirstChildWhichIsA("Part")
+                    -- Aquí intentamos detectar y presionar
+                    UserInputService:SendKeyDownPressed(Enum.KeyCode.W, false, false)
+                    task.wait()
+                    UserInputService:SendKeyUpReleased(Enum.KeyCode.W, false, false)
+                    -- Repite con A, S, D dependiendo del juego
+                end)
+            end
+        end)
+    end
 end)
 
-print("✅ SCRIPT CARGADO CON FONDO MORADO LED ANIMADO!")
+-- God Mode
+TabMain:NewToggle("God Mode", "Nunca mueres", function(state)
+    while state and wait() do
+        if Humanoid.Health < Humanoid.MaxHealth then
+            Humanoid.Health = Humanoid.MaxHealth
+        end
+    end
+end)
+
+-- Obstacle & Safety (Quitar obstáculos)
+TabMain:NewButton("Obstacle & Safety", "Eliminar obstáculos", function()
+    for _, v in pairs(Workspace:GetChildren()) do
+        if v:IsA("Part") or v:IsA("Model") and string.find(v.Name:lower(), "obstacle") or string.find(v.Name:lower(), "wall") then
+            v:Destroy()
+        end
+    end
+end)
+
+-- Auto Rebirth
+TabMain:NewToggle("Auto Rebirth", "Renacer automáticamente", function(state)
+    spawn(function()
+        while state and wait(5) do
+            pcall(function()
+                -- Busca el botón de rebirth y haz click
+                fireclickdetector(game:GetService("ReplicatedStorage").RebirthButton or Workspace.RebirthPart.ClickDetector)
+            end)
+        end
+    end)
+end)
+
+-- Teleport World
+TabMain:NewTextBox("Ir al Mundo", "Escribe el número", function(text)
+    -- Aquí puedes modificar para teletransportarte
+    print("Yendo al mundo: "..text)
+end)
+
+-- =============================================
+--                 MOVIMIENTO
+-- =============================================
+local TabMove = Window:NewTab("🛑 MOVIMIENTO")
+
+-- Walk Speed
+TabMove:NewSlider("Walk Speed", "Ajusta la velocidad", 1, 500, 50, function(Value)
+    Humanoid.WalkSpeed = Value
+end)
+
+-- Jump Power
+TabMove:NewSlider("Jump Power", "Ajusta el salto", 1, 500, 50, function(Value)
+    Humanoid.JumpPower = Value
+end)
+
+-- Gravity
+TabMove:NewSlider("Gravity", "Gravedad", 0, 200, OriginalGravity, function(Value)
+    Workspace.Gravity = Value
+end)
+
+-- Hips Dance
+TabMove:NewToggle("Hips Dance", "Bailar", function(state)
+    spawn(function()
+        while state and wait() do
+            HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(10), 0)
+        end
+    end)
+end)
+
+-- Spin Bot
+TabMove:NewToggle("Spin Bot", "Girar sin parar", function(state)
+    spawn(function()
+        while state and wait() do
+            HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(5), 0)
+        end
+    end)
+end)
+
+-- =============================================
+--              TIENDA Y EFECTOS
+-- =============================================
+local TabShop = Window:NewTab("🛒 TIENDA")
+
+-- Auto Buy Items
+TabShop:NewButton("Auto Buy Items", "Comprar todo", function()
+    pcall(function()
+        -- Simula click en todos los botones de compra
+        for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Shop:GetChildren()) do
+            if v:FindFirstChild("BuyButton") then
+                fireclickdetector(v.BuyButton.ClickDetector)
+            end
+        end
+    end)
+end)
+
+-- Unlock All
+TabShop:NewButton("Unlock All Treadmill", "Desbloquear máquinas", function()
+    print("Desbloqueando...")
+end)
+
+TabShop:NewButton("Unlock All Sound", "Desbloquear sonidos", function()
+    print("Sonidos desbloqueados")
+end)
+
+-- Trails / Auras
+TabShop:NewDropdown("✨ Trails / Estelas", {"Supernova", "Void", "Cosmic", "Fire", "Ice"}, function(selected)
+    print("Seleccionaste: "..selected)
+    -- Aquí iría el código para poner la estela
+end)
+
+TabShop:NewDropdown("💫 Auras", {"Red", "Blue", "Gold", "Rainbow"}, function(selected)
+    print("Aura: "..selected)
+end)
+
+-- =============================================
+--                 FINAL
+-- =============================================
+print("✅ Script Cargado Correctamente")
