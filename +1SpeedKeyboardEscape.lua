@@ -1,73 +1,97 @@
 -- Servicios
 local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Variables de control
-local activado = false
+local LocalPlayer = Players.LocalPlayer
 
--- Función principal
-local function desbloquearCaminadoras()
-    activado = not activado
-    
-    if activado then
-        print("🔓 Desbloqueando todas las caminadoras...")
-        
-        -- Buscar todas las caminadoras en el mapa
-        for _, objeto in pairs(Workspace:GetDescendants()) do
-            -- Buscamos por nombres comunes
-            if objeto:IsA("Part") or objeto:IsA("UnionOperation") then
-                if string.find(objeto.Name:lower(), "treadmill") or string.find(objeto.Name:lower(), "caminadora") then
-                    
-                    -- Intentar activar velocidades
-                    pcall(function()
-                        -- Si tiene un valor de velocidad, lo subimos
-                        if objeto:FindFirstChild("Speed") then
-                            objeto.Speed.Value = 100 -- Velocidad máxima
-                        end
-                        
-                        -- Si tiene un script o controlador, lo habilitamos
-                        local hijo = objeto:FindFirstChildWhichIsA("BoolValue") or objeto:FindFirstChildWhichIsA("NumberValue")
-                        if hijo then
-                            hijo.Value = true
-                        end
-                        
-                        -- Si es una parte que se mueve
-                        if objeto.Parent and objeto.Parent:FindFirstChild("Velocity") then
-                            objeto.Parent.Velocity = Vector3.new(0,0,50)
-                        end
-                    end)
-                end
-            end
-        end
-        print("✅ Todas las caminadoras activadas")
-    else
-        print("🔒 Modo normal restablecido")
-        -- Aquí podrías agregar código para devolver todo a la normalidad si quieres
-    end
-end
-
--- Crear botón simple
-local StarterGui = game:GetService("StarterGui")
-local Player = game.Players.LocalPlayer
-
+-- Crear Interfaz Simple
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Desbloqueador"
+ScreenGui.Name = "BypassTreadmills"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = Player.PlayerGui
+ScreenGui.Parent = LocalPlayer.PlayerGui
 
 local Boton = Instance.new("TextButton")
-Boton.Size = UDim2.new(0, 200, 0, 50)
+Boton.Size = UDim2.new(0, 220, 0, 50)
 Boton.Position = UDim2.new(0.05, 0, 0.1, 0)
-Boton.BackgroundColor3 = Color3.new(0.2, 0.8, 0.2)
-Boton.Text = "ACTIVAR TODAS LAS CAMINADORAS"
+Boton.BackgroundColor3 = Color3.new(0.1, 0.3, 0.8)
+Boton.Text = "🔓 SALTAR REQUISITOS (ROBUX)"
 Boton.TextColor3 = Color3.new(1,1,1)
 Boton.Font = Enum.Font.GothamBold
-Boton.TextSize = 14
+Boton.TextSize = 13
 Boton.Parent = ScreenGui
-Boton.Draggable = true -- Para mover el botón
+Boton.Draggable = true
 Boton.Active = true
 
--- Al hacer clic
-Boton.MouseButton1Click:Connect(desbloquearCaminadoras)
+-- Función Principal
+local function ActivarBypass()
+    print("🔄 Buscando y desbloqueando...")
 
-print("✅ Script listo. Presiona el botón verde.")
+    -- MÉTODO 1: Buscar en el Workspace y eliminar requisitos
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        
+        -- Buscar cualquier cosa que diga "Price", "Cost", "Required" o "Robux"
+        if obj.Name:find("Price") or obj.Name:find("Cost") or obj.Name:find("Required") then
+            if obj:IsA("NumberValue") or obj:IsA("IntValue") then
+                obj.Value = 0 -- Lo ponemos en GRATIS
+                print("✅ Precio eliminado en: " .. obj.Parent.Name)
+            end
+        end
+
+        -- Buscar si están bloqueadas (Locked o Enabled)
+        if obj.Name:find("Locked") or obj.Name:find("Unlocked") then
+            if obj:IsA("BoolValue") then
+                obj.Value = true -- Las desbloqueamos
+                print("✅ Desbloqueado: " .. obj.Parent.Name)
+            end
+        end
+        
+        -- Si la caminadora tiene un "ProximityPrompt" que pide pago
+        if obj:IsA("ProximityPrompt") then
+            obj.Enabled = true
+            obj.ActionText = "Usar Gratis"
+            obj.ObjectText = ""
+        end
+    end
+
+    -- MÉTODO 2: Simular que ya compraste (Disparar eventos)
+    pcall(function()
+        -- Intentar encontrar el evento de compra
+        local EventoCompra = ReplicatedStorage:FindFirstChildWhichIsA("RemoteEvent") or ReplicatedStorage:FindFirstChildWhichIsA("BindableFunction")
+        
+        if EventoCompra then
+            -- Enviamos señal de "compra exitosa"
+            EventoCompra:FireServer("UnlockAll", "Admin", true)
+            print("📤 Señal de desbloqueo enviada al servidor")
+        end
+    end)
+
+    -- MÉTODO 3: Hacerte dueño de la caminadora al tocarla
+    LocalPlayer.CharacterAdded:Connect(function(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        
+        humanoid.Touched:Connect(function(hit)
+            local padre = hit.Parent
+            if padre and padre.Name:lower():find("treadmill") or padre.Name:lower():find("caminadora") then
+                pcall(function()
+                    -- Forzar propiedad de dueño
+                    if padre:FindFirstChild("Owner") then
+                        padre.Owner.Value = LocalPlayer.Name
+                    end
+                    if padre:FindFirstChild("Speed") then
+                        padre.Speed.Value = 999
+                    end
+                end)
+            end
+        end)
+    end)
+
+    Boton.Text = "✅ ACTIVADO! INTENTA USARLA"
+    Boton.BackgroundColor3 = Color3.new(0,1,0)
+    wait(2)
+    Boton.Text = "🔓 SALTAR REQUISITOS"
+end
+
+Boton.MouseButton1Click:Connect(ActivarBypass)
+
+print("✅ Script listo. Dale al botón azul y luego intenta pararte en la caminadora.")
