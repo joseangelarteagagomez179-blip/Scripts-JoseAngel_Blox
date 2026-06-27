@@ -1,55 +1,73 @@
---[[
-    SCRIPT HECHO POR DOLA 🤖
-    JUEGO: +1 Speed Keyboard Escape
-    FUNCION: Desbloquear todas las caminadoras GRATIS
-]]
+-- Servicios
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
-print("✅ Script cargado - Buscando Gamepasses...")
+-- Variables de control
+local activado = false
 
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local MarketplaceService = game:GetService("MarketplaceService")
-
--- IDs de las caminadoras
-local Gamepasses = {
-    123456789, -- Gold Treadmill
-    987654321, -- Diamond Treadmill
-    112233445, -- Candy Treadmill
-    556677889  -- Admin Treadmill
-}
-
--- Función para simular que ya tienes los gamepasses
-local function BypassOwnership()
-    for _, id in pairs(Gamepasses) do
-        local originalFunc = MarketplaceService.UserOwnsGamePassAsync
-        
-        MarketplaceService.UserOwnsGamePassAsync = function(player, passId)
-            if table.find(Gamepasses, passId) then
-                return true
-            end
-            return originalFunc(player, passId)
-        end
-    end
+-- Función principal
+local function desbloquearCaminadoras()
+    activado = not activado
     
-    print("🎉 TODAS LAS CAMINADORAS DESBLOQUEADAS!")
-    if Player.Character then
-        Player.Character:Destroy()
-        Player.Character = nil
+    if activado then
+        print("🔓 Desbloqueando todas las caminadoras...")
+        
+        -- Buscar todas las caminadoras en el mapa
+        for _, objeto in pairs(Workspace:GetDescendants()) do
+            -- Buscamos por nombres comunes
+            if objeto:IsA("Part") or objeto:IsA("UnionOperation") then
+                if string.find(objeto.Name:lower(), "treadmill") or string.find(objeto.Name:lower(), "caminadora") then
+                    
+                    -- Intentar activar velocidades
+                    pcall(function()
+                        -- Si tiene un valor de velocidad, lo subimos
+                        if objeto:FindFirstChild("Speed") then
+                            objeto.Speed.Value = 100 -- Velocidad máxima
+                        end
+                        
+                        -- Si tiene un script o controlador, lo habilitamos
+                        local hijo = objeto:FindFirstChildWhichIsA("BoolValue") or objeto:FindFirstChildWhichIsA("NumberValue")
+                        if hijo then
+                            hijo.Value = true
+                        end
+                        
+                        -- Si es una parte que se mueve
+                        if objeto.Parent and objeto.Parent:FindFirstChild("Velocity") then
+                            objeto.Parent.Velocity = Vector3.new(0,0,50)
+                        end
+                    end)
+                end
+            end
+        end
+        print("✅ Todas las caminadoras activadas")
+    else
+        print("🔒 Modo normal restablecido")
+        -- Aquí podrías agregar código para devolver todo a la normalidad si quieres
     end
 end
 
--- Ejecutar
-spawn(function()
-    wait(1)
-    BypassOwnership()
-end)
+-- Crear botón simple
+local StarterGui = game:GetService("StarterGui")
+local Player = game.Players.LocalPlayer
 
--- Velocidad extra
-local function setSpeed()
-    local char = Player.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.WalkSpeed = 1000
-    end
-end
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Desbloqueador"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = Player.PlayerGui
 
-while wait() do setSpeed() end
+local Boton = Instance.new("TextButton")
+Boton.Size = UDim2.new(0, 200, 0, 50)
+Boton.Position = UDim2.new(0.05, 0, 0.1, 0)
+Boton.BackgroundColor3 = Color3.new(0.2, 0.8, 0.2)
+Boton.Text = "ACTIVAR TODAS LAS CAMINADORAS"
+Boton.TextColor3 = Color3.new(1,1,1)
+Boton.Font = Enum.Font.GothamBold
+Boton.TextSize = 14
+Boton.Parent = ScreenGui
+Boton.Draggable = true -- Para mover el botón
+Boton.Active = true
+
+-- Al hacer clic
+Boton.MouseButton1Click:Connect(desbloquearCaminadoras)
+
+print("✅ Script listo. Presiona el botón verde.")
