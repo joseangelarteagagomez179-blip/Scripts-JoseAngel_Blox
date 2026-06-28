@@ -1,10 +1,9 @@
 -- =============================================
 -- 🎮 SCRIPT PERSONALIZADO | +1 Speed Keyboard
--- ✅ MENU ARREGLADO | BOTONES VISIBLES
+-- ✅ TREADMILLS 100% DESBLOQUEADAS
 -- =============================================
 
 -- Servicios
-local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer
@@ -32,7 +31,7 @@ MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
 MainFrame.Size = UDim2.new(0, 260, 0, 380)
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.ClipsDescendants = true -- Para que no se salga nada
+MainFrame.ClipsDescendants = true
 
 -- Titulo
 Title.Parent = MainFrame
@@ -45,11 +44,11 @@ Title.TextColor3 = Color3.new(1, 1, 1)
 Title.TextSize = 18
 
 -- =============================================
--- 🔘 CREAR BOTONES CORRECTAMENTE
+-- 🔘 CREAR BOTONES
 -- =============================================
 
 local Buttons = {}
-local YPos = 55 -- Empezar despues del titulo
+local YPos = 55
 
 local function MakeButton(name, color)
     local btn = Instance.new("TextButton")
@@ -62,11 +61,10 @@ local function MakeButton(name, color)
     btn.TextColor3 = Color3.new(1,1,1)
     btn.TextSize = 16
     btn.AutoLocalize = false
-    YPos = YPos + 55 -- Espacio entre botones
+    YPos = YPos + 55
     return btn
 end
 
--- Crear todos los botones
 local ButtonUnlocked = MakeButton("🔓 UNLOCK ALL", Color3.new(0.2, 0.6, 0.2))
 local ButtonAutoRun = MakeButton("🏃 AUTO RUN", Color3.new(0.6, 0.2, 0.2))
 local ButtonFly = MakeButton("✈️ FLY MODE", Color3.new(0.2, 0.4, 0.6))
@@ -74,7 +72,7 @@ local ButtonNoclip = MakeButton("👻 NOCLIP", Color3.new(0.4, 0.2, 0.6))
 local ButtonAutoWin = MakeButton("🏁 AUTO WIN", Color3.new(0.6, 0.4, 0.2))
 
 -- =============================================
--- ⚙️ VARIABLES DE ESTADO
+-- ⚙️ VARIABLES
 -- =============================================
 local UnlockedAll = false
 local AutoRun = false
@@ -84,7 +82,7 @@ local AutoWin = false
 local SpeedFly = 50
 
 -- =============================================
--- 🎫 FUNCION: DESBLOQUEAR TODO
+-- 🎫 FUNCION: DESBLOQUEAR TREADMILLS (CORREGIDA)
 -- =============================================
 ButtonUnlocked.MouseButton1Click:Connect(function()
     UnlockedAll = not UnlockedAll
@@ -92,35 +90,75 @@ ButtonUnlocked.MouseButton1Click:Connect(function()
         ButtonUnlocked.Text = "✅ TODO DESBLOQUEADO"
         ButtonUnlocked.BackgroundColor3 = Color3.new(0,1,0)
         
-        pcall(function()
-            if getgenv then
-                getgenv().Unlocked = true
-                getgenv().HasPass = true
+        -- 1. Simular que tenemos todos los gamepasses
+        if getgenv then
+            getgenv().HasAllPasses = true
+            getgenv().Unlocked = true
+        end
+        
+        -- 2. Buscar TODAS las treadmills y forzar su activacion
+        workspace.DescendantAdded:Connect(function(obj)
+            if obj:IsA("ClickDetector") or obj:IsA("ProximityPrompt") or obj.Name:lower():find("treadmill") then
+                local parent = obj.Parent
+                if parent then
+                    -- Eliminar bloqueos
+                    for _, v in pairs(parent:GetChildren()) do
+                        if v.Name:lower():find("lock") or v.Name:lower():find("required") or v.Name:lower():find("price") then
+                            v:Destroy()
+                        end
+                        if v:IsA("BoolValue") or v:IsA("IntValue") then
+                            v.Value = true
+                        end
+                    end
+                    -- Hacerlas clickeables
+                    if parent:FindFirstChildOfClass("ClickDetector") then
+                        parent.ClickDetector.MaxActivationDistance = 100
+                    end
+                end
             end
-            
-            -- Dar dinero infinito
+        end)
+
+        -- 3. Hacer lo mismo con las que ya existen
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj.Name:lower():find("treadmill") or obj.Name:lower():find("cinta") then
+                pcall(function()
+                    -- Destruir candados y requisitos
+                    for _, child in pairs(obj:GetChildren()) do
+                        if child.Name:lower():find("lock") or child.Name:lower():find("required") then
+                            child:Destroy()
+                        end
+                        if child:IsA("BoolValue") or child:IsA("IntValue") then
+                            child.Value = 999999
+                        end
+                    end
+                    
+                    -- Hacer que se puedan usar
+                    obj.CanCollide = false
+                    obj.CanTouch = true
+                    
+                    -- Si tiene prompt, activarlo
+                    local prompt = obj:FindFirstChildOfClass("ProximityPrompt")
+                    if prompt then
+                        prompt.Enabled = true
+                        prompt.HoldDuration = 0.1
+                    end
+                end)
+            end
+        end
+
+        -- 4. Dar dinero infinito por si acaso
+        pcall(function()
             local leaderstats = Player:FindFirstChild("leaderstats")
             if leaderstats then
                 for _, v in pairs(leaderstats:GetChildren()) do
                     if v:IsA("NumberValue") or v:IsA("IntValue") then
-                        v.Value = 999999999
+                        v.Value = 99999999999
                     end
                 end
             end
-            
-            -- Desbloquear treadmills
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name:lower():find("treadmill") or obj.Name:lower():find("cinta") then
-                    pcall(function()
-                        obj.CanCollide = false
-                        obj.CanTouch = true
-                        if obj:FindFirstChild("RequiredPass") then
-                            obj.RequiredPass.Value = 0
-                        end
-                    end)
-                end
-            end
         end)
+
+        print("✅ TREADMILLS DESBLOQUEADAS!")
     else
         ButtonUnlocked.Text = "🔓 UNLOCK ALL"
         ButtonUnlocked.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
@@ -128,7 +166,7 @@ ButtonUnlocked.MouseButton1Click:Connect(function()
 end)
 
 -- =============================================
--- 🏃 FUNCION: AUTO RUN
+-- 🏃 AUTO RUN
 -- =============================================
 ButtonAutoRun.MouseButton1Click:Connect(function()
     AutoRun = not AutoRun
@@ -149,7 +187,7 @@ ButtonAutoRun.MouseButton1Click:Connect(function()
 end)
 
 -- =============================================
--- ✈️ FUNCION: FLY
+-- ✈️ FLY
 -- =============================================
 ButtonFly.MouseButton1Click:Connect(function()
     Fly = not Fly
@@ -181,7 +219,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- =============================================
--- 👻 FUNCION: NOCLIP
+-- 👻 NOCLIP
 -- =============================================
 ButtonNoclip.MouseButton1Click:Connect(function()
     Noclip = not Noclip
@@ -205,7 +243,7 @@ RunService.Stepped:Connect(function()
 end)
 
 -- =============================================
--- 🏁 FUNCION: AUTO WIN
+-- 🏁 AUTO WIN
 -- =============================================
 ButtonAutoWin.MouseButton1Click:Connect(function()
     for _, obj in pairs(workspace:GetChildren()) do
@@ -222,4 +260,4 @@ end)
 Humanoid.WalkSpeed = 100
 Humanoid.JumpPower = 150
 
-print("✅ Menu Cargado Correctamente!")
+print("✅ Script Listo! Dale a UNLOCK ALL")
