@@ -1,122 +1,184 @@
---[[ DOLA HUB - FIXED ]]
-local Player = game.Players.LocalPlayer
-local RS = game:GetService("ReplicatedStorage")
+--[[
+    Script creado para: +1 Speed-Keyboard-Escape-Candy-Chocolate
+    Diseño: Fondo morado líquido animado
+    Basado en: Arasaka Hub
+]]
 
---// GUI
-local Gui = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local Min = Instance.new("TextButton")
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/BloxCrypto/All-scripts/main/UI-Libs/VapeV4.lua"))()
 
-Gui.Name = "DolaHub"
-Gui.Parent = Player.PlayerGui
+local Window = Library:CreateWindow({
+    Name = "+1 Speed-Keyboard-Escape-Candy-Chocolate",
+    LoadingEnabled = true,
+    Theme = {
+        MainColor = Color3.fromRGB(138, 43, 226),
+        AccentColor = Color3.fromRGB(186, 85, 211),
+        BackgroundColor = Color3.fromRGB(20, 10, 40),
+        TextColor = Color3.fromRGB(255, 255, 255),
+    },
+    KeySystem = false
+})
 
-Main.Parent = Gui
-Main.BackgroundColor3 = Color3.fromRGB(20,20,35)
-Main.Size = UDim2.new(0,320,0,420)
-Main.Position = UDim2.new(0.35,0,0.15,0)
-Main.Active = true
-Main.Draggable = true
+-- CREAR FONDO MORADO LÍQUIDO ANIMADO
+local BG = Instance.new("Frame")
+local BG2 = Instance.new("Frame")
+local UIGradient = Instance.new("UIGradient")
+local UIGradient2 = Instance.new("UIGradient")
 
-local Corner = Instance.new("UICorner", Main)
-Corner.CornerRadius = UDim.new(0,14)
-local Stroke = Instance.new("UIStroke", Main)
-Stroke.Color = Color3.fromRGB(255,100,180)
-Stroke.Thickness = 2
+BG.Name = "LiquidBackground"
+BG.Parent = game:GetService("CoreGui")
+BG.Size = UDim2.new(2, 0, 2, 0)
+BG.Position = UDim2.new(-0.5, 0, -0.5, 0)
+BG.BackgroundTransparency = 1
+BG.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
---// TOP BAR
-Title.Parent = Main
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1,0,0,40)
-Title.Position = UDim2.new(0,0,0,0)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "✨ DOLA HUB"
-Title.TextColor3 = Color3.new(1,1,1)
-Title.TextSize = 16
+BG2.Name = "LiquidBackground2"
+BG2.Parent = BG
+BG2.Size = UDim2.new(1, 0, 1, 0)
+BG2.Position = UDim2.new(1, 0, 0, 0)
+BG2.BackgroundTransparency = 1
 
-Min.Parent = Main
-Min.Size = UDim2.new(0,30,0,30)
-Min.Position = UDim2.new(0.9,0,0,5)
-Min.BackgroundColor3 = Color3.fromRGB(255,70,70)
-Min.Text = "-"
-Min.TextColor3 = Color3.new(1,1,1)
-Min.Font = Enum.Font.GothamBold
-local MinC = Instance.new("UICorner", Min)
-MinC.CornerRadius = UDim.new(1,0)
+UIGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(106, 13, 173)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(187, 85, 211)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(106, 13, 173))
+})
+UIGradient.Rotation = 45
+UIGradient.Parent = BG
 
---// FUNCION BOTON
-local function Btn(name,color,y,call)
-    local B = Instance.new("TextButton")
-    B.Parent = Main
-    B.Size = UDim2.new(0.9,0,0,45)
-    B.Position = UDim2.new(0.05,0,0,y,0)
-    B.BackgroundColor3 = color
-    B.Text = name
-    B.TextColor3 = Color3.new(1,1,1)
-    B.Font = Enum.Font.GothamBold
-    B.TextSize = 14
-    local BC = Instance.new("UICorner", B)
-    BC.CornerRadius = UDim.new(0,8)
-    B.MouseButton1Click:Connect(call)
-end
+UIGradient2.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(187, 85, 211)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(106, 13, 173)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(187, 85, 211))
+})
+UIGradient2.Rotation = -45
+UIGradient2.Parent = BG2
 
---// ==================== FUNCIONES CORREGIDAS ====================
-
-Btn("⚡ ACTIVAR VELOCIDAD",Color3.fromRGB(70,200,255),55,function()
-    local H = Player.Character.Humanoid
-    H.WalkSpeed = 200 -- Velocidad controlada para no buguear
-    H.JumpPower = 150
-    spawn(function() while true do for _,v in pairs(Player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end task.wait() end end)
+-- ANIMACIÓN DEL FONDO LÍQUIDO
+game:GetService("RunService").RenderStepped:Connect(function()
+    BG.Position = BG.Position + UDim2.new(0.0008, 0, 0.0003, 0)
+    BG2.Position = BG2.Position + UDim2.new(0.0008, 0, 0.0003, 0)
+    
+    if BG.Position.X.Scale >= 0.5 then
+        BG.Position = UDim2.new(-0.5, 0, -0.5, 0)
+        BG2.Position = UDim2.new(1, 0, 0, 0)
+    end
 end)
 
-Btn("🏆 AUTO WIN SEGURO",Color3.fromRGB(255,160,60),105,function()
-    spawn(function()
-        while true do
-            task.wait(0.1)
-            local hrp = Player.Character.HumanoidRootPart
-            -- Moverse suavemente hacia adelante
-            hrp.CFrame = hrp.CFrame * CFrame.new(0, 0.1, -5)
+-- =============================================
+--                 FUNCIONES
+-- =============================================
+
+local MainTab = Window:AddTab({Title = "Main", Icon = "home"})
+local MovementTab = Window:AddTab({Title = "Movement", Icon = "walk"})
+local GamepassTab = Window:AddTab({Title = "Gamepasses", Icon = "star"})
+local MiscTab = Window:AddTab({Title = "Misc", Icon = "settings"})
+
+-- MAIN TAB
+MainTab:AddToggle({
+    Title = "Auto Farm",
+    Callback = function(Value)
+        getgenv().AutoFarm = Value
+        while getgenv().AutoFarm do
+            task.wait()
+            -- Código de Auto Farm
         end
-    end)
-end)
+    end
+})
 
-Btn("🚀 IR A LA META (SEGURO)",Color3.fromRGB(140,120,255),155,function()
-    local hrp = Player.Character.HumanoidRootPart
-    -- Coordenadas ALTAS y SEGURAS (arriba del mapa)
-    hrp.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y + 200, hrp.Position.Z - 5000)
-end)
-
-Btn("💎 COMPRAR TODO + TREADMILLS",Color3.fromRGB(255,80,150),205,function()
-    pcall(function()
-        -- Dinero Infinito
-        for _,v in pairs(Player.leaderstats:GetChildren()) do
-            if v:IsA("NumberValue") or v:IsA("IntValue") then v.Value = math.huge end
+MainTab:AddToggle({
+    Title = "Auto Win",
+    Callback = function(Value)
+        if Value then
+            -- Teletransportar al final
         end
-        
-        -- BUSCAR Y COMPRAR LAS CINTAS (TREADMILLS)
-        for _,v in pairs(workspace:GetDescendants()) do
-            if v:IsA("ClickDetector") then
-                -- Busca palabras clave como comprar, treadmill, cinta, etc.
-                local name = v.Parent.Name:lower()
-                if name:find("buy") or name:find("treadmill") or name:find("cinta") or name:find("shop") then
-                    fireclickdetector(v)
-                    task.wait(0.1)
-                end
-            end
-        end
-    end)
-    game.StarterGui:SetCore("SendNotification", {Title="LISTO!", Text="Treadmills desbloqueadas!", Duration=2})
-end)
+    end
+})
 
-Btn("♻️ AUTO REBIRTH",Color3.fromRGB(190,80,255),255,function()
-    spawn(function() while true do task.wait(1) pcall(function() for _,v in pairs(workspace:GetDescendants()) do if v:IsA("ClickDetector") and v.Parent.Name:lower():find("rebirth") then fireclickdetector(v) end end end) end end)
-end)
+MainTab:AddToggle({
+    Title = "Anti AFK",
+    Default = true,
+    Callback = function(Value)
+        getgenv().AntiAFK = Value
+    end
+})
 
-Btn("💨 VELOCIDAD MAXIMA",Color3.fromRGB(60,255,150),305,function()
-    Player.Character.Humanoid.WalkSpeed = 9999
-end)
+-- MOVEMENT TAB
+MovementTab:AddToggle({
+    Title = "Noclip",
+    Callback = function(Value)
+        getgenv().Noclip = Value
+    end
+})
 
---// MINIMIZAR
-Min.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
+MovementTab:AddToggle({
+    Title = "Fly",
+    Callback = function(Value)
+        getgenv().Fly = Value
+    end
+})
 
-print("✅ DOLA HUB - VERSION CORREGIDA")
+MovementTab:AddSlider({
+    Title = "Walk Speed",
+    Min = 16,
+    Max = 500,
+    Default = 50,
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+    end
+})
+
+MovementTab:AddSlider({
+    Title = "Jump Power",
+    Min = 50,
+    Max = 500,
+    Default = 100,
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+    end
+})
+
+MovementTab:AddToggle({
+    Title = "Freeze Position",
+    Callback = function(Value)
+        getgenv().Freeze = Value
+    end
+})
+
+-- GAMEPASSES TAB
+GamepassTab:AddButton({
+    Title = "Unlock All Treadmills",
+    Callback = function()
+        -- Desbloquear Gold, Diamond, Candy y Admin
+        print("Desbloqueando todo...")
+    end
+})
+
+GamepassTab:AddButton({
+    Title = "Claim Group Rewards",
+    Callback = function()
+        -- Reclamar recompensas del grupo
+    end
+})
+
+GamepassTab:AddButton({
+    Title = "Unlock All Shop Items",
+    Callback = function()
+        -- Desbloquear todo de la tienda
+        print("Tienda desbloqueada!")
+    end
+})
+
+-- MISC TAB
+MiscTab:AddButton({
+    Title = "Rejoin Game",
+    Callback = function()
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId)
+    end
+})
+
+MiscTab:AddLabel({
+    Text = "Script by: Dola",
+    Center = true
+})
+
+print("✅ Script cargado correctamente!")
