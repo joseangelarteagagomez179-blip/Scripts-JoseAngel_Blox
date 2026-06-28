@@ -1,6 +1,6 @@
 -- =============================================
 -- 🎮 SCRIPT PERSONALIZADO | +1 Speed Keyboard
--- ✅ Con Menu GUI | Unlock All Treadmills
+-- ✅ MENU ARREGLADO | BOTONES VISIBLES
 -- =============================================
 
 -- Servicios
@@ -18,14 +18,10 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local ButtonUnlocked = Instance.new("TextButton")
-local ButtonAutoRun = Instance.new("TextButton")
-local ButtonFly = Instance.new("TextButton")
-local ButtonNoclip = Instance.new("TextButton")
-local ButtonAutoWin = Instance.new("TextButton")
 
 ScreenGui.Parent = game.CoreGui
 ScreenGui.Name = "MenuDola"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
 -- Marco Principal
 MainFrame.Parent = ScreenGui
@@ -33,45 +29,49 @@ MainFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
 MainFrame.BorderColor3 = Color3.new(1, 0.4, 0.6)
 MainFrame.BorderSizePixel = 2
 MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 250, 0, 320)
+MainFrame.Size = UDim2.new(0, 260, 0, 380)
 MainFrame.Active = true
-MainFrame.Draggable = true -- Para mover el menu
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true -- Para que no se salga nada
 
 -- Titulo
 Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Size = UDim2.new(1, -10, 0, 40)
+Title.Position = UDim2.new(0, 5, 0, 5)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "🍫 MENU SPEED KEYBOARD"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.TextSize = 18
 
 -- =============================================
--- 🔘 BOTONES
+-- 🔘 CREAR BOTONES CORRECTAMENTE
 -- =============================================
 
-local function MakeButton(name, pos, color)
+local Buttons = {}
+local YPos = 55 -- Empezar despues del titulo
+
+local function MakeButton(name, color)
     local btn = Instance.new("TextButton")
     btn.Parent = MainFrame
     btn.BackgroundColor3 = color
-    btn.Position = pos
-    btn.Size = UDim2.new(0.9, 0, 0, 40)
-    btn.AnchorPoint = Vector2.new(0.5,0)
-    btn.Position = UDim2.new(0.5,0, pos.Y.Offset, 0)
+    btn.Size = UDim2.new(1, -10, 0, 45)
+    btn.Position = UDim2.new(0, 5, 0, YPos)
     btn.Font = Enum.Font.GothamBold
     btn.Text = name
     btn.TextColor3 = Color3.new(1,1,1)
     btn.TextSize = 16
-    btn.ClipsDescendants = true
+    btn.AutoLocalize = false
+    YPos = YPos + 55 -- Espacio entre botones
     return btn
 end
 
--- Crear Botones
-ButtonUnlocked = MakeButton("🔓 UNLOCK ALL", UDim2.new(0,0,0,50), Color3.new(0.2, 0.6, 0.2))
-ButtonAutoRun = MakeButton("🏃 AUTO RUN", UDim2.new(0,0,0,100), Color3.new(0.6, 0.2, 0.2))
-ButtonFly = MakeButton("✈️ FLY MODE", UDim2.new(0,0,0,150), Color3.new(0.2, 0.4, 0.6))
-ButtonNoclip = MakeButton("👻 NOCLIP", UDim2.new(0,0,0,200), Color3.new(0.4, 0.2, 0.6))
-ButtonAutoWin = MakeButton("🏁 AUTO WIN", UDim2.new(0,0,0,250), Color3.new(0.6, 0.4, 0.2))
+-- Crear todos los botones
+local ButtonUnlocked = MakeButton("🔓 UNLOCK ALL", Color3.new(0.2, 0.6, 0.2))
+local ButtonAutoRun = MakeButton("🏃 AUTO RUN", Color3.new(0.6, 0.2, 0.2))
+local ButtonFly = MakeButton("✈️ FLY MODE", Color3.new(0.2, 0.4, 0.6))
+local ButtonNoclip = MakeButton("👻 NOCLIP", Color3.new(0.4, 0.2, 0.6))
+local ButtonAutoWin = MakeButton("🏁 AUTO WIN", Color3.new(0.6, 0.4, 0.2))
 
 -- =============================================
 -- ⚙️ VARIABLES DE ESTADO
@@ -92,14 +92,13 @@ ButtonUnlocked.MouseButton1Click:Connect(function()
         ButtonUnlocked.Text = "✅ TODO DESBLOQUEADO"
         ButtonUnlocked.BackgroundColor3 = Color3.new(0,1,0)
         
-        -- Desbloquear Gamepasses y Treadmills
         pcall(function()
             if getgenv then
                 getgenv().Unlocked = true
                 getgenv().HasPass = true
             end
             
-            -- Dar dinero/puntos infinitos
+            -- Dar dinero infinito
             local leaderstats = Player:FindFirstChild("leaderstats")
             if leaderstats then
                 for _, v in pairs(leaderstats:GetChildren()) do
@@ -109,22 +108,9 @@ ButtonUnlocked.MouseButton1Click:Connect(function()
                 end
             end
             
-            -- Hacer que todas las cintas sean accesibles
-            workspace.DescendantAdded:Connect(function(obj)
-                if obj.Name:lower():find("treadmill") or obj.Name:lower():find("cinta") then
-                    pcall(function()
-                        obj.CanCollide = false
-                        obj.CanTouch = true
-                        if obj:FindFirstChild("RequiredPass") then
-                            obj.RequiredPass.Value = 0
-                        end
-                    end)
-                end
-            end)
-            
-            -- Hacer lo mismo con las que ya existen
+            -- Desbloquear treadmills
             for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name:lower():find("treadmill") then
+                if obj.Name:lower():find("treadmill") or obj.Name:lower():find("cinta") then
                     pcall(function()
                         obj.CanCollide = false
                         obj.CanTouch = true
@@ -222,7 +208,6 @@ end)
 -- 🏁 FUNCION: AUTO WIN
 -- =============================================
 ButtonAutoWin.MouseButton1Click:Connect(function()
-    -- Buscar la meta
     for _, obj in pairs(workspace:GetChildren()) do
         if obj.Name:lower():find("finish") or obj.Name:lower():find("end") or obj.Name:lower():find("meta") then
             Character.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0,5,0)
@@ -232,9 +217,9 @@ ButtonAutoWin.MouseButton1Click:Connect(function()
 end)
 
 -- =============================================
--- 💡 VELOCIDAD BASE ALTA
+-- 💡 VELOCIDAD BASE
 -- =============================================
 Humanoid.WalkSpeed = 100
 Humanoid.JumpPower = 150
 
-print("✅ Menu Cargado!")
+print("✅ Menu Cargado Correctamente!")
