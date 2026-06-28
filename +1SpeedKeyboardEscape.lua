@@ -25,7 +25,7 @@ end
 -- ==============================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 260, 0, 650)
+MainFrame.Size = UDim2.new(0, 260, 0, 580)
 MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
 MainFrame.BorderSizePixel = 0
@@ -50,52 +50,52 @@ UIShadow.Parent = MainFrame
 -- Main
 local MainButton = Instance.new("TextButton")
 MainButton.Name = "MainButton"
-MainButton.Size = UDim2.new(0.30, 0, 0, 45)
+MainButton.Size = UDim2.new(0.30, 0, 0, 40)
 MainButton.Position = UDim2.new(0.02, 0, 0, 10)
 MainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
 MainButton.Text = "Main↓"
-MainButton.TextSize = 16
+MainButton.TextSize = 14
 MainButton.Font = Enum.Font.GothamBold
 MainButton.TextColor3 = Color3.new(1, 1, 1)
 MainButton.BorderSizePixel = 0
 MainButton.Parent = MainFrame
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.CornerRadius = UDim.new(0, 8)
 MainCorner.Parent = MainButton
 
 -- Player
 local PlayerButton = Instance.new("TextButton")
 PlayerButton.Name = "PlayerButton"
-PlayerButton.Size = UDim2.new(0.30, 0, 0, 45)
+PlayerButton.Size = UDim2.new(0.30, 0, 0, 40)
 PlayerButton.Position = UDim2.new(0.35, 0, 0, 10)
 PlayerButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
 PlayerButton.Text = "Player↓"
-PlayerButton.TextSize = 16
+PlayerButton.TextSize = 14
 PlayerButton.Font = Enum.Font.GothamBold
 PlayerButton.TextColor3 = Color3.new(1, 1, 1)
 PlayerButton.BorderSizePixel = 0
 PlayerButton.Parent = MainFrame
 
 local PlayerCorner = Instance.new("UICorner")
-PlayerCorner.CornerRadius = UDim.new(0, 10)
+PlayerCorner.CornerRadius = UDim.new(0, 8)
 PlayerCorner.Parent = PlayerButton
 
 -- Shop
 local ShopButton = Instance.new("TextButton")
 ShopButton.Name = "ShopButton"
-ShopButton.Size = UDim2.new(0.30, 0, 0, 45)
+ShopButton.Size = UDim2.new(0.30, 0, 0, 40)
 ShopButton.Position = UDim2.new(0.68, 0, 0, 10)
 ShopButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
 ShopButton.Text = "Shop↓"
-ShopButton.TextSize = 16
+ShopButton.TextSize = 14
 ShopButton.Font = Enum.Font.GothamBold
 ShopButton.TextColor3 = Color3.new(1, 1, 1)
 ShopButton.BorderSizePixel = 0
 ShopButton.Parent = MainFrame
 
 local ShopCorner = Instance.new("UICorner")
-ShopCorner.CornerRadius = UDim.new(0, 10)
+ShopCorner.CornerRadius = UDim.new(0, 8)
 ShopCorner.Parent = ShopButton
 
 -- ==============================================
@@ -104,19 +104,19 @@ ShopCorner.Parent = ShopButton
 -- Panel Main
 local MainPanel = Instance.new("Frame")
 MainPanel.Name = "MainPanel"
-MainPanel.Size = UDim2.new(0, 240, 0, 570)
-MainPanel.Position = UDim2.new(0, 10, 0, 70)
+MainPanel.Size = UDim2.new(0, 240, 0, 480)
+MainPanel.Position = UDim2.new(0, 10, 0, 60)
 MainPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
 MainPanel.BorderSizePixel = 0
 MainPanel.Visible = false
 MainPanel.Parent = MainFrame
 
 local MainPanelCorner = Instance.new("UICorner")
-MainPanelCorner.CornerRadius = UDim.new(0, 12)
+MainPanelCorner.CornerRadius = UDim.new(0, 10)
 MainPanelCorner.Parent = MainPanel
 
 local MainList = Instance.new("UIListLayout")
-MainList.Padding = UDim.new(0, 10)
+MainList.Padding = UDim.new(0, 6)
 MainList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 MainList.VerticalAlignment = Enum.VerticalAlignment.Top
 MainList.Parent = MainPanel
@@ -124,19 +124,19 @@ MainList.Parent = MainPanel
 -- Panel Player
 local PlayerPanel = Instance.new("Frame")
 PlayerPanel.Name = "PlayerPanel"
-PlayerPanel.Size = UDim2.new(0, 240, 0, 570)
-PlayerPanel.Position = UDim2.new(0, 10, 0, 70)
+PlayerPanel.Size = UDim2.new(0, 240, 0, 480)
+PlayerPanel.Position = UDim2.new(0, 10, 0, 60)
 PlayerPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
 PlayerPanel.BorderSizePixel = 0
 PlayerPanel.Visible = false
 PlayerPanel.Parent = MainFrame
 
 local PlayerPanelCorner = Instance.new("UICorner")
-PlayerPanelCorner.CornerRadius = UDim.new(0, 12)
+PlayerPanelCorner.CornerRadius = UDim.new(0, 10)
 PlayerPanelCorner.Parent = PlayerPanel
 
 local PlayerList = Instance.new("UIListLayout")
-PlayerList.Padding = UDim.new(0, 10)
+PlayerList.Padding = UDim.new(0, 6)
 PlayerList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 PlayerList.VerticalAlignment = Enum.VerticalAlignment.Top
 PlayerList.Parent = PlayerPanel
@@ -144,19 +144,19 @@ PlayerList.Parent = PlayerPanel
 -- Panel Shop
 local ShopPanel = Instance.new("Frame")
 ShopPanel.Name = "ShopPanel"
-ShopPanel.Size = UDim2.new(0, 240, 0, 570)
-ShopPanel.Position = UDim2.new(0, 10, 0, 70)
+ShopPanel.Size = UDim2.new(0, 240, 0, 480)
+ShopPanel.Position = UDim2.new(0, 10, 0, 60)
 ShopPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
 ShopPanel.BorderSizePixel = 0
 ShopPanel.Visible = false
 ShopPanel.Parent = MainFrame
 
 local ShopPanelCorner = Instance.new("UICorner")
-ShopPanelCorner.CornerRadius = UDim.new(0, 12)
+ShopPanelCorner.CornerRadius = UDim.new(0, 10)
 ShopPanelCorner.Parent = ShopPanel
 
 local ShopList = Instance.new("UIListLayout")
-ShopList.Padding = UDim.new(0, 6)
+ShopList.Padding = UDim.new(0, 4)
 ShopList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 ShopList.VerticalAlignment = Enum.VerticalAlignment.Top
 ShopList.Parent = ShopPanel
@@ -166,19 +166,19 @@ ShopList.Parent = ShopPanel
 -- ==============================================
 local SoundsPanel = Instance.new("Frame")
 SoundsPanel.Name = "SoundsPanel"
-SoundsPanel.Size = UDim2.new(0, 200, 0, 150)
-SoundsPanel.Position = UDim2.new(1, 10, 0, 100)
+SoundsPanel.Size = UDim2.new(0, 200, 0, 120)
+SoundsPanel.Position = UDim2.new(1, 5, 0, 80)
 SoundsPanel.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
 SoundsPanel.BorderSizePixel = 0
 SoundsPanel.Visible = false
 SoundsPanel.Parent = ShopPanel
 
 local SoundsCorner = Instance.new("UICorner")
-SoundsCorner.CornerRadius = UDim.new(0, 10)
+SoundsCorner.CornerRadius = UDim.new(0, 8)
 SoundsCorner.Parent = SoundsPanel
 
 local SoundsList = Instance.new("UIListLayout")
-SoundsList.Padding = UDim.new(0, 5)
+SoundsList.Padding = UDim.new(0, 4)
 SoundsList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 SoundsList.VerticalAlignment = Enum.VerticalAlignment.Top
 SoundsList.Parent = SoundsPanel
@@ -189,17 +189,17 @@ SoundsList.Parent = SoundsPanel
 local function CreateButton(Name, Function, Parent)
     local Button = Instance.new("TextButton")
     Button.Name = Name.."Button"
-    Button.Size = UDim2.new(0, 220, 0, 45)
+    Button.Size = UDim2.new(0, 220, 0, 38)
     Button.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
     Button.Text = Name
-    Button.TextSize = 15
+    Button.TextSize = 13
     Button.Font = Enum.Font.GothamSemibold
     Button.TextColor3 = Color3.new(1, 1, 1)
     Button.BorderSizePixel = 0
     Button.Parent = Parent
 
     local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 8)
+    BtnCorner.CornerRadius = UDim.new(0, 6)
     BtnCorner.Parent = Button
 
     Button.MouseButton1Click:Connect(function()
@@ -218,27 +218,27 @@ local function CreateToggle(Name, Id, ToolName, Parent)
     local Enabled = false
     local Button = Instance.new("TextButton")
     Button.Name = Name.."Button"
-    Button.Size = UDim2.new(0, 220, 0, 38)
+    Button.Size = UDim2.new(0, 220, 0, 32)
     Button.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-    Button.Text = Name .. "\n[OFF]"
-    Button.TextSize = 13
+    Button.Text = Name .. " [OFF]"
+    Button.TextSize = 12
     Button.Font = Enum.Font.GothamSemibold
     Button.TextColor3 = Color3.new(1, 1, 1)
     Button.BorderSizePixel = 0
     Button.Parent = Parent
 
     local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.CornerRadius = UDim.new(0, 5)
     BtnCorner.Parent = Button
 
     Button.MouseButton1Click:Connect(function()
         Enabled = not Enabled
         if Enabled then
-            Button.Text = Name .. "\n[ON]"
+            Button.Text = Name .. " [ON]"
             Button.BackgroundColor3 = Color3.fromRGB(60, 120, 70)
             print("Unlocked: " .. ToolName .. " ["..Id.."]")
         else
-            Button.Text = Name .. "\n[OFF]"
+            Button.Text = Name .. " [OFF]"
             Button.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
             print("Locked: " .. ToolName .. " ["..Id.."]")
         end
@@ -252,17 +252,17 @@ end
 local function CreateSoundToggle(Name, Id, Parent)
     local Button = Instance.new("TextButton")
     Button.Name = Name.."Button"
-    Button.Size = UDim2.new(0, 180, 0, 35)
+    Button.Size = UDim2.new(0, 180, 0, 28)
     Button.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
     Button.Text = "▶ " .. Name
-    Button.TextSize = 13
+    Button.TextSize = 11
     Button.Font = Enum.Font.GothamSemibold
     Button.TextColor3 = Color3.new(1, 1, 1)
     Button.BorderSizePixel = 0
     Button.Parent = Parent
 
     local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.CornerRadius = UDim.new(0, 4)
     BtnCorner.Parent = Button
 
     Button.MouseButton1Click:Connect(function()
@@ -466,13 +466,15 @@ end
 -- 🎵 FUNCIÓN MOSTRAR/OCULTAR SELECCIÓN DE SONIDOS
 -- ==============================================
 local SoundsOpen = false
+local SoundsButton
+
 local function ToggleSoundsMenu()
     SoundsOpen = not SoundsOpen
     SoundsPanel.Visible = SoundsOpen
     if SoundsOpen then
-        SoundsButton.Text = "Unlock Sounds 1724877043 →"
+        SoundsButton.Text = "Unlock Sounds 1724877043 → [ON]"
     else
-        SoundsButton.Text = "Unlock Sounds 1724877043"
+        SoundsButton.Text = "Unlock Sounds 1724877043 [OFF]"
     end
 end
 
@@ -557,5 +559,4 @@ PlayerButton.MouseButton1Click:Connect(function()
     ShopPanel.Visible = false
     SoundsPanel.Visible = false
     PlayerPanel.Visible = PlayerOpen
-    PlayerButton.Text = PlayerOpen and "Player↑" or "Player↓"
-    MainBut
+    PlayerButton.Text = PlayerOpen and "Player↑" or "
