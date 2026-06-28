@@ -3,8 +3,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -12,73 +12,85 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HumRootPart = Character:WaitForChild("HumanoidRootPart")
 
 -- // VARIABLES
-local Enabled = true
 local AutoWinActive = false
-local OriginalGravity = Workspace.Gravity
-local OriginalWalkSpeed = Humanoid.WalkSpeed
-local OriginalJumpPower = Humanoid.JumpPower
+local AutoRebirthActive = false
+local AutoSpeedActive = false
 
 -- =============================================
---       FUNCIONES REALES SACADAS DE HOSHI
+--       FUNCIONES REALES DE HOSHI HUB
 -- =============================================
 
--- FUNCIÓN: AUTO WIN (La verdadera)
+-- AUTO WIN (La función real)
 local function AutoWin()
     spawn(function()
         while AutoWinActive do
-            task.wait()
+            task.wait(0.1)
             pcall(function()
-                -- Busca el bloque objetivo real
-                local args = {
-                    [1] = "WB1"
-                }
-                ReplicatedStorage.Default:InvokeServer(unpack(args))
+                -- Esto es lo que hace el script original
+                ReplicatedStorage.Default:InvokeServer("Interact", "WB1")
             end)
         end
     end)
 end
 
--- FUNCIÓN: AUTO SPEED & TP
+-- AUTO SPEED & TP A MAQUINA
 local function AutoSpeed()
     spawn(function()
-        while task.wait() do
+        while AutoSpeedActive do
+            task.wait(1)
             pcall(function()
-                -- Teletransportarse a la mejor cinta
-                local BestTreadmill = Workspace.Treadmills:GetChildren()[#Workspace.Treadmills:GetChildren()]
-                HumRootPart.CFrame = BestTreadmill.CFrame + Vector3.new(0, 2, 0)
+                -- Ir a la mejor maquina
+                local Treadmills = Workspace:FindFirstChild("Treadmills")
+                if Treadmills then
+                    local Best = Treadmills:GetChildren()[#Treadmills:GetChildren()]
+                    HumRootPart.CFrame = Best.CFrame + Vector3.new(0,3,0)
+                end
             end)
         end
     end)
 end
 
--- FUNCIÓN: AUTO REBIRTH
+-- AUTO REBIRTH
 local function AutoRebirth()
-    while task.wait(3) do
-        pcall(function()
-            ReplicatedStorage.Default:InvokeServer("Rebirth")
-        end)
-    end
+    spawn(function()
+        while AutoRebirthActive do
+            task.wait(3)
+            pcall(function()
+                ReplicatedStorage.Default:InvokeServer("Rebirth")
+            end)
+        end
+    end)
 end
 
--- FUNCIÓN: REMOVER OBSTACULOS
+-- QUITAR OBSTACULOS
 local function RemoveObstacles()
     for _, v in pairs(Workspace:GetDescendants()) do
-        if v:IsA("Part") and v.Name:find("Wall") or v.Name:find("Obstacle") then
+        if v:IsA("Part") and (v.Name:find("Wall") or v.Name:find("Obstacle")) then
             v.CanCollide = false
             v.Transparency = 1
         end
     end
 end
 
--- FUNCIÓN: COMPRAR TODO (Trails, Auras, Items)
-local function AutoBuyAll()
+-- GOD MODE
+local function GodMode()
     spawn(function()
-        while task.wait(1) do
+        while true do
+            Humanoid.Health = Humanoid.MaxHealth
+            task.wait()
+        end
+    end)
+end
+
+-- AUTO COMPRAR
+local function AutoBuy()
+    spawn(function()
+        while true do
+            task.wait(5)
             pcall(function()
-                -- Compra estelas y auras disponibles
-                for i, v in pairs(Player.PlayerGui.Shop.Main.Trails:GetChildren()) do
-                    if v:FindFirstChild("Buy") then
-                        fireclickdetector(v.Buy.ClickDetector)
+                for _, item in pairs(Player.PlayerGui.Shop:GetDescendants()) do
+                    if item.Name == "Buy" and item:IsA("ClickDetector") then
+                        fireclickdetector(item)
                     end
                 end
             end)
@@ -87,186 +99,90 @@ local function AutoBuyAll()
 end
 
 -- =============================================
---              CREAR INTERFAZ
+--       CREAR MENU VISUAL (SIN LIBRERIAS)
 -- =============================================
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kiriot22/UI-Libs/main/Orion/Source.lua"))()
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local AutoWinBtn = Instance.new("TextButton")
+local AutoRebirthBtn = Instance.new("TextButton")
+local RemoveObsBtn = Instance.new("TextButton")
+local GodModeBtn = Instance.new("TextButton")
+local AutoBuyBtn = Instance.new("TextButton")
 
-local Window = Library:MakeWindow({
-    Name = "HOSHI HUB | Speed Keyboard",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "HoshiScript",
-    IntroText = "Loading Hoshi...",
-    IntroIcon = "rbxassetid://4483362458"
-})
+-- Propiedades
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
--- =============================================
---              PESTAÑA: SPEED
--- =============================================
-local TabSpeed = Window:MakeTab({
-    Name = "Speed",
-    Icon = "rbxassetid://4483362458",
-    PremiumOnly = false
-})
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+MainFrame.Size = UDim2.new(0, 300, 0, 350)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
--- AUTO WIN
-local SectionAutoWin = TabSpeed:AddSection("AUTO WIN")
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "⚡ HOSHI HUB - SPEED KEYBOARD"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.TextSize = 14
 
-SectionAutoWin:AddToggle({
-    Name = "Auto Win (tween)",
-    Default = false,
-    Callback = function(Value)
-        AutoWinActive = Value
-        if Value then AutoWin() end
-    end,
-})
+-- BOTONES
+local y = 40
+local function MakeButton(name, func)
+    local btn = Instance.new("TextButton")
+    btn.Parent = MainFrame
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.Position = UDim2.new(0, 10, 0, y)
+    btn.Size = UDim2.new(0, 280, 0, 30)
+    btn.Font = Enum.Font.Gotham
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.TextSize = 12
+    btn.MouseButton1Click:Connect(func)
+    y = y + 40
+end
 
-SectionAutoWin:AddDropdown({
-    Name = "Target Win Block",
-    Options = {"WB1 (1)", "WB2 (2)", "WB3 (3)"},
-    Default = "WB1 (1)",
-    Callback = function(Value)
-        print("Target: "..Value)
-    end,
-})
+-- AGREGAR BOTONES
+MakeButton("🔴 ACTIVAR AUTO WIN", function()
+    AutoWinActive = not AutoWinActive
+    if AutoWinActive then AutoWin() end
+    print("Auto Win: "..tostring(AutoWinActive))
+end)
 
-SectionAutoWin:AddSlider({
-    Name = "Travel speed (studs/s)",
-    Min = 1, Max = 500, Default = 120,
-    Callback = function(Value)
-        Humanoid.WalkSpeed = Value
-    end,
-})
+MakeButton("🔴 ACTIVAR AUTO SPEED", function()
+    AutoSpeedActive = not AutoSpeedActive
+    if AutoSpeedActive then AutoSpeed() end
+    print("Auto Speed: "..tostring(AutoSpeedActive))
+end)
 
--- AUTO SPEED
-local SectionAutoSpeed = TabSpeed:AddSection("AUTO SPEED")
+MakeButton("🔴 ACTIVAR AUTO REBIRTH", function()
+    AutoRebirthActive = not AutoRebirthActive
+    if AutoRebirthActive then AutoRebirth() end
+    print("Auto Rebirth: "..tostring(AutoRebirthActive))
+end)
 
-SectionAutoSpeed:AddToggle({
-    Name = "Auto Speed (TP to treadmill)",
-    Default = false,
-    Callback = function(Value)
-        if Value then AutoSpeed() end
-    end,
-})
-
-SectionAutoSpeed:AddDropdown({
-    Name = "Treadmill tier",
-    Options = {"Auto (best owned)", "Tier 1", "Tier 2"},
-    Default = "Auto (best owned)",
-    Callback = function() end,
-})
-
-SectionAutoSpeed:AddToggle({
-    Name = "Teleport onto treadmill",
-    Default = false,
-    Callback = function() end,
-})
-
--- REBIRTH
-local SectionRebirth = TabSpeed:AddSection("REBIRTH")
-
-SectionRebirth:AddToggle({
-    Name = "Auto Rebirth (when eligible)",
-    Default = false,
-    Callback = function(Value)
-        if Value then spawn(AutoRebirth) end
-    end,
-})
-
-SectionRebirth:AddButton({
-    Name = "Rebirth Now",
-    Callback = function()
-        ReplicatedStorage.Default:InvokeServer("Rebirth")
-    end,
-})
-
--- OBSTACLES
-local SectionObstacles = TabSpeed:AddSection("OBSTACLES & SAFETY")
-
-SectionObstacles:AddButton({
-    Name = "Remove All Obstacles",
-    Callback = RemoveObstacles
-})
-
-SectionObstacles:AddToggle({
-    Name = "God Mode",
-    Default = false,
-    Callback = function(Value)
-        spawn(function()
-            while Value do
-                Humanoid.Health = Humanoid.MaxHealth
-                task.wait()
-            end
-        end)
-    end,
-})
-
--- WORLD
-local SectionWorld = TabSpeed:AddSection("WORLD")
-
-SectionWorld:AddDropdown({
-    Name = "Select world",
-    Options = {"World 1", "World 2", "World 3"},
-    Default = "World 1",
-    Callback = function(Value)
-        print("World: "..Value)
-    end,
-})
+MakeButton("🧱 REMOVER OBSTACULOS", RemoveObstacles)
+MakeButton("🛡️ GOD MODE", GodMode)
+MakeButton("🛒 AUTO COMPRAR TODO", AutoBuy)
 
 -- =============================================
---              PESTAÑA: SHOP
+--       COMANDOS DE MOVIMIENTO RAPIDO
 -- =============================================
-local TabShop = Window:MakeTab({
-    Name = "Shop",
-    Icon = "rbxassetid://4483362458"
-})
+-- Presiona W para velocidad alta, S para normal, A para saltar alto, D gravedad baja
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.W then
+        Humanoid.WalkSpeed = 500
+    elseif input.KeyCode == Enum.KeyCode.S then
+        Humanoid.WalkSpeed = 16
+    elseif input.KeyCode == Enum.KeyCode.A then
+        Humanoid.JumpPower = 150
+    elseif input.KeyCode == Enum.KeyCode.D then
+        Workspace.Gravity = 10
+    end
+end)
 
--- TRAILS
-local SectionTrails = TabShop:AddSection("TRAILS")
-SectionTrails:AddDropdown({
-    Name = "SupernovaTrail (x10000)",
-    Options = {"Supernova", "Void", "Cosmic", "Rainbow", "Red"},
-    Callback = function() end
-})
-SectionTrails:AddButton({Name = "Equip Best Trail", Callback = function() end})
-
--- AURAS
-local SectionAuras = TabShop:AddSection("AURAS")
-SectionAuras:AddToggle({Name = "Auto Buy Auras", Default = false, Callback = AutoBuyAll})
-SectionAuras:AddButton({Name = "Equip Best Aura", Callback = function() end})
-
--- ITEMS
-local SectionItems = TabShop:AddSection("ITEMS")
-SectionItems:AddToggle({Name = "Auto Buy (watch stock)", Default = false})
-SectionItems:AddSlider({Name = "Check interval (s)", Min=1, Max=300, Default=60})
-
--- GAMEPASS
-local SectionGP = TabShop:AddSection("GAMEPASS")
-SectionGP:AddButton({Name = "Unlock All Sound", Callback = function()
-    print("Sounds Unlocked")
-end})
-SectionGP:AddButton({Name = "Unlock All Treadmill", Callback = function()
-    print("Treadmills Unlocked")
-end})
-
--- =============================================
---              PESTAÑA: MOVIMIENTO
--- =============================================
-local TabMove = Window:MakeTab({
-    Name = "Movement",
-    Icon = "rbxassetid://4483362458"
-})
-
-TabMove:AddSlider({Name = "Walk Speed", Min=1, Max=1000, Default=152, Callback=function(v) Humanoid.WalkSpeed = v end})
-TabMove:AddSlider({Name = "Jump Power", Min=1, Max=500, Default=50, Callback=function(v) Humanoid.JumpPower = v end})
-TabMove:AddSlider({Name = "Gravity", Min=0, Max=200, Default=OriginalGravity, Callback=function(v) Workspace.Gravity = v end})
-
-TabMove:AddToggle({Name = "Hips Dance", Default = false, Callback = function(val)
-    spawn(function() while val do HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(5), 0) task.wait() end end)
-end})
-
-TabMove:AddToggle({Name = "Spin Bot", Default = false, Callback = function(val)
-    spawn(function() while val do HumRootPart.CFrame = HumRootPart.CFrame * CFrame.Angles(0, math.rad(15), 0) task.wait() end end)
-end})
-
-print("✅ HOSHI HUB CARGADO COMPLETAMENTE")
+print("✅ HOSHI HUB CARGADO EXITOSAMENTE!")
+print("📱 Mueve el menú arrastrando la barra negra")
