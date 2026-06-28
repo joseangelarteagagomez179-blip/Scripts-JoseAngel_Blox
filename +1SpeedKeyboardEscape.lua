@@ -1,68 +1,137 @@
--- CARGAR ARASAKA HUB ORIGINAL
-loadstring(game:HttpGet("https://gist.githubusercontent.com/nex-no1/ce10c68544ec307586f36cf1e6d15e98/raw"))()
+-- Servicios
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 
--- ESPERAR A QUE CARGUE LA INTERFAZ
-task.wait(2)
+-- Variables
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local leaderstats = player:WaitForChild("leaderstats")
+local stats = player:WaitForChild("Stats")
 
--- =============================================
---      MODIFICAR NOMBRE Y AGREGAR FONDO
--- =============================================
+-- === CREAR GUI ===
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local UnlockAllBtn = Instance.new("TextButton")
+local CloseBtn = Instance.new("TextButton")
 
--- CAMBIAR NOMBRE DE LA VENTANA
-pcall(function()
-    local Window = game:GetService("CoreGui"):FindFirstChild("Arasaka Hub")
-    if Window then
-        Window.TopBar.Title.Text = "+1 Speed-Keyboard-Escape-Candy-Chocolate"
+ScreenGui.Name = "UltraHub"
+ScreenGui.Parent = game.CoreGui
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.new(0.05, 0.05, 0.05)
+MainFrame.BorderColor3 = Color3.new(1, 0.5, 0)
+MainFrame.BorderSizePixel = 3
+MainFrame.Position = UDim2.new(0.35, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 320, 0, 220)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.new(1, 0.5, 0)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "💎 ULTRA HUB - TODO DESBLOQUEADO 💎"
+Title.TextColor3 = Color3.new(0, 0, 0)
+Title.TextSize = 16
+
+UnlockAllBtn.Name = "UnlockAllBtn"
+UnlockAllBtn.Parent = MainFrame
+UnlockAllBtn.BackgroundColor3 = Color3.new(0, 0.7, 0.2)
+UnlockAllBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
+UnlockAllBtn.Size = UDim2.new(0.8, 0, 50, 0)
+UnlockAllBtn.Font = Enum.Font.GothamBold
+UnlockAllBtn.Text = "🔥 ACTIVAR TODO (Incl. Treadmills)"
+UnlockAllBtn.TextColor3 = Color3.new(1, 1, 1)
+UnlockAllBtn.TextSize = 15
+
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Parent = MainFrame
+CloseBtn.BackgroundColor3 = Color3.new(0.8, 0.1, 0.1)
+CloseBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+CloseBtn.Size = UDim2.new(0.8, 0, 40, 0)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "❌ CERRAR"
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.TextSize = 16
+
+-- === FUNCIONES PRINCIPALES ===
+local function unlockEverything()
+    -- 1. DINERO Y STATS INFINITOS
+    if leaderstats:FindFirstChild("Wins") then leaderstats.Wins.Value = 999999999 end
+    if stats:FindFirstChild("Speed") then stats.Speed.Value = 999999 end
+    if stats:FindFirstChild("Multiplier") then stats.Multiplier.Value = 99999 end
+    if stats:FindFirstChild("Money") or stats:FindFirstChild("Coins") then 
+        stats.Money.Value = 999999999 
     end
-end)
 
--- CREAR FONDO MORADO LÍQUIDO ANIMADO
-local BG = Instance.new("Frame")
-local BG2 = Instance.new("Frame")
-local UIGradient = Instance.new("UIGradient")
-local UIGradient2 = Instance.new("UIGradient")
-
-BG.Name = "LiquidBackground"
-BG.Parent = game:GetService("CoreGui")
-BG.Size = UDim2.new(2, 0, 2, 0)
-BG.Position = UDim2.new(-0.5, 0, -0.5, 0)
-BG.BackgroundTransparency = 1
-BG.ZIndexBehavior = Enum.ZIndexBehavior.Global
-BG.ZIndex = -1 -- Poner detrás de todo
-
-BG2.Name = "LiquidBackground2"
-BG2.Parent = BG
-BG2.Size = UDim2.new(1, 0, 1, 0)
-BG2.Position = UDim2.new(1, 0, 0, 0)
-BG2.BackgroundTransparency = 1
-
--- COLORES MORADOS BRILLOSOS
-UIGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 150)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 0, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 150))
-})
-UIGradient.Rotation = 45
-UIGradient.Parent = BG
-
-UIGradient2.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 0, 255)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(80, 0, 150)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 255))
-})
-UIGradient2.Rotation = -45
-UIGradient2.Parent = BG2
-
--- ANIMACIÓN DE FLUJO LÍQUIDO
-game:GetService("RunService").RenderStepped:Connect(function()
-    BG.Position = BG.Position + UDim2.new(0.001, 0, 0.0005, 0)
-    BG2.Position = BG2.Position + UDim2.new(0.001, 0, 0.0005, 0)
-    
-    if BG.Position.X.Scale >= 0.5 then
-        BG.Position = UDim2.new(-0.5, 0, -0.5, 0)
-        BG2.Position = UDim2.new(1, 0, 0, 0)
+    -- 2. DESBLOQUEAR MUNDOS, TRAILS Y GAMEPASSES
+    for _, folder in pairs(player:GetChildren()) do
+        for _, item in pairs(folder:GetChildren()) do
+            if item:IsA("BoolValue") then
+                item.Value = true
+            elseif item:IsA("IntValue") or item:IsA("NumberValue") then
+                item.Value = item:GetAttribute("MaxValue") or 99999
+            end
+        end
     end
-end)
 
-print("✅ Script cargado con éxito!")
-print("🟣 Fondo morado líquido activado")
+    -- 3. 💪 MEJORAR Y COMPRAR TODAS LAS TREADMILLS
+    local workspace = game:GetService("Workspace")
+    local machinesFolder = workspace:FindFirstChild("Machines") or workspace:FindFirstChild("Treadmills") or workspace
+
+    for _, obj in pairs(machinesFolder:GetChildren()) do
+        -- Buscar partes que parezcan máquinas o botones de compra
+        if obj:FindFirstChild("ClickDetector") or obj.Name:lower():find("treadmill") or obj.Name:lower():find("machine") then
+            
+            -- Comprar/Desbloquear
+            if obj:FindFirstChild("ClickDetector") then
+                fireclickdetector(obj.ClickDetector)
+            end
+
+            -- Subir nivel al máximo
+            if obj:FindFirstChild("Level") or obj:FindFirstChild("Upgrade") then
+                for _, v in pairs(obj:GetChildren()) do
+                    if v:IsA("IntValue") and v.Name ~= "Price" then
+                        v.Value = 9999 -- Nivel Maximo
+                    end
+                end
+            end
+            
+            -- Activar la cinta
+            if obj:FindFirstChild("Enabled") or obj:FindFirstChild("Active") then
+                obj.Enabled.Value = true
+            end
+        end
+    end
+
+    -- VELOCIDAD MAXIMA
+    humanoid.WalkSpeed = 1000
+    humanoid.JumpPower = 600
+
+    -- MENSAJE FINAL
+    StarterGui:SetCore("SendNotification", {
+        Title = "✅ ¡LISTO!",
+        Text = "Todo desbloqueado, Treadmills al maximo y dinero infinito!",
+        Duration = 7
+    })
+end
+
+-- AUTO CORRER
+local autoRun = true
+local function moveForward()
+    if autoRun and humanoid then
+        humanoid:Move(Vector3.new(0,0,-1), true)
+    end
+end
+RunService.Heartbeat:Connect(moveForward)
+
+-- EVENTOS
+UnlockAllBtn.MouseButton1Click:Connect(unlockEverything)
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+print("Hub Cargado!")
