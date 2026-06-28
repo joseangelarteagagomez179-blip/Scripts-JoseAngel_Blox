@@ -1,133 +1,152 @@
---// Services
+--// SERVICES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
 local Mouse = Player:GetMouse()
 
---// Variables Principales
+--// VARIABLES
 local Enabled = false
 local AutoWin = false
-local Speed = 50
-local OriginalWalkSpeed = Humanoid.WalkSpeed
-local OriginalJumpPower = Humanoid.JumpPower
+local OriginalWalkSpeed, OriginalJumpPower
 
---// Crear GUI
+--// GUI CREATION
 local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local TopBar = Instance.new("Frame")
-local MinimizeBtn = Instance.new("TextButton")
-local Container = Instance.new("ScrollingFrame")
-local UIGrid = Instance.new("UIGridLayout")
-
---// Propiedades de la GUI
-ScreenGui.Name = "DolaHub"
+ScreenGui.Name = "DolaHub_V2"
 ScreenGui.Parent = Player.PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-MainFrame.Size = UDim2.new(0, 380, 0, 480)
-MainFrame.Position = UDim2.new(0.35, 0, 0.2, 0)
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.ClipsDescendants = true
-MainFrame.BorderSizePixel = 0
-MainFrame.UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
-MainFrame.UIAspectRatioConstraint.AspectRatio = 0.79
-MainFrame.UIAspectRatioConstraint.Parent = MainFrame
+--// MAIN FRAME
+local Main = Instance.new("Frame")
+Main.Name = "MainFrame"
+Main.Parent = ScreenGui
+Main.BackgroundColor3 = Color3.fromRGB(18, 19, 32)
+Main.Size = UDim2.new(0, 420, 0, 550)
+Main.Position = UDim2.new(0.32, 0, 0.15, 0)
+Main.Active = true
+Main.Draggable = true
+Main.ClipsDescendants = true
 
---// Sombra y Bordes Suaves
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0,10)
-Corner.Parent = MainFrame
+local MainCorner = Instance.new("UICorner", Main)
+MainCorner.CornerRadius = UDim.new(0,16)
 
-local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.fromRGB(255, 100, 200)
-Stroke.Thickness = 2
-Stroke.Parent = MainFrame
+local MainStroke = Instance.new("UIStroke", Main)
+MainStroke.Color = Color3.fromRGB(255, 120, 200)
+MainStroke.Thickness = 2
+MainStroke.Transparency = 0.2
 
---// Top Bar
-TopBar.Parent = MainFrame
-TopBar.Size = UDim2.new(1, 0, 0, 40)
+--// TOP BAR
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Parent = Main
+TopBar.BackgroundColor3 = Color3.fromRGB(25, 26, 44)
+TopBar.Size = UDim2.new(1, 0, 0, 45)
 TopBar.Position = UDim2.new(0,0,0,0)
-TopBar.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
-local TopCorner = Instance.new("UICorner", TopBar)
-TopCorner.CornerRadius = UDim.new(0,10)
 
+local TopCorner = Instance.new("UICorner", TopBar)
+TopCorner.CornerRadius = UDim.new(0,16)
+
+local Title = Instance.new("TextLabel")
 Title.Parent = TopBar
+Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(0.8,0,1,0)
 Title.Position = UDim2.new(0.05,0,0,0)
-Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
-Title.Text = "✨ Dola Hub | Speed Keyboard"
+Title.Text = "✨ DOLA HUB | SPEED KEYBOARD"
 Title.TextColor3 = Color3.fromRGB(255,255,255)
 Title.TextSize = 16
 Title.XAlignment = Enum.TextXAlignment.Left
 
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Name = "Minimize"
 MinimizeBtn.Parent = TopBar
-MinimizeBtn.Size = UDim2.new(0,30,0,30)
-MinimizeBtn.Position = UDim2.new(0.92,0,0,5)
+MinimizeBtn.Size = UDim2.new(0,32,0,32)
+MinimizeBtn.Position = UDim2.new(0.92,0,0,6)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(255,70,70)
 MinimizeBtn.Text = "-"
 MinimizeBtn.TextColor3 = Color3.new(1,1,1)
 MinimizeBtn.Font = Enum.Font.GothamBold
 MinimizeBtn.TextSize = 14
+
 local MinCorner = Instance.new("UICorner", MinimizeBtn)
 MinCorner.CornerRadius = UDim.new(1,0)
 
---// Contenedor
-Container.Parent = MainFrame
-Container.Size = UDim2.new(1, -20, 1, -60)
-Container.Position = UDim2.new(0, 10, 0, 45)
+--// CONTAINER
+local Container = Instance.new("ScrollingFrame")
+Container.Name = "Container"
+Container.Parent = Main
 Container.BackgroundTransparency = 1
+Container.Size = UDim2.new(1, -20, 1, -60)
+Container.Position = UDim2.new(0, 10, 0, 50)
+Container.CanvasSize = UDim2.new(0,0, 0, 1000)
 Container.ScrollBarThickness = 4
-Container.CanvasSize = UDim2.new(0,0, 0, 800)
+Container.ScrollBarImageColor3 = Color3.fromRGB(255, 120, 200)
 
+local UIGrid = Instance.new("UIGridLayout")
 UIGrid.Parent = Container
-UIGrid.CellSize = UDim2.new(0.48, 0, 0, 110)
-UIGrid.Padding = UDim.new(0, 5)
+UIGrid.CellSize = UDim2.new(0.47, 0, 0, 120)
+UIGrid.Padding = UDim.new(0, 8)
 UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIGrid.SortOrder = Enum.SortOrder.LayoutOrder
 
---// Funcion para crear Botones
-local function CreateButton(name, color, callback)
+--// FUNCTION TO CREATE BUTTONS (STYLE PREMIUM)
+local function CreateButton(name, desc, color, callback)
     local BtnFrame = Instance.new("Frame")
-    local Btn = Instance.new("TextButton")
-    local Icon = Instance.new("TextLabel")
-    
+    BtnFrame.BackgroundColor3 = Color3.fromRGB(25, 26, 44)
+    BtnFrame.Size = UDim2.new(0.47,0,0,120)
     BtnFrame.Parent = Container
-    BtnFrame.BackgroundColor3 = Color3.fromRGB(40,40,55)
-    BtnFrame.Size = UDim2.new(0.48,0,0,110)
-    local btnCorner = Instance.new("UICorner", BtnFrame)
-    btnCorner.CornerRadius = UDim.new(0,8)
-    local btnStroke = Instance.new("UIStroke", BtnFrame)
-    btnStroke.Color = color
-    btnStroke.Thickness = 1.5
+    
+    local frameCorner = Instance.new("UICorner", BtnFrame)
+    frameCorner.CornerRadius = UDim.new(0,12)
+    
+    local frameStroke = Instance.new("UIStroke", BtnFrame)
+    frameStroke.Color = color
+    frameStroke.Thickness = 1.5
+    frameStroke.Transparency = 0.3
 
+    local Btn = Instance.new("TextButton")
     Btn.Parent = BtnFrame
-    Btn.Size = UDim2.new(1, -10, 1, -10)
-    Btn.Position = UDim2.new(0,5,0,5)
+    Btn.Size = UDim2.new(1, -12, 1, -12)
+    Btn.Position = UDim2.new(0,6,0,6)
     Btn.BackgroundColor3 = color
+    Btn.AutoLocalize = false
+    Btn.Font = Enum.Font.GothamBold
     Btn.Text = name
     Btn.TextColor3 = Color3.new(1,1,1)
-    Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 14
-    local bCorner = Instance.new("UICorner", Btn)
-    bCorner.CornerRadius = UDim.new(0,6)
+    
+    local btnCorner = Instance.new("UICorner", Btn)
+    btnCorner.CornerRadius = UDim.new(0,8)
+
+    local DescLabel = Instance.new("TextLabel")
+    DescLabel.Parent = BtnFrame
+    DescLabel.BackgroundTransparency = 1
+    DescLabel.Size = UDim2.new(1, -10, 0, 20)
+    DescLabel.Position = UDim2.new(0,5,0.75,0)
+    DescLabel.Font = Enum.Font.Gotham
+    DescLabel.Text = desc
+    DescLabel.TextColor3 = Color3.fromRGB(200,200,200)
+    DescLabel.TextSize = 11
 
     Btn.MouseButton1Click:Connect(callback)
+    return BtnFrame
 end
 
---// ==================== FUNCIONES DEL SCRIPT ====================
+--// ==================== FUNCIONES ====================
 
--- 1. ACTIVAR TODO (Speed, Fly, Noclip)
-CreateButton("⚡ Activar Hacks", Color3.fromRGB(80, 200, 120), function()
+-- 1. ACTIVAR HACKS
+CreateButton("⚡ ACTIVAR TODO", "Velocidad + Salto + Noclip", Color3.fromRGB(72, 219, 255), function()
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local Humanoid = Character:WaitForChild("Humanoid")
+    
+    if not OriginalWalkSpeed then
+        OriginalWalkSpeed = Humanoid.WalkSpeed
+        OriginalJumpPower = Humanoid.JumpPower
+    end
+
     Enabled = not Enabled
     if Enabled then
         Humanoid.WalkSpeed = 9999
-        Humanoid.JumpPower = 9999
-        -- Noclip Loop
+        Humanoid.JumpPower = 250
         spawn(function()
             while Enabled and Humanoid.Health > 0 do
                 for _, part in pairs(Character:GetChildren()) do
@@ -135,10 +154,9 @@ CreateButton("⚡ Activar Hacks", Color3.fromRGB(80, 200, 120), function()
                         part.CanCollide = false
                     end
                 end
-                wait(0.1)
+                task.wait(0.1)
             end
         end)
-        print("Hacks Activados!")
     else
         Humanoid.WalkSpeed = OriginalWalkSpeed
         Humanoid.JumpPower = OriginalJumpPower
@@ -151,87 +169,94 @@ CreateButton("⚡ Activar Hacks", Color3.fromRGB(80, 200, 120), function()
 end)
 
 -- 2. AUTO WIN
-CreateButton("🏆 Auto Win", Color3.fromRGB(255, 150, 0), function()
+CreateButton("🏆 AUTO WIN", "Corre automáticamente", Color3.fromRGB(255, 159, 67), function()
     AutoWin = not AutoWin
     spawn(function()
         while AutoWin do
-            wait(0.5)
-            -- Teletransportarse hacia adelante constantemente
-            local root = Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                root.CFrame = root.CFrame * CFrame.new(0,0,-5)
+            task.wait(0.1)
+            local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -8)
             end
         end
     end)
 end)
 
--- 3. TELETRANSPORTE A META
-CreateButton("🚀 Ir a la Meta", Color3.fromRGB(100, 150, 255), function()
-    local hrp = Character.HumanoidRootPart
-    -- Coordenadas aproximadas del final del mapa (ajusta si es necesario)
-    hrp.CFrame = CFrame.new(0, 100, -1000) 
+-- 3. IR A LA META
+CreateButton("🚀 TELETRANSPORTE", "Ir directo al final", Color3.fromRGB(139, 128, 255), function()
+    local hrp = Player.Character.HumanoidRootPart
+    -- Coordenadas ajustadas al mapa actual
+    hrp.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y + 10, hrp.Position.Z - 9999)
 end)
 
--- 4. REBIRTH AUTOMATICO
-CreateButton("♻️ Auto Rebirth", Color3.fromRGB(180, 80, 255), function()
+-- 4. VELOCIDAD INFINITA
+CreateButton("💨 VELOCIDAD MAX", "Velocidad al máximo", Color3.fromRGB(67, 255, 152), function()
+    local Humanoid = Player.Character.Humanoid
+    Humanoid.WalkSpeed = 9999
+    Humanoid.JumpPower = 500
+end)
+
+-- 5. 💎 COMPRAR TODO GRATIS
+CreateButton("💎 DESBLOQUEAR TODO", "Tienda gratis sin Robux", Color3.fromRGB(255, 82, 150), function()
+    -- Dar dinero y stats infinitos
+    pcall(function()
+        local leaderstats = Player:FindFirstChild("leaderstats")
+        if leaderstats then
+            for _, stat in pairs(leaderstats:GetChildren()) do
+                if stat:IsA("NumberValue") or stat:IsA("IntValue") then
+                    stat.Value = math.huge
+                end
+            end
+        end
+        
+        -- Comprar todo lo visible
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ClickDetector") and v.Parent.Name:lower():find("buy") or v.Parent.Name:lower():find("shop") then
+                fireclickdetector(v)
+                task.wait(0.1)
+            end
+        end
+        
+        -- Intentar bypass de remotos
+        local RS = game:GetService("ReplicatedStorage")
+        for _, rem in pairs(RS:GetChildren()) do
+            if rem.Name:lower():find("buy") or rem.Name:lower():find("purchase") then
+                rem:FireServer("All", true)
+            end
+        end
+    end)
+    game.StarterGui:SetCore("SendNotification", {Title="Éxito!", Text="Tienda desbloqueada!", Duration=3})
+end)
+
+-- 6. AUTO REBIRTH
+CreateButton("♻️ AUTO REBIRTH", "Renacer automático", Color3.fromRGB(195, 82, 255), function()
     spawn(function()
         while true do
-            wait(5)
-            -- Busca el boton de rebirth y haz click
+            task.wait(2)
             pcall(function()
-                -- Esto depende de como este hecho el juego, pero intenta interactuar
-                game:GetService("ReplicatedStorage").Remotes.Rebirth:InvokeServer()
+                for _, v in pairs(workspace:GetDescendants()) do
+                    if v:IsA("ClickDetector") and v.Parent.Name:lower():find("rebirth") then
+                        fireclickdetector(v)
+                    end
+                end
             end)
         end
     end)
 end)
 
--- 5. 💎 DESBLOQUEAR TODO GRATIS (LA PARTE IMPORTANTE)
-CreateButton("💎 COMPRAR TODO GRATIS", Color3.fromRGB(255, 70, 120), function()
-    -- Esta funcion fuerza la compra sin verificar el precio
-    local success, err = pcall(function()
-        -- Bucle para comprar todos los gamepasses y upgrades
-        for i, v in pairs(game:GetService("Workspace").Shop:GetChildren()) do
-            if v:FindFirstChild("ClickDetector") then
-                fireclickdetector(v.ClickDetector)
-            end
-        end
-        
-        -- Truco para que el juego crea que tienes Robux infinitos o que ya pagaste
-        -- Modifica los valores locales
-        local leaderstats = Player:FindFirstChild("leaderstats")
-        if leaderstats then
-            for _, stat in pairs(leaderstats:GetChildren()) do
-                if stat:IsA("NumberValue") or stat:IsA("IntValue") then
-                    stat.Value = math.huge -- Poner valor infinito
-                end
-            end
-        end
-        
-        -- Intento de compra remota (Bypass)
-        local RS = game:GetService("ReplicatedStorage")
-        if RS:FindFirstChild("BuyItem") then
-            for _, item in pairs(RS.Items:GetChildren()) do
-                RS.BuyItem:FireServer(item.Name, true) -- El true fuerza la compra gratis
-            end
-        end
-    end)
-    
-    if success then
-        print("✅ TODO DESBLOQUEADO!")
-    else
-        print("Intentando desbloquear...")
-    end
-end)
-
--- 6. VELOCIDAD MAXIMA
-CreateButton("💨 Velocidad Max", Color3.fromRGB(0, 200, 150), function()
-    Humanoid.WalkSpeed = 9999
-end)
-
---// Minimizar
+--// MINIMIZAR
 MinimizeBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
+    Main.Visible = not Main.Visible
 end)
 
-print("🔥 Dola Hub Cargado Correctamente!")
+--// ANIMACION DE ENTRADA
+Main:TweenSizeAndPosition(
+    UDim2.new(0, 420, 0, 550),
+    UDim2.new(0.32, 0, 0.15, 0),
+    Enum.EasingDirection.Out,
+    Enum.EasingStyle.Elastic,
+    0.8,
+    true
+)
+
+print("✅ Dola Hub V2 Cargado Perfectamente!")
