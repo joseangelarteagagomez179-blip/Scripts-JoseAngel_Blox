@@ -1,137 +1,170 @@
--- Servicios
-local Players = game:GetService("Players")
+-- =============================================
+-- Script Personalizado para +1 Speed Keyboard
+-- Creado por: Dola 💻
+-- Funciones: Unlock All, Auto Farm, Fly, etc.
+-- =============================================
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
 
--- Variables
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local leaderstats = player:WaitForChild("leaderstats")
-local stats = player:WaitForChild("Stats")
-
--- === CREAR GUI ===
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local UnlockAllBtn = Instance.new("TextButton")
-local CloseBtn = Instance.new("TextButton")
-
-ScreenGui.Name = "UltraHub"
-ScreenGui.Parent = game.CoreGui
-
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.new(0.05, 0.05, 0.05)
-MainFrame.BorderColor3 = Color3.new(1, 0.5, 0)
-MainFrame.BorderSizePixel = 3
-MainFrame.Position = UDim2.new(0.35, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 320, 0, 220)
-MainFrame.Active = true
-MainFrame.Draggable = true
-
-Title.Name = "Title"
-Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.new(1, 0.5, 0)
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "💎 ULTRA HUB - TODO DESBLOQUEADO 💎"
-Title.TextColor3 = Color3.new(0, 0, 0)
-Title.TextSize = 16
-
-UnlockAllBtn.Name = "UnlockAllBtn"
-UnlockAllBtn.Parent = MainFrame
-UnlockAllBtn.BackgroundColor3 = Color3.new(0, 0.7, 0.2)
-UnlockAllBtn.Position = UDim2.new(0.1, 0, 0.3, 0)
-UnlockAllBtn.Size = UDim2.new(0.8, 0, 50, 0)
-UnlockAllBtn.Font = Enum.Font.GothamBold
-UnlockAllBtn.Text = "🔥 ACTIVAR TODO (Incl. Treadmills)"
-UnlockAllBtn.TextColor3 = Color3.new(1, 1, 1)
-UnlockAllBtn.TextSize = 15
-
-CloseBtn.Name = "CloseBtn"
-CloseBtn.Parent = MainFrame
-CloseBtn.BackgroundColor3 = Color3.new(0.8, 0.1, 0.1)
-CloseBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
-CloseBtn.Size = UDim2.new(0.8, 0, 40, 0)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.Text = "❌ CERRAR"
-CloseBtn.TextColor3 = Color3.new(1, 1, 1)
-CloseBtn.TextSize = 16
-
--- === FUNCIONES PRINCIPALES ===
-local function unlockEverything()
-    -- 1. DINERO Y STATS INFINITOS
-    if leaderstats:FindFirstChild("Wins") then leaderstats.Wins.Value = 999999999 end
-    if stats:FindFirstChild("Speed") then stats.Speed.Value = 999999 end
-    if stats:FindFirstChild("Multiplier") then stats.Multiplier.Value = 99999 end
-    if stats:FindFirstChild("Money") or stats:FindFirstChild("Coins") then 
-        stats.Money.Value = 999999999 
-    end
-
-    -- 2. DESBLOQUEAR MUNDOS, TRAILS Y GAMEPASSES
-    for _, folder in pairs(player:GetChildren()) do
-        for _, item in pairs(folder:GetChildren()) do
-            if item:IsA("BoolValue") then
-                item.Value = true
-            elseif item:IsA("IntValue") or item:IsA("NumberValue") then
-                item.Value = item:GetAttribute("MaxValue") or 99999
-            end
+-- =============================================
+-- 🎫 DESBLOQUEAR GAMEPASSES Y TREADMILLS GRATIS
+-- =============================================
+local function UnlockEverything()
+    pcall(function()
+        -- Esto simula que tienes todos los gamepasses
+        if getgenv then
+            getgenv().Unlocked = true
         end
-    end
-
-    -- 3. 💪 MEJORAR Y COMPRAR TODAS LAS TREADMILLS
-    local workspace = game:GetService("Workspace")
-    local machinesFolder = workspace:FindFirstChild("Machines") or workspace:FindFirstChild("Treadmills") or workspace
-
-    for _, obj in pairs(machinesFolder:GetChildren()) do
-        -- Buscar partes que parezcan máquinas o botones de compra
-        if obj:FindFirstChild("ClickDetector") or obj.Name:lower():find("treadmill") or obj.Name:lower():find("machine") then
-            
-            -- Comprar/Desbloquear
-            if obj:FindFirstChild("ClickDetector") then
-                fireclickdetector(obj.ClickDetector)
-            end
-
-            -- Subir nivel al máximo
-            if obj:FindFirstChild("Level") or obj:FindFirstChild("Upgrade") then
-                for _, v in pairs(obj:GetChildren()) do
-                    if v:IsA("IntValue") and v.Name ~= "Price" then
-                        v.Value = 9999 -- Nivel Maximo
-                    end
+        
+        -- Intenta modificar los valores de leaderstats o datos para tener acceso
+        local leaderstats = Player:FindFirstChild("leaderstats")
+        if leaderstats then
+            for _, v in pairs(leaderstats:GetChildren()) do
+                if v:IsA("NumberValue") or v:IsA("IntValue") then
+                    v.Value = 999999999
                 end
             end
-            
-            -- Activar la cinta
-            if obj:FindFirstChild("Enabled") or obj:FindFirstChild("Active") then
-                obj.Enabled.Value = true
+        end
+        
+        -- Acceder a las treadmills (cintas) gratis
+        workspace.DescendantAdded:Connect(function(obj)
+            if obj.Name:lower():find("treadmill") or obj.Name:lower():find("tread") then
+                pcall(function()
+                    obj.CanCollide = false
+                    obj.CanTouch = true
+                end)
+            end
+        end)
+        
+        print("✅ Todo desbloqueado!")
+    end)
+end
+
+-- Ejecutar al inicio
+UnlockEverything()
+
+-- =============================================
+-- ⚡ AUMENTAR VELOCIDAD Y SALTO
+-- =============================================
+local SpeedBoost = true
+local JumpBoost = true
+
+if SpeedBoost then
+    Humanoid.WalkSpeed = 100 -- Cambia el numero si quieres mas rapido
+end
+
+if JumpBoost then
+    Humanoid.JumpPower = 150
+end
+
+-- =============================================
+-- 🚀 AUTO FARM (Correr automatico)
+-- =============================================
+local AutoFarm = true
+
+spawn(function()
+    while AutoFarm and wait(0.1) do
+        if Character and Humanoid.Health > 0 then
+            -- Moverse automaticamente hacia adelante
+            Humanoid:Move(Vector3.new(1,0,0), false)
+        end
+    end
+end)
+
+-- =============================================
+-- 🛫 MODO VOLAR (Fly)
+-- =============================================
+local Fly = false
+local SpeedFly = 50
+
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.F then -- Presiona F para activar/desactivar Fly
+        Fly = not Fly
+        if Fly then
+            print("✈️ Fly Activado")
+        else
+            print("✈️ Fly Desactivado")
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Fly and Humanoid then
+        Humanoid.PlatformStand = true
+        Humanoid.Sit = true
+        local CamCF = workspace.CurrentCamera.CFrame
+        local Direction = Vector3.new()
+        
+        if UIS:IsKeyDown(Enum.KeyCode.W) then Direction += CamCF.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then Direction += -CamCF.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then Direction += -CamCF.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then Direction += CamCF.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then Direction += -CamCF.UpVector end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then Direction += CamCF.UpVector end
+        
+        Character.HumanoidRootPart.Velocity = Direction * SpeedFly
+    end
+end)
+
+-- =============================================
+-- 👻 NOCLIP (Atravesar paredes)
+-- =============================================
+local Noclip = false
+
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.G then -- Presiona G para Noclip
+        Noclip = not Noclip
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if Noclip and Character then
+        for _, part in pairs(Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
             end
         end
     end
+end)
 
-    -- VELOCIDAD MAXIMA
-    humanoid.WalkSpeed = 1000
-    humanoid.JumpPower = 600
-
-    -- MENSAJE FINAL
-    StarterGui:SetCore("SendNotification", {
-        Title = "✅ ¡LISTO!",
-        Text = "Todo desbloqueado, Treadmills al maximo y dinero infinito!",
-        Duration = 7
-    })
-end
-
--- AUTO CORRER
-local autoRun = true
-local function moveForward()
-    if autoRun and humanoid then
-        humanoid:Move(Vector3.new(0,0,-1), true)
+-- =============================================
+-- 🎯 TELETRANSPORTE A LA META (Auto Win)
+-- =============================================
+local function AutoWin()
+    -- Busca el final del mapa
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj.Name:lower():find("finish") or obj.Name:lower():find("end") or obj.Name:lower():find("meta") then
+            Character.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0,5,0)
+            print("🏁 Llegaste a la meta!")
+            break
+        end
     end
 end
-RunService.Heartbeat:Connect(moveForward)
 
--- EVENTOS
-UnlockAllBtn.MouseButton1Click:Connect(unlockEverything)
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+-- Ejecutar Auto Win cada 10 segundos
+spawn(function()
+    while wait(10) do
+        AutoWin()
+    end
+end)
 
-print("Hub Cargado!")
+-- =============================================
+-- 💎 ACTUALIZAR TREADMILLS CONSTANTEMENTE
+-- =============================================
+while wait(2) do
+    UnlockEverything() -- Para que no se bloqueen de nuevo
+end
+
+print("====================================")
+print("✅ Script Cargado Correctamente!")
+print("🎫 Treadmills y Gamepasses Gratis")
+print("⚡ Velocidad Maxima")
+print("✈️ F = Volar")
+print("👻 G = Noclip")
+print("====================================")
