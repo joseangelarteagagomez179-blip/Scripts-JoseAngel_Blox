@@ -1,19 +1,8 @@
---// Services
+--// SERVICES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local PlayerGui = Players.LocalPlayer.PlayerGui
-
---// Variables
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local TitleBar = Instance.new("Frame")
-local TitleText = Instance.new("TextLabel")
-local CloseButton = Instance.new("TextButton")
-local MinimizeButton = Instance.new("TextButton")
-local Container = Instance.new("Frame")
-local BackgroundEffect = Instance.new("Frame")
-local UIGradient = Instance.new("UIGradient")
 
 --// == ANIMACIÓN DE BIENVENIDA (SOLO LETRAS RGB) ==
 local WelcomeText = Instance.new("TextLabel")
@@ -28,57 +17,61 @@ WelcomeText.TextTransparency = 1
 WelcomeText.TextStrokeTransparency = 0.5
 WelcomeText.ZIndex = 10
 
--- Efecto RGB Giratorio
+-- Efecto de colores RGB girando
 local hue = 0
 local RGBLoop
 RGBLoop = RunService.Heartbeat:Connect(function()
     hue = hue + 0.01
     if hue > 1 then hue = 0 end
-    WelcomeText.TextColor3 = Color3.fromHSV(hue, 0.7, 1)
+    WelcomeText.TextColor3 = Color3.fromHSV(hue, 0.8, 1)
 end)
 
 -- Animación de entrada y salida
-local TweenInfo = TweenInfo.new(1.2, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
-local FadeIn = TweenService:Create(WelcomeText, TweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0})
-local FadeOut = TweenService:Create(WelcomeText, TweenInfo, {TextTransparency = 1, TextStrokeTransparency = 1})
+local TweenInfoFast = TweenInfo.new(1.2, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out)
+local FadeIn = TweenService:Create(WelcomeText, TweenInfoFast, {TextTransparency = 0, TextStrokeTransparency = 0})
+local FadeOut = TweenService:Create(WelcomeText, TweenInfoFast, {TextTransparency = 1, TextStrokeTransparency = 1})
 
 FadeIn:Play()
 task.wait(3.5)
 FadeOut:Play()
 task.wait(1.2)
-RGBLoop:Disconnect() -- Detener colores
+RGBLoop:Disconnect()
 WelcomeText:Destroy()
 
 --// == CREACIÓN DE LA INTERFAZ PRINCIPAL ==
+local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
 
--- Main Frame (Pequeño y Redondeado)
-MainFrame.Name = "MainFrame"
+-- Marco Principal
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainUI"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-MainFrame.Size = UDim2.new(0, 420, 0, 500) -- Tamaño más pequeño
-MainFrame.Position = UDim2.new(0.5, -210, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.Size = UDim2.new(0, 400, 0, 480)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -240)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.ClipsDescendants = true
 
 -- Esquinas Redondeadas
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0,18)
-Corner.Parent = MainFrame
+local UICornerMain = Instance.new("UICorner")
+UICornerMain.CornerRadius = UDim.new(0, 20)
+UICornerMain.Parent = MainFrame
 
 -- Fondo con Efecto Neón Movimiento
+local BackgroundEffect = Instance.new("Frame")
 BackgroundEffect.Parent = MainFrame
-BackgroundEffect.BackgroundColor3 = Color3.fromRGB(25,25,25)
+BackgroundEffect.BackgroundColor3 = Color3.fromRGB(20,20,20)
 BackgroundEffect.Size = UDim2.new(1.5,0,1.5,0)
 BackgroundEffect.Position = UDim2.new(-0.25,0,-0.25,0)
 BackgroundEffect.ZIndex = 0
+
 local bgCorner = Instance.new("UICorner")
-bgCorner.CornerRadius = UDim.new(0,18)
+bgCorner.CornerRadius = UDim.new(0,20)
 bgCorner.Parent = BackgroundEffect
 
+local UIGradient = Instance.new("UIGradient")
 UIGradient.Parent = BackgroundEffect
 UIGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
@@ -87,22 +80,25 @@ UIGradient.Color = ColorSequence.new{
 }
 UIGradient.Rotation = 45
 
--- Animar fondo
+-- Animar fondo colores
 spawn(function()
     while wait(0.05) do
-        UIGradient.Rotation = UIGradient.Rotation + 5
+        UIGradient.Rotation = UIGradient.Rotation + 4
     end
 end)
 
 -- Barra de Titulo
+local TitleBar = Instance.new("Frame")
 TitleBar.Parent = MainFrame
 TitleBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
 TitleBar.Size = UDim2.new(1, 0, 0, 40)
 TitleBar.ZIndex = 2
+
 local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0,18)
+titleCorner.CornerRadius = UDim.new(0,20)
 titleCorner.Parent = TitleBar
 
+local TitleText = Instance.new("TextLabel")
 TitleText.Parent = TitleBar
 TitleText.BackgroundTransparency = 1
 TitleText.Size = UDim2.new(0.6, 0, 1, 0)
@@ -114,7 +110,7 @@ TitleText.TextSize = 18
 TitleText.ZIndex = 3
 
 -- Boton Minimizar
-MinimizeButton = Instance.new("TextButton")
+local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Parent = TitleBar
 MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 180, 0)
 MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
@@ -127,6 +123,7 @@ minCorner.CornerRadius = UDim.new(0,6)
 minCorner.Parent = MinimizeButton
 
 -- Boton Cerrar
+local CloseButton = Instance.new("TextButton")
 CloseButton.Parent = TitleBar
 CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 CloseButton.Size = UDim2.new(0, 30, 0, 30)
@@ -139,6 +136,7 @@ closeCorner.CornerRadius = UDim.new(0,6)
 closeCorner.Parent = CloseButton
 
 -- Contenedor Principal
+local Container = Instance.new("Frame")
 Container.Parent = MainFrame
 Container.BackgroundTransparency = 1
 Container.Size = UDim2.new(1, -20, 1, -60)
@@ -161,7 +159,7 @@ end)
 MainFrame.InputChanged:Connect(function(input)
     if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
         local Delta = input.Position - DragStart
-        MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.X + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+        MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
     end
 end)
 
@@ -175,10 +173,10 @@ end)
 MinimizeButton.MouseButton1Click:Connect(function()
     Minimized = not Minimized
     if Minimized then
-        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0,420,0,40)}):Play()
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0,400,0,40)}):Play()
         Container.Visible = false
     else
-        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0,420,0,500)}):Play()
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0,400,0,480)}):Play()
         Container.Visible = true
     end
 end)
@@ -329,22 +327,20 @@ local function CreateToggle(name, posY)
         if Enabled then
             TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
             TweenService:Create(Knob, TweenInfo.new(0.2), {Position = UDim2.new(0, 27, 0, 2.5)}):Play()
-            -- AQUI IRIA LA FUNCION ACTIVADA
             print(name .. " ACTIVADO")
         else
             TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
             TweenService:Create(Knob, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0, 2.5)}):Play()
-            -- AQUI IRIA LA FUNCION DESACTIVADA
             print(name .. " DESACTIVADO")
         end
     end)
 end
 
--- CREAR FUNCIONES (Aqui puedes agregar cuantas quieras)
+-- CREAR FUNCIONES
 CreateToggle("Auto Farm Dinero", 10)
 CreateToggle("Auto Construir", 60)
 CreateToggle("Velocidad Rapida", 110)
 CreateToggle("Fly / Volar", 160)
 CreateToggle("Auto Recoger Items", 210)
 
-print("✅ Script JoseAngel_Blox - Listo!")
+print("✅ Script JoseAngel_Blox - Cargado Correctamente!")
