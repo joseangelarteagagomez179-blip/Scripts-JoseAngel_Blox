@@ -1,261 +1,238 @@
---// 🔒 PROTECCIÓN: SOLO FUNCIONA EN MANSION TYCOON
-local GameID = game.PlaceId
-local TargetID = 12912731475 -- ID DEL JUEGO
-
-if GameID ~= TargetID then
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "⚠️ SCRIPT DE JOSEANGEL_BLOX",
-        Text = "Este script solo funciona en Mansion Tycoon!",
-        Duration = 4
-    })
-    return -- SE DETIENE AQUÍ
-end
-
---// SERVICES
+--// Services
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
+local PlayerGui = Players.LocalPlayer.PlayerGui
 
---// VARIABLES
+--// Variables
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
 local Title = Instance.new("TextLabel")
-local Container = Instance.new("Frame")
+local Topbar = Instance.new("Frame")
+local MenuButtons = Instance.new("Frame")
+local UIListLayout = Instance.new("UIListLayout")
+local ContentFrame = Instance.new("Frame")
+local WelcomeFrame = Instance.new("Frame")
+local WelcomeText = Instance.new("TextLabel")
 
---// PESTAÑAS
-local TabInfo = Instance.new("TextButton")
-local TabMain = Instance.new("TextButton")
-
---// PAGINAS
-local PageInfo = Instance.new("Frame")
-local PageMain = Instance.new("Frame")
-
---// ESTADO DE FUNCIONES
-local AutoCollectON = false
-local AutoBuildON = false
-local SpeedON = false
-
---// CREAR GUI
-ScreenGui.Name = "MansionTycoonHub"
-ScreenGui.Parent = game:GetService("CoreGui")
+--// Propiedades de la GUI
+ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
---// MARCO PRINCIPAL
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-MainFrame.Size = UDim2.new(0, 650, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -325, 0.5, -210)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.15, 0, 0.15, 0)
+MainFrame.Size = UDim2.new(0, 600, 0, 400) -- Cuadrado y ancho
 MainFrame.Active = true
-MainFrame.Draggable = true -- SE PUEDE MOVER
-MainFrame.Selectable = false
+MainFrame.Draggable = true -- Deslizable por la pantalla
 
-UICorner.CornerRadius = UDim.new(0, 18)
+UICorner.CornerRadius = UDim.new(0, 16) -- Esquinas redondeadas
 UICorner.Parent = MainFrame
 
---// TITULO
+--// Topbar
+Topbar.Name = "Topbar"
+Topbar.Parent = MainFrame
+Topbar.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+Topbar.BorderSizePixel = 0
+Topbar.Size = UDim2.new(1, 0, 0, 50)
+
 Title.Name = "Title"
-Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-Title.Size = UDim2.new(1, 0, 0, 55)
+Title.Parent = Topbar
+Title.BackgroundTransparency = 1.000
+Title.Size = UDim2.new(1, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "🏰 MANSION TYCOON - JOSEANGEL_BLOX"
-Title.TextColor3 = Color3.fromRGB(255, 215, 0)
-Title.TextSize = 24
-Title.BorderSizePixel = 0
+Title.Text = "🏠 Mansion Tycoon Script"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20.000
 
-local TitleCorner = Instance.new("UICorner", Title)
-TitleCorner.CornerRadius = UDim.new(0,18)
+--// Menú de Botones
+MenuButtons.Name = "MenuButtons"
+MenuButtons.Parent = MainFrame
+MenuButtons.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+MenuButtons.BorderSizePixel = 0
+MenuButtons.Position = UDim2.new(0, 0, 0, 50)
+MenuButtons.Size = UDim2.new(0, 120, 1, -50)
 
---// BOTONES DE PESTAÑAS
-TabInfo.Name = "TabInfo"
-TabInfo.Parent = MainFrame
-TabInfo.Position = UDim2.new(0, 15, 0, 65)
-TabInfo.Size = UDim2.new(0, 110, 0, 35)
-TabInfo.Text = "ℹ️ INFO"
-TabInfo.BackgroundColor3 = Color3.fromRGB(70, 150, 255)
-TabInfo.TextColor3 = Color3.new(1,1,1)
-TabInfo.Font = Enum.Font.GothamBold
-TabInfo.BorderSizePixel = 0
+UIListLayout.Parent = MenuButtons
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.Padding = UDim.new(0, 10)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-TabMain.Name = "TabMain"
-TabMain.Parent = MainFrame
-TabMain.Position = UDim2.new(0, 135, 0, 65)
-TabMain.Size = UDim2.new(0, 110, 0, 35)
-TabMain.Text = "🚀 FUNCIONES"
-TabMain.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-TabMain.TextColor3 = Color3.new(1,1,1)
-TabMain.Font = Enum.Font.GothamBold
-TabMain.BorderSizePixel = 0
+--// Contenido
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Parent = MainFrame
+ContentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+ContentFrame.BorderSizePixel = 0
+ContentFrame.Position = UDim2.new(0, 120, 0, 50)
+ContentFrame.Size = UDim2.new(1, -120, 1, -50)
 
---// CONTENEDOR
-Container.Name = "Container"
-Container.Parent = MainFrame
-Container.Position = UDim2.new(0, 15, 0, 110)
-Container.Size = UDim2.new(1, -30, 1, -130)
-Container.BackgroundTransparency = 1
+--// Animación de Bienvenida
+WelcomeFrame.Name = "WelcomeFrame"
+WelcomeFrame.Parent = ScreenGui
+WelcomeFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+WelcomeFrame.BorderSizePixel = 0
+WelcomeFrame.Position = UDim2.new(0.5, -200, 0.5, -50)
+WelcomeFrame.Size = UDim2.new(0, 400, 0, 100)
+WelcomeFrame.Visible = false
 
---// PAGINA INFO
-PageInfo.Name = "PageInfo"
-PageInfo.Parent = Container
-PageInfo.Size = UDim2.new(1, 0, 1, 0)
-PageInfo.BackgroundTransparency = 1
+local WelcomeCorner = Instance.new("UICorner", WelcomeFrame)
+WelcomeCorner.CornerRadius = UDim.new(0, 12)
 
-local InfoText = Instance.new("TextLabel", PageInfo)
-InfoText.Size = UDim2.new(1, 0, 1, 0)
-InfoText.BackgroundTransparency = 1
-InfoText.Font = Enum.Font.Gotham
-InfoText.TextColor3 = Color3.new(1,1,1)
-InfoText.TextSize = 17
-InfoText.TextWrapped = true
-InfoText.Text = [[
-👨‍💻 CREADOR: JoseAngel_Blox
-📅 FECHA: 29/06/2026
-
-📖 MANUAL DE USO
-
-¡Hola! Gracias por usar mi script.
-Este script funciona 100% local y sin internet.
-
-✅ CARACTERÍSTICAS:
-• Auto Collect: Recoge dinero automáticamente.
-• Auto Build: Construye rápido tu mansión.
-• Speed Boost: Corre más rápido.
-
-📌 INSTRUCCIONES:
-1. Ve a la pestaña "FUNCIONES".
-2. Activa lo que necesites con un clic.
-3. ¡Disfruta y sube de nivel rápido!
-
-⚠️ NOTA: Si algo no funciona, reinicia el script.
-]]
-
---// PAGINA MAIN
-PageMain.Name = "PageMain"
-PageMain.Parent = Container
-PageMain.Size = UDim2.new(1, 0, 1, 0)
-PageMain.BackgroundTransparency = 1
-PageMain.Visible = false
-
---// BOTONES
-local BtnCollect = Instance.new("TextButton")
-BtnCollect.Size = UDim2.new(0.9, 0, 0, 45)
-BtnCollect.Position = UDim2.new(0.05, 0, 0, 20)
-BtnCollect.BackgroundColor3 = Color3.fromRGB(60, 180, 80)
-BtnCollect.Text = "✅ AUTO COLLECT DINERO"
-BtnCollect.TextColor3 = Color3.new(1,1,1)
-BtnCollect.Font = Enum.Font.GothamBold
-BtnCollect.Parent = PageMain
-
-local BtnBuild = Instance.new("TextButton")
-BtnBuild.Size = UDim2.new(0.9, 0, 0, 45)
-BtnBuild.Position = UDim2.new(0.05, 0, 0, 80)
-BtnBuild.BackgroundColor3 = Color3.fromRGB(60, 180, 80)
-BtnBuild.Text = "🏗️ AUTO CONSTRUIR"
-BtnBuild.TextColor3 = Color3.new(1,1,1)
-BtnBuild.Font = Enum.Font.GothamBold
-BtnBuild.Parent = PageMain
-
-local BtnSpeed = Instance.new("TextButton")
-BtnSpeed.Size = UDim2.new(0.9, 0, 0, 45)
-BtnSpeed.Position = UDim2.new(0.05, 0, 0, 140)
-BtnSpeed.BackgroundColor3 = Color3.fromRGB(60, 180, 80)
-BtnSpeed.Text = "⚡ VELOCIDAD EXTRA"
-BtnSpeed.TextColor3 = Color3.new(1,1,1)
-BtnSpeed.Font = Enum.Font.GothamBold
-BtnSpeed.Parent = PageMain
-
---// FUNCION CAMBIAR PESTAÑAS
-TabInfo.MouseButton1Click:Connect(function()
-    PageInfo.Visible = true
-    PageMain.Visible = false
-    TabInfo.BackgroundColor3 = Color3.fromRGB(70, 150, 255)
-    TabMain.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-end)
-
-TabMain.MouseButton1Click:Connect(function()
-    PageInfo.Visible = false
-    PageMain.Visible = true
-    TabInfo.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-    TabMain.BackgroundColor3 = Color3.fromRGB(70, 150, 255)
-end)
-
---// ANIMACION DE BIENVENIDA
-local WelcomeText = Instance.new("TextLabel")
+WelcomeText.Name = "WelcomeText"
+WelcomeText.Parent = WelcomeFrame
+WelcomeText.BackgroundTransparency = 1.000
 WelcomeText.Size = UDim2.new(1, 0, 1, 0)
-WelcomeText.Position = UDim2.new(0,0,0,0)
-WelcomeText.BackgroundColor3 = Color3.fromRGB(0,0,0)
 WelcomeText.Font = Enum.Font.GothamBold
-WelcomeText.Text = "BIENVENIDO\nJOSEANGEL_BLOX"
+WelcomeText.Text = "Bienvenidos a Scripts JoseAngel_Blox"
 WelcomeText.TextColor3 = Color3.fromRGB(255, 215, 0)
-WelcomeText.TextScaled = true
-WelcomeText.Parent = ScreenGui
-WelcomeText.ZIndex = 100
+WelcomeText.TextSize = 24.000
+WelcomeText.TextTransparency = 1
 
-local tweenIn = TweenService:Create(WelcomeText, TweenInfo.new(0.8), {BackgroundTransparency = 0, TextTransparency = 0})
-local tweenOut = TweenService:Create(WelcomeText, TweenInfo.new(0.8), {BackgroundTransparency = 1, TextTransparency = 1})
+--// Funciones
+local function CreateButton(name, order, callback)
+    local Button = Instance.new("TextButton")
+    Button.Name = name.."Button"
+    Button.Parent = MenuButtons
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+    Button.BorderSizePixel = 0
+    Button.Size = UDim2.new(0.8, 0, 0, 40)
+    Button.Font = Enum.Font.GothamBold
+    Button.Text = name
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 16.000
+    Button.LayoutOrder = order
+    
+    local BtnCorner = Instance.new("UICorner", Button)
+    BtnCorner.CornerRadius = UDim.new(0, 8)
+    
+    Button.MouseButton1Click:Connect(callback)
+end
 
-tweenIn:Play()
-task.wait(2.5)
-tweenOut:Play()
-task.wait(1)
-WelcomeText:Destroy()
+local function ClearContent()
+    for _, v in pairs(ContentFrame:GetChildren()) do
+        if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Frame") then
+            v:Destroy()
+        end
+    end
+end
 
---// LOGICA DE FUNCIONES
+--// Página Info
+local function PageInfo()
+    ClearContent()
+    
+    local InfoTitle = Instance.new("TextLabel")
+    InfoTitle.Parent = ContentFrame
+    InfoTitle.BackgroundTransparency = 1
+    InfoTitle.Size = UDim2.new(1, -20, 0, 40)
+    InfoTitle.Position = UDim2.new(0, 10, 0, 20)
+    InfoTitle.Font = Enum.Font.GothamBold
+    InfoTitle.Text = "📄 Información"
+    InfoTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+    InfoTitle.TextSize = 22
+    InfoTitle.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local Creator = Instance.new("TextLabel")
+    Creator.Parent = ContentFrame
+    Creator.BackgroundTransparency = 1
+    Creator.Size = UDim2.new(1, -20, 0, 30)
+    Creator.Position = UDim2.new(0, 10, 0, 70)
+    Creator.Font = Enum.Font.Gotham
+    Creator.Text = "👨‍💻 Nombre del creador: JoseAngel_Blox"
+    Creator.TextColor3 = Color3.fromRGB(255,255,255)
+    Creator.TextSize = 16
+    Creator.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local Date = Instance.new("TextLabel")
+    Date.Parent = ContentFrame
+    Date.BackgroundTransparency = 1
+    Date.Size = UDim2.new(1, -20, 0, 30)
+    Date.Position = UDim2.new(0, 10, 0, 110)
+    Date.Font = Enum.Font.Gotham
+    Date.Text = "📅 Fecha de lanzamiento: 29/06/2026"
+    Date.TextColor3 = Color3.fromRGB(255,255,255)
+    Date.TextSize = 16
+    Date.TextXAlignment = Enum.TextXAlignment.Left
+end
 
--- AUTO COLLECT
-BtnCollect.MouseButton1Click:Connect(function()
-    AutoCollectON = not AutoCollectON
-    if AutoCollectON then
-        BtnCollect.Text = "❌ AUTO COLLECT (ACTIVO)"
-        BtnCollect.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-        -- Iniciar loop
-        task.spawn(function()
-            while AutoCollectON do
-                for _, obj in pairs(workspace:GetChildren()) do
-                    if obj:IsA("Part") or obj:IsA("Model") then
-                        if string.find(string.lower(obj.Name), "money") or string.find(string.lower(obj.Name), "cash") then
-                            firetouchinterest(Character.HumanoidRootPart, obj, 0)
-                            firetouchinterest(Character.HumanoidRootPart, obj, 1)
-                        end
-                    end
-                end
-                task.wait(0.5)
+--// Página Main (Funciones)
+local function PageMain()
+    ClearContent()
+    
+    local MainTitle = Instance.new("TextLabel")
+    MainTitle.Parent = ContentFrame
+    MainTitle.BackgroundTransparency = 1
+    MainTitle.Size = UDim2.new(1, -20, 0, 40)
+    MainTitle.Position = UDim2.new(0, 10, 0, 20)
+    MainTitle.Font = Enum.Font.GothamBold
+    MainTitle.Text = "⚡ Funciones Principales"
+    MainTitle.TextColor3 = Color3.fromRGB(0, 255, 150)
+    MainTitle.TextSize = 22
+    MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Funciones
+    local functions = {
+        "Auto Recolectar Dinero",
+        "Auto Construir Todo",
+        "Auto Comprar Mejoras",
+        "Teletransportarse a Base",
+        "Dinero Infinito",
+        "Quitar Gravedad"
+    }
+    
+    local YPos = 70
+    for i, funcName in pairs(functions) do
+        local Btn = Instance.new("TextButton")
+        Btn.Parent = ContentFrame
+        Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+        Btn.Size = UDim2.new(0.9, 0, 0, 40)
+        Btn.Position = UDim2.new(0.05, 0, 0, YPos)
+        Btn.Font = Enum.Font.GothamBold
+        Btn.Text = "▶ "..funcName
+        Btn.TextColor3 = Color3.fromRGB(255,255,255)
+        Btn.TextSize = 14
+        
+        local Corner = Instance.new("UICorner", Btn)
+        Corner.CornerRadius = UDim.new(0, 8)
+        
+        Btn.MouseButton1Click:Connect(function()
+            if Btn.Text:find("▶") then
+                Btn.Text = "⏸ "..funcName
+                Btn.BackgroundColor3 = Color3.fromRGB(0, 150, 80)
+                -- Aquí iría la lógica de la función
+            else
+                Btn.Text = "▶ "..funcName
+                Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
             end
         end)
-    else
-        BtnCollect.Text = "✅ AUTO COLLECT DINERO"
-        BtnCollect.BackgroundColor3 = Color3.fromRGB(60, 180, 80)
+        
+        YPos = YPos + 50
     end
+end
+
+--// Crear Botones
+CreateButton("Info", 1, PageInfo)
+CreateButton("Main", 2, PageMain)
+
+--// Animación de Bienvenida
+WelcomeFrame.Visible = true
+WelcomeFrame.Size = UDim2.new(0, 0, 0, 100)
+
+local TweenIn = TweenService:Create(WelcomeFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 400, 0, 100)})
+local TweenText = TweenService:Create(WelcomeText, TweenInfo.new(0.5), {TextTransparency = 0})
+local TweenOut = TweenService:Create(WelcomeFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 100)})
+
+TweenIn:Play()
+TweenText:Play()
+
+TweenIn.Completed:Connect(function()
+    wait(2)
+    TweenOut:Play()
+    TweenOut.Completed:Connect(function()
+        WelcomeFrame:Destroy()
+    end)
 end)
 
--- VELOCIDAD
-BtnSpeed.MouseButton1Click:Connect(function()
-    SpeedON = not SpeedON
-    if SpeedON then
-        BtnSpeed.Text = "❌ VELOCIDAD (ACTIVA)"
-        BtnSpeed.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-        Humanoid.WalkSpeed = 50
-    else
-        BtnSpeed.Text = "⚡ VELOCIDAD EXTRA"
-        BtnSpeed.BackgroundColor3 = Color3.fromRGB(60, 180, 80)
-        Humanoid.WalkSpeed = 16 -- Velocidad normal
-    end
-end)
-
--- AUTO BUILD (SIMULADO)
-BtnBuild.MouseButton1Click:Connect(function()
-    AutoBuildON = not AutoBuildON
-    if AutoBuildON then
-        BtnBuild.Text = "❌ AUTO CONSTRUIR (ACTIVO)"
-        BtnBuild.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-    else
-        BtnBuild.Text = "🏗️ AUTO CONSTRUIR"
-        BtnBuild.BackgroundColor3 = Color3.fromRGB(60, 180, 80)
-    end
-end)
-
-print("✅ SCRIPT CARGADO CORRECTAMENTE - JOSEANGEL_BLOX")
+--// Cargar página por defecto
+PageMain()
