@@ -1,6 +1,7 @@
 --// Services
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local PlayerGui = Players.LocalPlayer.PlayerGui
 
 --// Variables
@@ -9,51 +10,99 @@ local MainFrame = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
 local Title = Instance.new("TextLabel")
 local Topbar = Instance.new("Frame")
+local MinimizeButton = Instance.new("TextButton")
 local MenuButtons = Instance.new("Frame")
 local UIListLayout = Instance.new("UIListLayout")
 local ContentFrame = Instance.new("Frame")
-local WelcomeFrame = Instance.new("Frame")
 local WelcomeText = Instance.new("TextLabel")
+local BackgroundEffect = Instance.new("Frame")
+local UIGradient = Instance.new("UIGradient")
 
 --// Propiedades de la GUI
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
 
+--// Ventana Principal
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.15, 0, 0.15, 0)
-MainFrame.Size = UDim2.new(0, 600, 0, 400) -- Cuadrado y ancho
+MainFrame.Position = UDim2.new(0.2, 0, 0.15, 0)
+MainFrame.Size = UDim2.new(0, 450, 0, 350) -- Más pequeño
 MainFrame.Active = true
-MainFrame.Draggable = true -- Deslizable por la pantalla
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
 
-UICorner.CornerRadius = UDim.new(0, 16) -- Esquinas redondeadas
+--// Esquinas Redondeadas
+UICorner.CornerRadius = UDim.new(0, 18)
 UICorner.Parent = MainFrame
+
+--// Fondo Animado Neon
+BackgroundEffect.Name = "BackgroundEffect"
+BackgroundEffect.Parent = MainFrame
+BackgroundEffect.BackgroundColor3 = Color3.new(1,1,1)
+BackgroundEffect.BackgroundTransparency = 0.9
+BackgroundEffect.Size = UDim2.new(2, 0, 2, 0)
+BackgroundEffect.Position = UDim2.new(-0.5, 0, -0.5, 0)
+BackgroundEffect.ZIndex = 0
+
+UIGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 0))
+}
+UIGradient.Rotation = 45
+UIGradient.Parent = BackgroundEffect
+
+--// Animación del fondo
+spawn(function()
+    while wait(0.03) do
+        UIGradient.Rotation = UIGradient.Rotation + 5
+    end
+end)
 
 --// Topbar
 Topbar.Name = "Topbar"
 Topbar.Parent = MainFrame
-Topbar.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+Topbar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
 Topbar.BorderSizePixel = 0
-Topbar.Size = UDim2.new(1, 0, 0, 50)
+Topbar.Size = UDim2.new(1, 0, 0, 45)
+Topbar.ZIndex = 2
 
 Title.Name = "Title"
 Title.Parent = Topbar
-Title.BackgroundTransparency = 1.000
-Title.Size = UDim2.new(1, 0, 1, 0)
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(0.8, 0, 1, 0)
+Title.Position = UDim2.new(0.1, 0, 0, 0)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "🏠 Mansion Tycoon Script"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 20.000
+Title.TextColor3 = Color3.new(1,1,1)
+Title.TextSize = 18
+
+--// Botón Minimizar
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.Parent = Topbar
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+MinimizeButton.Size = UDim2.new(0, 35, 0, 35)
+MinimizeButton.Position = UDim2.new(1, -40, 0, 5)
+MinimizeButton.Font = Enum.Font.GothamBold
+MinimizeButton.Text = "_"
+MinimizeButton.TextColor3 = Color3.new(1,1,1)
+MinimizeButton.TextSize = 20
+MinimizeButton.ZIndex = 3
+
+local MinimizeCorner = Instance.new("UICorner", MinimizeButton)
+MinimizeCorner.CornerRadius = UDim.new(0, 10)
 
 --// Menú de Botones
 MenuButtons.Name = "MenuButtons"
 MenuButtons.Parent = MainFrame
-MenuButtons.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+MenuButtons.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
 MenuButtons.BorderSizePixel = 0
-MenuButtons.Position = UDim2.new(0, 0, 0, 50)
-MenuButtons.Size = UDim2.new(0, 120, 1, -50)
+MenuButtons.Position = UDim2.new(0, 10, 0, 55)
+MenuButtons.Size = UDim2.new(0, 100, 1, -65)
+MenuButtons.ZIndex = 2
 
 UIListLayout.Parent = MenuButtons
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -63,176 +112,229 @@ UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 --// Contenido
 ContentFrame.Name = "ContentFrame"
 ContentFrame.Parent = MainFrame
-ContentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-ContentFrame.BorderSizePixel = 0
-ContentFrame.Position = UDim2.new(0, 120, 0, 50)
-ContentFrame.Size = UDim2.new(1, -120, 1, -50)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Position = UDim2.new(0, 120, 0, 55)
+ContentFrame.Size = UDim2.new(1, -130, 1, -65)
+ContentFrame.ZIndex = 2
 
---// Animación de Bienvenida
-WelcomeFrame.Name = "WelcomeFrame"
-WelcomeFrame.Parent = ScreenGui
-WelcomeFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-WelcomeFrame.BorderSizePixel = 0
-WelcomeFrame.Position = UDim2.new(0.5, -200, 0.5, -50)
-WelcomeFrame.Size = UDim2.new(0, 400, 0, 100)
-WelcomeFrame.Visible = false
-
-local WelcomeCorner = Instance.new("UICorner", WelcomeFrame)
-WelcomeCorner.CornerRadius = UDim.new(0, 12)
-
+--// ANIMACIÓN DE BIENVENIDA RGB
 WelcomeText.Name = "WelcomeText"
-WelcomeText.Parent = WelcomeFrame
-WelcomeText.BackgroundTransparency = 1.000
-WelcomeText.Size = UDim2.new(1, 0, 1, 0)
-WelcomeText.Font = Enum.Font.GothamBold
+WelcomeText.Parent = ScreenGui
+WelcomeText.BackgroundTransparency = 1
+WelcomeText.Size = UDim2.new(0, 600, 0, 100)
+WelcomeText.Position = UDim2.new(0.5, -300, 0.5, -50)
+WelcomeText.Font = Enum.Font.GothamBlack
 WelcomeText.Text = "Bienvenidos a Scripts JoseAngel_Blox"
-WelcomeText.TextColor3 = Color3.fromRGB(255, 215, 0)
-WelcomeText.TextSize = 24.000
+WelcomeText.TextSize = 36
 WelcomeText.TextTransparency = 1
+WelcomeText.TextScaled = true
+
+--// Efecto RGB en letras
+local hue = 0
+spawn(function()
+    while WelcomeText.Parent do
+        hue = hue + 0.01
+        if hue > 1 then hue = 0 end
+        WelcomeText.TextColor3 = Color3.fromHSV(hue, 0.8, 1)
+        RunService.Heartbeat:Wait()
+    end
+end)
 
 --// Funciones
 local function CreateButton(name, order, callback)
     local Button = Instance.new("TextButton")
     Button.Name = name.."Button"
     Button.Parent = MenuButtons
-    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+    Button.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
     Button.BorderSizePixel = 0
-    Button.Size = UDim2.new(0.8, 0, 0, 40)
+    Button.Size = UDim2.new(0.9, 0, 0, 40)
     Button.Font = Enum.Font.GothamBold
     Button.Text = name
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.TextSize = 16.000
+    Button.TextColor3 = Color3.new(1,1,1)
+    Button.TextSize = 16
     Button.LayoutOrder = order
+    Button.ZIndex = 3
     
     local BtnCorner = Instance.new("UICorner", Button)
-    BtnCorner.CornerRadius = UDim.new(0, 8)
+    BtnCorner.CornerRadius = UDim.new(0, 10)
     
     Button.MouseButton1Click:Connect(callback)
 end
 
 local function ClearContent()
     for _, v in pairs(ContentFrame:GetChildren()) do
-        if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Frame") then
+        if v.Name ~= "BackgroundEffect" then
             v:Destroy()
         end
     end
 end
 
---// Página Info
+--// Página Info con Acordeón
 local function PageInfo()
     ClearContent()
     
-    local InfoTitle = Instance.new("TextLabel")
-    InfoTitle.Parent = ContentFrame
-    InfoTitle.BackgroundTransparency = 1
-    InfoTitle.Size = UDim2.new(1, -20, 0, 40)
-    InfoTitle.Position = UDim2.new(0, 10, 0, 20)
-    InfoTitle.Font = Enum.Font.GothamBold
-    InfoTitle.Text = "📄 Información"
-    InfoTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
-    InfoTitle.TextSize = 22
-    InfoTitle.TextXAlignment = Enum.TextXAlignment.Left
+    local DropdownButton = Instance.new("TextButton")
+    DropdownButton.Parent = ContentFrame
+    DropdownButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    DropdownButton.Size = UDim2.new(1, -10, 0, 45)
+    DropdownButton.Position = UDim2.new(0, 5, 0, 10)
+    DropdownButton.Font = Enum.Font.GothamBold
+    DropdownButton.Text = "📄 Información ▼"
+    DropdownButton.TextColor3 = Color3.new(1,1,1)
+    DropdownButton.TextSize = 16
+    DropdownButton.ZIndex = 2
+    
+    local DDCorner = Instance.new("UICorner", DropdownButton)
+    DDCorner.CornerRadius = UDim.new(0, 10)
+    
+    local ContentInfo = Instance.new("Frame")
+    ContentInfo.Parent = ContentFrame
+    ContentInfo.BackgroundTransparency = 1
+    ContentInfo.Size = UDim2.new(1, -10, 0, 0)
+    ContentInfo.Position = UDim2.new(0, 5, 0, 65)
+    ContentInfo.ClipsDescendants = true
+    ContentInfo.ZIndex = 1
     
     local Creator = Instance.new("TextLabel")
-    Creator.Parent = ContentFrame
+    Creator.Parent = ContentInfo
     Creator.BackgroundTransparency = 1
-    Creator.Size = UDim2.new(1, -20, 0, 30)
-    Creator.Position = UDim2.new(0, 10, 0, 70)
+    Creator.Size = UDim2.new(1, 0, 0, 35)
+    Creator.Position = UDim2.new(0, 0, 0, 10)
     Creator.Font = Enum.Font.Gotham
-    Creator.Text = "👨‍💻 Nombre del creador: JoseAngel_Blox"
-    Creator.TextColor3 = Color3.fromRGB(255,255,255)
-    Creator.TextSize = 16
+    Creator.Text = "👨‍💻 Creador: JoseAngel_Blox"
+    Creator.TextColor3 = Color3.new(1,1,1)
+    Creator.TextSize = 15
     Creator.TextXAlignment = Enum.TextXAlignment.Left
     
     local Date = Instance.new("TextLabel")
-    Date.Parent = ContentFrame
+    Date.Parent = ContentInfo
     Date.BackgroundTransparency = 1
-    Date.Size = UDim2.new(1, -20, 0, 30)
-    Date.Position = UDim2.new(0, 10, 0, 110)
+    Date.Size = UDim2.new(1, 0, 0, 35)
+    Date.Position = UDim2.new(0, 0, 0, 50)
     Date.Font = Enum.Font.Gotham
-    Date.Text = "📅 Fecha de lanzamiento: 29/06/2026"
-    Date.TextColor3 = Color3.fromRGB(255,255,255)
-    Date.TextSize = 16
+    Date.Text = "📅 Lanzamiento: 29/06/2026"
+    Date.TextColor3 = Color3.new(1,1,1)
+    Date.TextSize = 15
     Date.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local open = false
+    DropdownButton.MouseButton1Click:Connect(function()
+        open = not open
+        if open then
+            DropdownButton.Text = "📄 Información ▲"
+            TweenService:Create(ContentInfo, TweenInfo.new(0.3), {Size = UDim2.new(1, -10, 0, 100)}):Play()
+        else
+            DropdownButton.Text = "📄 Información ▼"
+            TweenService:Create(ContentInfo, TweenInfo.new(0.3), {Size = UDim2.new(1, -10, 0, 0)}):Play()
+        end
+    end)
 end
 
---// Página Main (Funciones)
+--// Página Main con Toggle Switch
 local function PageMain()
     ClearContent()
     
-    local MainTitle = Instance.new("TextLabel")
-    MainTitle.Parent = ContentFrame
-    MainTitle.BackgroundTransparency = 1
-    MainTitle.Size = UDim2.new(1, -20, 0, 40)
-    MainTitle.Position = UDim2.new(0, 10, 0, 20)
-    MainTitle.Font = Enum.Font.GothamBold
-    MainTitle.Text = "⚡ Funciones Principales"
-    MainTitle.TextColor3 = Color3.fromRGB(0, 255, 150)
-    MainTitle.TextSize = 22
-    MainTitle.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Funciones
     local functions = {
-        "Auto Recolectar Dinero",
-        "Auto Construir Todo",
-        "Auto Comprar Mejoras",
-        "Teletransportarse a Base",
-        "Dinero Infinito",
-        "Quitar Gravedad"
+        {name = "Auto Recolectar Dinero", enabled = false},
+        {name = "Auto Construir Todo", enabled = false},
+        {name = "Auto Comprar Mejoras", enabled = false},
+        {name = "Teletransportarse a Base", enabled = false},
+        {name = "Dinero Infinito", enabled = false},
+        {name = "Quitar Gravedad", enabled = false}
     }
     
-    local YPos = 70
-    for i, funcName in pairs(functions) do
-        local Btn = Instance.new("TextButton")
-        Btn.Parent = ContentFrame
-        Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-        Btn.Size = UDim2.new(0.9, 0, 0, 40)
-        Btn.Position = UDim2.new(0.05, 0, 0, YPos)
-        Btn.Font = Enum.Font.GothamBold
-        Btn.Text = "▶ "..funcName
-        Btn.TextColor3 = Color3.fromRGB(255,255,255)
-        Btn.TextSize = 14
+    local YPos = 10
+    for i, func in pairs(functions) do
+        local FuncFrame = Instance.new("Frame")
+        FuncFrame.Parent = ContentFrame
+        FuncFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+        FuncFrame.Size = UDim2.new(1, -10, 0, 45)
+        FuncFrame.Position = UDim2.new(0, 5, 0, YPos)
+        FuncFrame.ZIndex = 2
         
-        local Corner = Instance.new("UICorner", Btn)
-        Corner.CornerRadius = UDim.new(0, 8)
+        local FCorner = Instance.new("UICorner", FuncFrame)
+        FCorner.CornerRadius = UDim.new(0, 10)
         
-        Btn.MouseButton1Click:Connect(function()
-            if Btn.Text:find("▶") then
-                Btn.Text = "⏸ "..funcName
-                Btn.BackgroundColor3 = Color3.fromRGB(0, 150, 80)
-                -- Aquí iría la lógica de la función
+        local FuncName = Instance.new("TextLabel")
+        FuncName.Parent = FuncFrame
+        FuncName.BackgroundTransparency = 1
+        FuncName.Size = UDim2.new(0.7, 0, 1, 0)
+        FuncName.Position = UDim2.new(0.05, 0, 0, 0)
+        FuncName.Font = Enum.Font.GothamBold
+        FuncName.Text = "• "..func.name
+        FuncName.TextColor3 = Color3.new(1,1,1)
+        FuncName.TextSize = 14
+        FuncName.TextXAlignment = Enum.TextXAlignment.Left
+        
+        --// Interruptor (Toggle)
+        local Toggle = Instance.new("TextButton")
+        Toggle.Parent = FuncFrame
+        Toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+        Toggle.Size = UDim2.new(0, 50, 0, 25)
+        Toggle.Position = UDim2.new(0.85, -25, 0.5, -12)
+        Toggle.Text = ""
+        Toggle.ZIndex = 3
+        
+        local TCorner = Instance.new("UICorner", Toggle)
+        TCorner.CornerRadius = UDim.new(0, 12)
+        
+        local Circle = Instance.new("Frame")
+        Circle.Parent = Toggle
+        Circle.BackgroundColor3 = Color3.new(1,1,1)
+        Circle.Size = UDim2.new(0, 20, 0, 20)
+        Circle.Position = UDim2.new(0, 3, 0, 2)
+        Circle.ZIndex = 4
+        
+        local CCircle = Instance.new("UICorner", Circle)
+        CCircle.CornerRadius = UDim.new(1, 0)
+        
+        --// Logica Toggle
+        Toggle.MouseButton1Click:Connect(function()
+            func.enabled = not func.enabled
+            if func.enabled then
+                TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 120)}):Play()
+                TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -23, 0, 2)}):Play()
+                -- Aquí activas la función real del juego
+                print("Activado: "..func.name)
             else
-                Btn.Text = "▶ "..funcName
-                Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+                TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 100)}):Play()
+                TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0, 2)}):Play()
+                -- Aquí desactivas la función
+                print("Desactivado: "..func.name)
             end
         end)
         
-        YPos = YPos + 50
+        YPos = YPos + 55
     end
 end
+
+--// Botón Minimizar funcional
+local minimized = false
+MinimizeButton.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 150, 0, 45)}):Play()
+    else
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 450, 0, 350)}):Play()
+    end
+end)
 
 --// Crear Botones
 CreateButton("Info", 1, PageInfo)
 CreateButton("Main", 2, PageMain)
 
---// Animación de Bienvenida
-WelcomeFrame.Visible = true
-WelcomeFrame.Size = UDim2.new(0, 0, 0, 100)
+--// ANIMACIÓN DE INICIO
+MainFrame.Visible = false
+WelcomeText.Visible = true
 
-local TweenIn = TweenService:Create(WelcomeFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 400, 0, 100)})
-local TweenText = TweenService:Create(WelcomeText, TweenInfo.new(0.5), {TextTransparency = 0})
-local TweenOut = TweenService:Create(WelcomeFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 100)})
+local TweenTextIn = TweenService:Create(WelcomeText, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {TextTransparency = 0})
+local TweenTextOut = TweenService:Create(WelcomeText, TweenInfo.new(0.5), {TextTransparency = 1})
 
-TweenIn:Play()
-TweenText:Play()
-
-TweenIn.Completed:Connect(function()
-    wait(2)
-    TweenOut:Play()
-    TweenOut.Completed:Connect(function()
-        WelcomeFrame:Destroy()
-    end)
+TweenTextIn:Play()
+wait(3)
+TweenTextOut:Play()
+TweenTextOut.Completed:Connect(function()
+    WelcomeText:Destroy()
+    MainFrame.Visible = true
+    PageMain() -- Cargar menú principal
 end)
-
---// Cargar página por defecto
-PageMain()
