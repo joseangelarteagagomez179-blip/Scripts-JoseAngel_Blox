@@ -4,6 +4,11 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 
+--// Destroy old UI if exists
+if PlayerGui:FindFirstChild("MansionTycoonUI") then
+    PlayerGui:FindFirstChild("MansionTycoonUI"):Destroy()
+end
+
 --// Variables
 local ScreenGui = Instance.new("ScreenGui")
 local MainUI = Instance.new("Frame")
@@ -16,49 +21,45 @@ local LoadingText = Instance.new("TextLabel")
 --// Properties
 ScreenGui.Name = "MansionTycoonUI"
 ScreenGui.Parent = PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
 --// Loading Screen
 LoadingUI.Name = "LoadingUI"
-LoadingUI.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-LoadingUI.Size = UDim2.new(0, 300, 0, 150)
-LoadingUI.Position = UDim2.new(0.5, -150, 0.5, -75)
+LoadingUI.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+LoadingUI.Size = UDim2.new(0, 350, 0, 180)
+LoadingUI.Position = UDim2.new(0.5, -175, 0.5, -90)
 LoadingUI.AnchorPoint = Vector2.new(0.5, 0.5)
-LoadingUI.ClipsDescendants = true
 LoadingUI.BorderSizePixel = 0
-LoadingUI.BackgroundTransparency = 0.2
 LoadingUI.Parent = ScreenGui
 
--- Corner for Loading
 local LoadingCorner = Instance.new("UICorner", LoadingUI)
-LoadingCorner.CornerRadius = UDim.new(0, 15)
+LoadingCorner.CornerRadius = UDim.new(0, 20)
 
 LoadingText.Name = "LoadingText"
 LoadingText.BackgroundTransparency = 1
 LoadingText.Size = UDim2.new(1, 0, 1, 0)
 LoadingText.Font = Enum.Font.GothamBold
 LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoadingText.TextSize = 20
+LoadingText.TextSize = 24
 LoadingText.TextWrapped = true
 LoadingText.Text = "Bienvenidos a\nScripts JoseAngel_Blox"
 LoadingText.Parent = LoadingUI
 
 --// Main UI (Hidden at start)
 MainUI.Name = "MainUI"
-MainUI.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainUI.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainUI.Size = UDim2.new(0, 400, 0, 500)
 MainUI.Position = UDim2.new(0.5, -200, 0.5, -250)
 MainUI.AnchorPoint = Vector2.new(0.5, 0.5)
-MainUI.ClipsDescendants = true
 MainUI.BorderSizePixel = 0
 MainUI.Visible = false
 MainUI.Parent = ScreenGui
 
--- Corner for Main UI
 local MainCorner = Instance.new("UICorner", MainUI)
 MainCorner.CornerRadius = UDim.new(0, 20)
 
 Title.Name = "Title"
-Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.Font = Enum.Font.GothamBold
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -78,6 +79,7 @@ Container.Parent = MainUI
 UIListLayout.Parent = Container
 UIListLayout.Padding = UDim.new(0, 10)
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 --// Function to create Sections
 local function CreateSection(name)
@@ -87,16 +89,17 @@ local function CreateSection(name)
 	local Layout = Instance.new("UIListLayout")
 
 	Section.Name = name.."Section"
-	Section.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	Section.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
 	Section.Size = UDim2.new(1, 0, 0, 200)
 	Section.ClipsDescendants = true
 	Section.Parent = Container
+    Section.LayoutOrder = 1
 
 	local SecCorner = Instance.new("UICorner", Section)
 	SecCorner.CornerRadius = UDim.new(0, 12)
 
 	SectionTitle.Name = "SectionTitle"
-	SectionTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	SectionTitle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	SectionTitle.Size = UDim2.new(1, 0, 0, 35)
 	SectionTitle.Font = Enum.Font.GothamBold
 	SectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -147,7 +150,8 @@ local function CreateToggle(parent, text, callback)
 	ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	ToggleButton.Size = UDim2.new(0, 50, 0, 25)
 	ToggleButton.Position = UDim2.new(1, -55, 0.5, -12.5)
-	ToggleButton.Parent = ToggleFrame
+	ToggleButton.Parent = ToggleButton
+    ToggleButton.Parent = ToggleFrame
 
 	ToggleCorner.CornerRadius = UDim.new(0, 12)
 	ToggleCorner.Parent = ToggleButton
@@ -162,16 +166,19 @@ local function CreateToggle(parent, text, callback)
 	FillCorner.Parent = ToggleFill
 
 	local Enabled = false
+    local Connection = nil
 
 	local function Update()
 		if Enabled then
 			TweenService:Create(ToggleFill, TweenInfo.new(0.2), {Position = UDim2.new(1, -24, 0, 1), BackgroundColor3 = Color3.fromRGB(0, 255, 127)}):Play()
-			TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 80, 60)}):Play()
+			TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 70, 55)}):Play()
 		else
 			TweenService:Create(ToggleFill, TweenInfo.new(0.2), {Position = UDim2.new(0, 1, 0, 1), BackgroundColor3 = Color3.fromRGB(0, 170, 255)}):Play()
 			TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
 		end
-		if callback then callback(Enabled) end
+        if callback then
+            callback(Enabled)
+        end
 	end
 
 	ToggleButton.MouseButton1Click:Connect(function()
@@ -193,7 +200,7 @@ InfoLabel.BackgroundTransparency = 1
 InfoLabel.Size = UDim2.new(1, 0, 0, 100)
 InfoLabel.Font = Enum.Font.Gotham
 InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfoLabel.TextSize = 15
+InfoLabel.TextSize = 16
 InfoLabel.Text = "Nombre del Creador: JoseAngel_Blox\nFecha de lanzamiento: 29/06/2026"
 InfoLabel.TextWrapped = true
 InfoLabel.Parent = InfoSection
@@ -201,15 +208,14 @@ InfoLabel.Parent = InfoSection
 -- 2) MAIN SECTION
 local MainSection = CreateSection("Main↓")
 
--- FUNCIONES ÚTILES PARA MANSION TYCOON
+-- FUNCIONES
 CreateToggle(MainSection, "Auto Recoger Dinero", function(state)
 	if state then
 		print("Auto Dinero ON")
-		-- Aquí pones el código para que recoja dinero
 		spawn(function()
 			while task.wait(0.5) and state do
 				pcall(function()
-					-- Lógica de recolección
+					-- Codigo aqui
 				end)
 			end
 		end)
@@ -224,7 +230,7 @@ CreateToggle(MainSection, "Auto Construir", function(state)
 		spawn(function()
 			while task.wait(1) and state do
 				pcall(function()
-					-- Lógica de construcción
+					-- Codigo aqui
 				end)
 			end
 		end)
@@ -239,9 +245,9 @@ CreateToggle(MainSection, "Auto Comprar Mejoras", function(state)
 		spawn(function()
 			while task.wait(1.5) and state do
 				pcall(function()
-					-- Lógica de mejoras
+					-- Codigo aqui
 				end)
-			end)
+			end
 		end)
 	else
 		print("Auto Mejoras OFF")
@@ -257,9 +263,11 @@ CreateToggle(MainSection, "Velocidad Extra", function(state)
 end)
 
 --// ANIMACIÓN DE CARGA
-TweenService:Create(LoadingText, TweenInfo.new(1.5, Enum.EasingStyle.Back), {TextTransparency = 0, TextStrokeTransparency = 0}):Play()
+task.wait(0.1)
+TweenService:Create(LoadingUI, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
+TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 
-task.wait(3) -- Tiempo que dura la animación
+task.wait(3) -- Tiempo de espera
 
 TweenService:Create(LoadingUI, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
 TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
@@ -269,7 +277,8 @@ LoadingUI:Destroy()
 
 -- Aparece el menú principal
 MainUI.Visible = true
+MainUI.Size = UDim2.new(0, 400, 0, 450)
 local TweenOpen = TweenService:Create(MainUI, TweenInfo.new(0.6, Enum.EasingStyle.Back), {Size = UDim2.new(0, 400, 0, 500)})
 TweenOpen:Play()
 
-print("Script Cargado Correctamente - Mansion Tycoon v1.0")
+print("✅ Script Cargado Correctamente - Mansion Tycoon v1.0")
