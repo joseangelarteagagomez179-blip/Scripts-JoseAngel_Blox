@@ -56,11 +56,11 @@ UIGradient.Color = ColorSequence.new{
 UIGradient.Rotation = 45
 UIGradient.Parent = BackgroundEffect
 
-spawn(function()
+coroutine.wrap(function()
     while task.wait(0.03) do
         UIGradient.Rotation = UIGradient.Rotation + 5
     end
-end)
+end)()
 
 --// Topbar
 Topbar.Name = "Topbar"
@@ -130,15 +130,15 @@ WelcomeText.TextTransparency = 0
 WelcomeText.TextScaled = true
 
 --// Efecto RGB en letras
-local hue = 0
-spawn(function()
-    while WelcomeText.Parent do
+coroutine.wrap(function()
+    local hue = 0
+    while WelcomeText and WelcomeText.Parent do
         hue = hue + 0.01
         if hue > 1 then hue = 0 end
         WelcomeText.TextColor3 = Color3.fromHSV(hue, 0.8, 1)
         RunService.Heartbeat:Wait()
     end
-end)
+end)()
 
 --// Funciones
 local function CreateButton(name, order, callback)
@@ -323,6 +323,6 @@ CreateButton("Main", 2, PageMain)
 task.wait(1)
 TweenService:Create(WelcomeText, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
 task.wait(1.5)
-WelcomeText:Destroy()
+if WelcomeText then WelcomeText:Destroy() end
 MainFrame.Visible = true
 PageMain()
