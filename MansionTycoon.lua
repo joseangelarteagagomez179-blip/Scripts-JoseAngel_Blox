@@ -3,9 +3,15 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local PlayerGui = Players.LocalPlayer.PlayerGui
+local UIS = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
 --// == ANIMACIÓN DE BIENVENIDA (SOLO LETRAS RGB) ==
 local WelcomeText = Instance.new("TextLabel")
+WelcomeText.Name = "WelcomeText"
 WelcomeText.Parent = PlayerGui
 WelcomeText.BackgroundTransparency = 1
 WelcomeText.Size = UDim2.new(1, 0, 1, 0)
@@ -59,6 +65,12 @@ local UICornerMain = Instance.new("UICorner")
 UICornerMain.CornerRadius = UDim.new(0, 20)
 UICornerMain.Parent = MainFrame
 
+-- Borde Brillante
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(80, 80, 255)
+UIStroke.Parent = MainFrame
+
 -- Fondo con Efecto Neón Movimiento
 local BackgroundEffect = Instance.new("Frame")
 BackgroundEffect.Parent = MainFrame
@@ -81,7 +93,7 @@ UIGradient.Color = ColorSequence.new{
 UIGradient.Rotation = 45
 
 -- Animar fondo colores
-spawn(function()
+task.spawn(function()
     while wait(0.05) do
         UIGradient.Rotation = UIGradient.Rotation + 4
     end
@@ -148,7 +160,7 @@ local Dragging = false
 local DragStart, StartPos = nil, nil
 local Minimized = false
 
-MainFrame.InputBegan:Connect(function(input)
+TitleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         Dragging = true
         DragStart = input.Position
@@ -156,14 +168,14 @@ MainFrame.InputBegan:Connect(function(input)
     end
 end)
 
-MainFrame.InputChanged:Connect(function(input)
+UIS.InputChanged:Connect(function(input)
     if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
         local Delta = input.Position - DragStart
         MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
     end
 end)
 
-MainFrame.InputEnded:Connect(function(input)
+UIS.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         Dragging = false
     end
@@ -280,8 +292,15 @@ MainArrow.MouseButton1Click:Connect(function()
     MainArrow.Text = MainOpen and "🎮 FUNCIONES ▲" or "🎮 FUNCIONES ▼"
 end)
 
---// == BOTONES TOGGLE (INTERRUPTORES) ==
-local function CreateToggle(name, posY)
+--// == VARIABLES PARA LAS FUNCIONES ==
+local AutoFarmEnabled = false
+local AutoBuildEnabled = false
+local SpeedEnabled = false
+local FlyEnabled = false
+local AutoCollectEnabled = false
+
+--// == BOTONES TOGGLE CON FUNCIONES ==
+local function CreateToggle(name, posY, funcOn, funcOff)
     local ButtonFrame = Instance.new("Frame")
     ButtonFrame.Parent = MainContent
     ButtonFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
@@ -327,20 +346,123 @@ local function CreateToggle(name, posY)
         if Enabled then
             TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
             TweenService:Create(Knob, TweenInfo.new(0.2), {Position = UDim2.new(0, 27, 0, 2.5)}):Play()
-            print(name .. " ACTIVADO")
+            if funcOn then funcOn() end
         else
             TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
             TweenService:Create(Knob, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0, 2.5)}):Play()
-            print(name .. " DESACTIVADO")
+            if funcOff then funcOff() end
         end
     end)
 end
 
--- CREAR FUNCIONES
-CreateToggle("Auto Farm Dinero", 10)
-CreateToggle("Auto Construir", 60)
-CreateToggle("Velocidad Rapida", 110)
-CreateToggle("Fly / Volar", 160)
-CreateToggle("Auto Recoger Items", 210)
+--// == FUNCIONES REALES ==
 
-print("✅ Script JoseAngel_Blox - Cargado Correctamente!")
+-- AUTO FARM DINERO
+local function AutoFarmOn()
+    AutoFarmEnabled = true
+    task.spawn(function()
+        while AutoFarmEnabled do
+            -- Busca objetos que den dinero cerca
+            for _, obj in pairs(Workspace:GetChildren()) do
+                if obj:FindFirstChild("TouchInterest") and obj:IsA("Part") then
+                    fireclickdetector(obj:FindFirstChildOfClass("ClickDetector"))
+                end
+            end
+            task.wait(0.5)
+        end
+    end)
+end
+
+local function AutoFarmOff()
+    AutoFarmEnabled = false
+end
+
+-- AUTO CONSTRUIR (Simula clickear botones)
+local function AutoBuildOn()
+    AutoBuildEnabled = true
+    task.spawn(function()
+        while AutoBuildEnabled do
+            -- Busca botones de construir en la pantalla
+            for _, gui in pairs(PlayerGui:GetChildren()) do
+                if gui:FindFirstChild("BuildButton") or gui.Name:lower():find("build") or gui.Name:lower():find("buy") then
+                    for _, btn in pairs(gui:GetChildren()) do
+                        if btn:IsA("TextButton") or btn:IsA("ImageButton") then
+                            fireclickdetector(btn:FindFirstChildOfClass("ClickDetector") or btn)
+                        end
+                    end
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end
+
+local function AutoBuildOff()
+    AutoBuildEnabled = false
+end
+
+-- VELOCIDAD RAPIDA
+local function SpeedOn()
+    Humanoid.WalkSpeed = 100
+end
+
+local function SpeedOff()
+    Humanoid.WalkSpeed = 16 -- Normal
+end
+
+-- FLY / VOLAR
+local function FlyOn()
+    FlyEnabled = true
+    local BG = Instance.new("BodyGyro")
+    local BV = Instance.new("BodyVelocity")
+    BG.Parent = Humanoid.RootPart
+    BV.Parent = Humanoid.RootPart
+    BG.MaxTorque = Vector3.new(400000, 400000, 400000)
+    BG.P = 3000
+    BV.MaxForce = Vector3.new(400000, 400000, 400000)
+    
+    task.spawn(function()
+        while FlyEnabled and Humanoid.Health > 0 do
+            local CamCF = Workspace.CurrentCamera.CFrame
+            BV.Velocity = CamCF.LookVector * 50
+            task.wait()
+            if not BG.Parent then break end
+        end
+        if BG then BG:Destroy() end
+        if BV then BV:Destroy() end
+    end)
+end
+
+local function FlyOff()
+    FlyEnabled = false
+end
+
+-- AUTO RECOGER ITEMS
+local function AutoCollectOn()
+    AutoCollectEnabled = true
+    task.spawn(function()
+        while AutoCollectEnabled do
+            for _, item in pairs(Workspace:GetChildren()) do
+                if item.Name:lower():find("money") or item.Name:lower():find("coin") or item.Name:lower():find("item") then
+                    if item:IsA("Part") then
+                        item.CFrame = Humanoid.RootPart.CFrame
+                    end
+                end
+            end
+            task.wait(0.2)
+        end
+    end)
+end
+
+local function AutoCollectOff()
+    AutoCollectEnabled = false
+end
+
+-- CREAR LOS BOTONES CON SUS FUNCIONES
+CreateToggle("Auto Farm Dinero", 10, AutoFarmOn, AutoFarmOff)
+CreateToggle("Auto Construir", 60, AutoBuildOn, AutoBuildOff)
+CreateToggle("Velocidad Rapida", 110, SpeedOn, SpeedOff)
+CreateToggle("Fly / Volar", 160, FlyOn, FlyOff)
+CreateToggle("Auto Recoger Items", 210, AutoCollectOn, AutoCollectOff)
+
+print("✅ Script JoseAngel_Blox - Listo y Funcionando!")
