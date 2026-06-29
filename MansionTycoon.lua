@@ -29,10 +29,11 @@ MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Position = UDim2.new(0.2, 0, 0.15, 0)
-MainFrame.Size = UDim2.new(0, 450, 0, 350) -- Más pequeño
+MainFrame.Size = UDim2.new(0, 450, 0, 350)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.ClipsDescendants = true
+MainFrame.Visible = false
 
 --// Esquinas Redondeadas
 UICorner.CornerRadius = UDim.new(0, 18)
@@ -55,9 +56,8 @@ UIGradient.Color = ColorSequence.new{
 UIGradient.Rotation = 45
 UIGradient.Parent = BackgroundEffect
 
---// Animación del fondo
 spawn(function()
-    while wait(0.03) do
+    while task.wait(0.03) do
         UIGradient.Rotation = UIGradient.Rotation + 5
     end
 end)
@@ -126,7 +126,7 @@ WelcomeText.Position = UDim2.new(0.5, -300, 0.5, -50)
 WelcomeText.Font = Enum.Font.GothamBlack
 WelcomeText.Text = "Bienvenidos a Scripts JoseAngel_Blox"
 WelcomeText.TextSize = 36
-WelcomeText.TextTransparency = 1
+WelcomeText.TextTransparency = 0
 WelcomeText.TextScaled = true
 
 --// Efecto RGB en letras
@@ -294,13 +294,9 @@ local function PageMain()
             if func.enabled then
                 TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 120)}):Play()
                 TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -23, 0, 2)}):Play()
-                -- Aquí activas la función real del juego
-                print("Activado: "..func.name)
             else
                 TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 100)}):Play()
                 TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0, 2)}):Play()
-                -- Aquí desactivas la función
-                print("Desactivado: "..func.name)
             end
         end)
         
@@ -324,17 +320,9 @@ CreateButton("Info", 1, PageInfo)
 CreateButton("Main", 2, PageMain)
 
 --// ANIMACIÓN DE INICIO
-MainFrame.Visible = false
-WelcomeText.Visible = true
-
-local TweenTextIn = TweenService:Create(WelcomeText, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {TextTransparency = 0})
-local TweenTextOut = TweenService:Create(WelcomeText, TweenInfo.new(0.5), {TextTransparency = 1})
-
-TweenTextIn:Play()
-wait(3)
-TweenTextOut:Play()
-TweenTextOut.Completed:Connect(function()
-    WelcomeText:Destroy()
-    MainFrame.Visible = true
-    PageMain() -- Cargar menú principal
-end)
+task.wait(1)
+TweenService:Create(WelcomeText, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+task.wait(1.5)
+WelcomeText:Destroy()
+MainFrame.Visible = true
+PageMain()
