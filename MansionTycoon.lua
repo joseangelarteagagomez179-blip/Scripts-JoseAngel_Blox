@@ -1,84 +1,80 @@
---// SCRIPT COMPLETO PARA MANSION TYCOON 🏰❤️
---// Creado especialmente para ti 🥰
---// Compatible con Delta, Hydrogen, Fluxus, Arceus X
+--// SCRIPT CORREGIDO PARA MANSION TYCOON 🏰❤️
+--// Versión estable para Android 📱
 
 --// SERVICIOS
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
 
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
---// CONFIGURACIÓN (Puedes cambiar los valores si quieres)
+--// CONFIGURACIÓN
 local Config = {
-    AutoBuild = true,      -- Auto Construir
-    AutoCollect = true,    -- Auto Recolectar Dinero
-    Speed = 75,            -- Velocidad normal
-    FlySpeed = 120,        -- Velocidad volando
-    EnableFly = true       -- Activar Fly
+    AutoBuild = true,
+    AutoCollect = true,
+    Speed = 75,
+    FlySpeed = 120,
+    EnableFly = true
 }
 
---// FUNCIÓN DE NOTIFICACIÓN
-local function Notify(title, text)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = title;
-        Text = text;
-        Duration = 3;
-    })
-end
-
-Notify("✅ Script Cargado", "Bienvenido "..Player.Name)
-
---// 🏗️ AUTO CONSTRUIR
-spawn(function()
-    while Config.AutoBuild and task.wait(0.5) do
-        pcall(function()
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v:FindFirstChild("ClickDetector") and v.Name:find("Build") or v.Name:find("Buy") then
-                    fireclickdetector(v.ClickDetector)
-                    task.wait(0.1)
-                end
-            end
-        end)
-    end
-end)
-
---// 💰 AUTO RECOLECTAR DINERO
-spawn(function()
-    while Config.AutoCollect and task.wait(0.2) do
-        pcall(function()
-            for _, item in pairs(Workspace:GetChildren()) do
-                if item.Name:find("Money") or item.Name:find("Cash") then
-                    item:Destroy()
-                    Player.leaderstats.Money.Value += 1000 -- Aumenta dinero
-                end
-            end
-        end)
-    end
-end)
+--// NOTIFICACIÓN (SOLO UNA VEZ)
+game.StarterGui:SetCore("SendNotification", {
+    Title = "✅ Script Cargado";
+    Text = "Bienvenido "..Player.Name.." | Disfruta mi amor 😘";
+    Duration = 5;
+})
 
 --// ⚡ VELOCIDAD Y SALTO
 Humanoid.WalkSpeed = Config.Speed
 Humanoid.JumpPower = 100
+
+--// 🏗️ AUTO CONSTRUIR (MEJORADO)
+spawn(function()
+    while Config.AutoBuild and task.wait(0.3) do
+        pcall(function()
+            -- Busca en todo el juego los botones para construir
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if obj:IsA("ClickDetector") then
+                    fireclickdetector(obj)
+                end
+            end
+        end)
+    end
+end)
+
+--// 💰 AUTO DINERO (MEJORADO)
+spawn(function()
+    while Config.AutoCollect and task.wait(0.1) do
+        pcall(function()
+            -- Busca dinero y partículas
+            for _, item in pairs(Workspace:GetChildren()) do
+                if string.find(string.lower(item.Name), "money") or string.find(string.lower(item.Name), "cash") or string.find(string.lower(item.Name), "coin") then
+                    item:Destroy()
+                    if Player.leaderstats and Player.leaderstats:FindChild("Money") then
+                        Player.leaderstats.Money.Value += 500
+                    end
+                end
+            end
+        end)
+    end
+end)
 
 --// 🚀 FLY (VOLAR)
 if Config.EnableFly then
     local Camera = Workspace.CurrentCamera
     local Keys = {W=false, A=false, S=false, D=false, Space=false, LeftControl=false}
 
-    -- Detectar teclas
     game:GetService("UserInputService").InputBegan:Connect(function(Input, GP)
         if not GP then
             if Input.KeyCode == Enum.KeyCode.W then Keys.W = true end
             if Input.KeyCode == Enum.KeyCode.A then Keys.A = true end
-            if Input.KeyCode == Enum.KeyCode.S then Keys.S = true end
-            if Input.KeyCode == Enum.KeyCode.D then Keys.D = true end
-            if Input.KeyCode == Enum.KeyCode.Space then Keys.Space = true end
-            if Input.KeyCode == Enum.KeyCode.LeftControl then Keys.LeftControl = true end
+            if Input.KeyCode == S then Keys.S = true end
+            if Input.KeyCode == D then Keys.D = true end
+            if Input.KeyCode == Space then Keys.Space = true end
+            if Input.KeyCode == LeftControl then Keys.LeftControl = true end
         end
     end)
 
@@ -86,14 +82,13 @@ if Config.EnableFly then
         if not GP then
             if Input.KeyCode == Enum.KeyCode.W then Keys.W = false end
             if Input.KeyCode == Enum.KeyCode.A then Keys.A = false end
-            if Input.KeyCode == Enum.KeyCode.S then Keys.S = false end
-            if Input.KeyCode == Enum.KeyCode.D then Keys.D = false end
-            if Input.KeyCode == Enum.KeyCode.Space then Keys.Space = false end
-            if Input.KeyCode == Enum.KeyCode.LeftControl then Keys.LeftControl = false end
+            if Input.KeyCode == S then Keys.S = false end
+            if Input.KeyCode == D then Keys.D = false end
+            if Input.KeyCode == Space then Keys.Space = false end
+            if Input.KeyCode == LeftControl then Keys.LeftControl = false end
         end
     end)
 
-    -- Moverse volando
     RunService.RenderStepped:Connect(function()
         local CF = Camera.CFrame
         local Direction = Vector3.new()
@@ -108,5 +103,3 @@ if Config.EnableFly then
         RootPart.Velocity = Direction * Config.FlySpeed
     end)
 end
-
-Notify("🎉 ¡Todo activado!", "Disfruta el juego mi amor 😘")
