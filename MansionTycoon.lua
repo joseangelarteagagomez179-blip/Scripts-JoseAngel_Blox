@@ -1,4 +1,4 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/Database/main/UiLib"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/Database/main/UiLib"))()
 
 local Window = Library:CreateWindow({
     Name = "Scripts JoseAngel_Blox",
@@ -46,19 +46,21 @@ LoadingGui:Destroy()
 Window:CreateSection({Name = "📄 Información"})
 
 local InfoOpen = false
-Window:CreateButton({
+local InfoButton = Window:CreateButton({
     Name = "Ver Datos del Script ▶",
     Callback = function()
         InfoOpen = not InfoOpen
         if InfoOpen then
             Window:CreateLabel({Text = "Nombre del Creador: JoseAngel_Blox"})
             Window:CreateLabel({Text = "Fecha de lanzamiento: 29/06/2026"})
+            InfoButton.Name = "Ver Datos del Script ▼"
         else
             for i,v in pairs(Window.Sections.Informacion.Elements) do
                 if v.Type == "Label" then
                     v:Destroy()
                 end
             end
+            InfoButton.Name = "Ver Datos del Script ▶"
         end
     end
 })
