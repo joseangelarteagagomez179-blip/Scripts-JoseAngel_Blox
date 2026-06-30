@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 local Camera = workspace.CurrentCamera
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 --// DESTROY OLD UI
 if PlayerGui:FindFirstChild("MansionTycoonUI") then 
@@ -29,9 +30,9 @@ ScreenGui.Name = "MansionTycoonUI"
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true -- Para que ignore el joystick
+ScreenGui.IgnoreGuiInset = true
 
---// ========== ANIMACION DE CARGA PROFESIONAL ==========
+--// ========== ANIMACION DE CARGA ==========
 LoadingUI.Name = "LoadingUI"
 LoadingUI.BackgroundColor3 = Color3.fromRGB(8, 8, 15)
 LoadingUI.BackgroundTransparency = 0.95
@@ -45,7 +46,6 @@ local LoadingCorner = Instance.new("UICorner")
 LoadingCorner.CornerRadius = UDim.new(0, 20)
 LoadingCorner.Parent = LoadingUI
 
--- Fondo en movimiento (Efecto de ondas)
 local WaveBackground = Instance.new("Frame")
 WaveBackground.Name = "WaveBackground"
 WaveBackground.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
@@ -58,7 +58,6 @@ local WaveCorner = Instance.new("UICorner")
 WaveCorner.CornerRadius = UDim.new(0, 20)
 WaveCorner.Parent = WaveBackground
 
--- Efecto de ondas con UIGradient (optimizado)
 local WaveGradient = Instance.new("UIGradient")
 WaveGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 20, 80)),
@@ -69,7 +68,6 @@ WaveGradient.Color = ColorSequence.new{
 WaveGradient.Rotation = 0
 WaveGradient.Parent = WaveBackground
 
--- TEXTO PRINCIPAL (GRANDE)
 LoadingText.Name = "LoadingText"
 LoadingText.BackgroundTransparency = 1
 LoadingText.Size = UDim2.new(1, 0, 0.6, 0)
@@ -85,7 +83,6 @@ LoadingText.TextStrokeTransparency = 0.3
 LoadingText.TextStrokeColor3 = Color3.fromRGB(80, 0, 180)
 LoadingText.Parent = LoadingUI
 
--- SUBTEXTO (JoseAngel_Blox)
 LoadingSubText.Name = "LoadingSubText"
 LoadingSubText.BackgroundTransparency = 1
 LoadingSubText.Size = UDim2.new(1, 0, 0.3, 0)
@@ -100,7 +97,6 @@ LoadingSubText.TextStrokeTransparency = 0.5
 LoadingSubText.TextStrokeColor3 = Color3.fromRGB(40, 0, 80)
 LoadingSubText.Parent = LoadingUI
 
--- BARRA DE CARGA
 LoadingBar.Name = "LoadingBar"
 LoadingBar.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
 LoadingBar.Size = UDim2.new(0.8, 0, 0, 6)
@@ -123,14 +119,12 @@ FillCorner.Parent = LoadingBarFill
 
 --// ========== ANIMACIONES DE CARGA ==========
 local function PlayLoadingAnimation()
-    -- ANIMACION DEL TEXTO PRINCIPAL (ENTRADA CON ELASTIC)
     local Tween1 = TweenService:Create(LoadingText, TweenInfo.new(1.2, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
         TextTransparency = 0,
         TextSize = 60
     })
     Tween1:Play()
     
-    -- ANIMACION DEL SUBTEXTO (RETRASADO)
     task.wait(0.3)
     local Tween2 = TweenService:Create(LoadingSubText, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         TextTransparency = 0,
@@ -138,14 +132,12 @@ local function PlayLoadingAnimation()
     })
     Tween2:Play()
     
-    -- ANIMACION DE LA BARRA (PROGRESIVA)
     local StartTime = tick()
     local function UpdateBar()
         local elapsed = tick() - StartTime
-        local progress = math.min(elapsed / 3.5, 1) -- 3.5 segundos de carga
+        local progress = math.min(elapsed / 3.5, 1)
         LoadingBarFill.Size = UDim2.new(progress, 0, 1, 0)
         
-        -- Cambiar color de la barra según progreso
         if progress < 0.3 then
             LoadingBarFill.BackgroundColor3 = Color3.fromRGB(100, 50, 200)
         elseif progress < 0.6 then
@@ -162,14 +154,11 @@ local function PlayLoadingAnimation()
         end
     end
     
-    -- Iniciar la barra en un hilo separado
     coroutine.wrap(UpdateBar)()
     
-    -- ANIMACION DE ONDAS EN EL FONDO
     local WaveConnection
     WaveConnection = RunService.Heartbeat:Connect(function()
         WaveGradient.Rotation = (WaveGradient.Rotation or 0) + 0.3
-        -- Efecto de respiración en la transparencia
         local breath = math.sin(tick() * 0.5) * 0.1 + 0.8
         WaveBackground.BackgroundTransparency = breath
     end)
@@ -177,7 +166,7 @@ local function PlayLoadingAnimation()
     return WaveConnection
 end
 
---// ========== MAIN UI CON FONDO EN MOVIMIENTO ==========
+--// ========== MAIN UI ==========
 MainUI.Name = "MainUI"
 MainUI.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
 MainUI.Size = UDim2.new(0, 350, 0, 450)
@@ -194,10 +183,9 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainUI
 
--- FONDO EN MOVIMIENTO (EFECTO DE AURORA BOREAL)
 MovingBackground.Name = "MovingBackground"
 MovingBackground.BackgroundColor3 = Color3.fromRGB(20, 10, 40)
-MovingBackground.Size = UDim2.new(2, 0, 2, 0) -- Más grande para movimiento
+MovingBackground.Size = UDim2.new(2, 0, 2, 0)
 MovingBackground.Position = UDim2.new(-0.5, 0, -0.5, 0)
 MovingBackground.BackgroundTransparency = 0.5
 MovingBackground.ZIndex = -1
@@ -214,7 +202,6 @@ MovingGradient.Color = ColorSequence.new{
 MovingGradient.Rotation = 0
 MovingGradient.Parent = MovingBackground
 
--- FONDO NEON MORADO (BRILLO)
 BackgroundGlow.Name = "BackgroundGlow"
 BackgroundGlow.BackgroundColor3 = Color3.fromRGB(80, 0, 150)
 BackgroundGlow.Size = UDim2.new(1, 0, 1, 0)
@@ -228,7 +215,6 @@ local GlowCorner = Instance.new("UICorner")
 GlowCorner.CornerRadius = UDim.new(0, 16)
 GlowCorner.Parent = BackgroundGlow
 
--- TITULO
 Title.Name = "Title"
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
 Title.Size = UDim2.new(1, 0, 0, 40)
@@ -242,14 +228,12 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 10)
 TitleCorner.Parent = Title
 
--- CONTENEDOR
 Container.Name = "Container"
 Container.BackgroundTransparency = 1
 Container.Size = UDim2.new(1, -16, 1, -60)
 Container.Position = UDim2.new(0, 8, 0, 50)
 Container.Parent = MainUI
 
--- ScrollView
 local ScrollContainer = Instance.new("ScrollingFrame")
 ScrollContainer.Size = UDim2.new(1, 0, 1, -10)
 ScrollContainer.Position = UDim2.new(0, 0, 0, 5)
@@ -265,7 +249,7 @@ ScrollLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 ScrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ScrollLayout.Parent = ScrollContainer
 
---// FUNCIONES DE UI (OPTIMIZADAS)
+--// FUNCIONES UI
 local function CreateCollapsibleSection(name)
     local Section = Instance.new("Frame")
     local SectionTitle = Instance.new("TextButton")
@@ -398,109 +382,191 @@ InfoLabel.Size = UDim2.new(1, 0, 0, 50)
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.TextColor3 = Color3.new(1,1,1)
 InfoLabel.TextSize = 13
-InfoLabel.Text = "👑 Creador: JoseAngel_Blox\n📅 Versión: 2.0 - 29/06/2026"
+InfoLabel.Text = "👑 Creador: JoseAngel_Blox\n📅 Versión: 2.0 - Especial Mansion"
 InfoLabel.TextWrapped = true
 InfoLabel.Parent = InfoSection
 
 local MainSection = CreateCollapsibleSection("⚙️ Main")
 local AutoSection = CreateCollapsibleSection("🤖 Automatización")
 
---// ========== FUNCIONES OPTIMIZADAS ==========
-local function SafeFindParts(partName)
-    local found = {}
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and not obj:IsA("Terrain") then
-            if string.find(string.lower(obj.Name or ""), partName) then
-                table.insert(found, obj)
-            end
-        end
-    end
-    return found
-end
+--// =============================================
+--// FUNCIONES ESPECÍFICAS PARA MANSION TYCOON
+--// =============================================
 
--- AUTO RECOGER DINERO (OPTIMIZADO)
+--// 1. AUTO RECOGER DINERO (FUNCIONAL)
 CreateToggle(AutoSection, "💰 Auto Recoger", function(state)
     local running = false
+    local connection
+    
     if state then
         running = true
-        coroutine.wrap(function()
-            while running and state do
-                task.wait(0.3)
-                pcall(function()
-                    local char = Player.Character
-                    if not char then return end
-                    local hrp = char:FindFirstChild("HumanoidRootPart")
-                    if not hrp then return end
-                    
-                    local moneyParts = SafeFindParts("money") 
-                    for _, part in pairs(moneyParts) do
-                        if part and part:IsA("Part") and part:IsDescendantOf(workspace) then
-                            part.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
+        connection = RunService.Heartbeat:Connect(function()
+            if not running then return end
+            pcall(function()
+                local char = Player.Character
+                if not char then return end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+                
+                -- Buscar objetos de dinero en el juego
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and not obj:IsA("Terrain") then
+                        local name = string.lower(obj.Name or "")
+                        -- Nombres comunes de dinero en Mansion Tycoon
+                        if name:find("money") or name:find("cash") or name:find("coin") or 
+                           name:find("drop") or name:find("dollar") or name:find("peso") or
+                           name:find("oro") or name:find("gold") then
+                            -- Mover el dinero al jugador
+                            if obj:IsA("Part") and obj.CanCollide then
+                                obj.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
+                            end
                         end
                     end
-                end)
-            end
-        end)()
+                end
+            end)
+        end)
     else
         running = false
+        if connection then 
+            connection:Disconnect()
+            connection = nil
+        end
     end
 end)
 
--- AUTO CONSTRUIR (OPTIMIZADO)
+--// 2. AUTO CONSTRUIR (FUNCIONAL PARA MANSION TYCOON)
 CreateToggle(AutoSection, "🔨 Auto Construir", function(state)
     local running = false
+    local connection
+    
     if state then
         running = true
-        coroutine.wrap(function()
-            while running and state do
-                task.wait(0.5)
-                pcall(function()
-                    for _, gui in pairs(PlayerGui:GetChildren()) do
-                        for _, button in pairs(gui:GetDescendants()) do
-                            if button:IsA("TextButton") or button:IsA("ImageButton") then
-                                if button.Visible and button.Active then
-                                    local name = string.lower(button.Name or "")
-                                    if name:find("buy") or name:find("build") or name:find("claim") then
-                                        button:MouseButton1Click()
-                                    end
+        connection = RunService.Heartbeat:Connect(function()
+            if not running then return end
+            pcall(function()
+                -- Buscar en todas las GUI del juego
+                for _, gui in pairs(PlayerGui:GetChildren()) do
+                    -- Buscar botones de construcción
+                    for _, button in pairs(gui:GetDescendants()) do
+                        if button:IsA("TextButton") or button:IsA("ImageButton") then
+                            if button.Visible and button.Active then
+                                local name = string.lower(button.Name or "")
+                                local text = string.lower(button.Text or "")
+                                
+                                -- Palabras clave para construcción en Mansion Tycoon
+                                if name:find("buy") or name:find("build") or name:find("claim") or
+                                   name:find("construir") or name:find("comprar") or name:find("purchase") or
+                                   text:find("comprar") or text:find("construir") or text:find("buy") or
+                                   text:find("build") then
+                                    button:MouseButton1Click()
+                                    task.wait(0.1)
                                 end
                             end
                         end
                     end
-                end)
-            end
-        end)()
+                end
+            end)
+        end)
     else
         running = false
+        if connection then 
+            connection:Disconnect()
+            connection = nil
+        end
     end
 end)
 
--- AUTO MEJORAS (OPTIMIZADO)
+--// 3. AUTO MEJORAS (FUNCIONAL PARA MANSION TYCOON)
 CreateToggle(AutoSection, "⬆️ Auto Mejoras", function(state)
     local running = false
+    local connection
+    
     if state then
         running = true
-        coroutine.wrap(function()
-            while running and state do
-                task.wait(0.8)
-                pcall(function()
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if obj:IsA("ClickDetector") then
-                            local parentName = string.lower(obj.Parent and obj.Parent.Name or "")
-                            if parentName:find("upgrade") or parentName:find("mejora") or parentName:find("improve") then
-                                fireclickdetector(obj)
+        connection = RunService.Heartbeat:Connect(function()
+            if not running then return end
+            pcall(function()
+                -- Buscar ClickDetectors de mejoras
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("ClickDetector") then
+                        local parentName = string.lower(obj.Parent and obj.Parent.Name or "")
+                        local objName = string.lower(obj.Name or "")
+                        
+                        -- Palabras clave para mejoras
+                        if parentName:find("upgrade") or parentName:find("mejora") or 
+                           parentName:find("improve") or parentName:find("level") or
+                           objName:find("upgrade") or objName:find("mejora") then
+                            fireclickdetector(obj)
+                            task.wait(0.05)
+                        end
+                    end
+                end
+                
+                -- También buscar botones de mejora en GUI
+                for _, gui in pairs(PlayerGui:GetChildren()) do
+                    for _, button in pairs(gui:GetDescendants()) do
+                        if button:IsA("TextButton") or button:IsA("ImageButton") then
+                            if button.Visible and button.Active then
+                                local name = string.lower(button.Name or "")
+                                local text = string.lower(button.Text or "")
+                                
+                                if name:find("upgrade") or name:find("mejora") or 
+                                   text:find("upgrade") or text:find("mejora") or
+                                   text:find("mejorar") then
+                                    button:MouseButton1Click()
+                                    task.wait(0.05)
+                                end
                             end
                         end
                     end
-                end)
-            end
-        end)()
+                end
+            end)
+        end)
     else
         running = false
+        if connection then 
+            connection:Disconnect()
+            connection = nil
+        end
     end
 end)
 
--- VELOCIDAD (OPTIMIZADO)
+--// 4. AUTO REBAJAS (NUEVO - PARA COMPRAR REBAJAS)
+CreateToggle(AutoSection, "🛒 Auto Re bajas", function(state)
+    local running = false
+    local connection
+    
+    if state then
+        running = true
+        connection = RunService.Heartbeat:Connect(function()
+            if not running then return end
+            pcall(function()
+                for _, gui in pairs(PlayerGui:GetChildren()) do
+                    for _, button in pairs(gui:GetDescendants()) do
+                        if button:IsA("TextButton") or button:IsA("ImageButton") then
+                            if button.Visible and button.Active then
+                                local text = string.lower(button.Text or "")
+                                if text:find("reba") or text:find("ofert") or text:find("sale") or
+                                   text:find("descu") or text:find("discount") then
+                                    button:MouseButton1Click()
+                                    task.wait(0.1)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end)
+    else
+        running = false
+        if connection then 
+            connection:Disconnect()
+            connection = nil
+        end
+    end
+end)
+
+--// 5. VELOCIDAD Y SALTO (FUNCIONAL)
 CreateToggle(MainSection, "🏃 Velocidad x3", function(state)
     local function setSpeed()
         local char = Player.Character
@@ -508,7 +574,7 @@ CreateToggle(MainSection, "🏃 Velocidad x3", function(state)
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
                 humanoid.WalkSpeed = state and 50 or 16
-                humanoid.JumpPower = state and 60 or 50
+                humanoid.JumpPower = state and 70 or 50
             end
         end
     end
@@ -524,14 +590,13 @@ CreateToggle(MainSection, "🏃 Velocidad x3", function(state)
     end
 end)
 
--- SALTO EXTRA
 CreateToggle(MainSection, "🦘 Salto Extra", function(state)
     local function setJump()
         local char = Player.Character
         if char then
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
-                humanoid.JumpPower = state and 80 or 50
+                humanoid.JumpPower = state and 100 or 50
             end
         end
     end
@@ -547,9 +612,54 @@ CreateToggle(MainSection, "🦘 Salto Extra", function(state)
     end
 end)
 
+--// 6. AUTO FARM (NUEVO - RECOGER TODO AUTOMÁTICAMENTE)
+CreateToggle(AutoSection, "⚡ Auto Farm", function(state)
+    local running = false
+    local connections = {}
+    
+    if state then
+        running = true
+        
+        -- Función para recoger todo
+        local function farm()
+            if not running then return end
+            pcall(function()
+                local char = Player.Character
+                if not char then return end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+                
+                -- Recoger dinero
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("Part") and obj:IsDescendantOf(workspace) and obj.CanCollide then
+                        local name = string.lower(obj.Name or "")
+                        if name:find("money") or name:find("cash") or name:find("coin") or 
+                           name:find("drop") or name:find("dollar") then
+                            obj.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
+                        end
+                    end
+                end
+            end)
+        end
+        
+        -- Múltiples conexiones para farmeo rápido
+        table.insert(connections, RunService.Heartbeat:Connect(farm))
+        table.insert(connections, RunService.Stepped:Connect(function()
+            task.wait(0.1)
+            farm()
+        end))
+        
+    else
+        running = false
+        for _, conn in pairs(connections) do
+            conn:Disconnect()
+        end
+        connections = {}
+    end
+end)
+
 --// ========== INICIAR ANIMACIONES DE FONDO ==========
 local function StartBackgroundAnimations()
-    -- Movimiento del fondo principal
     local BgConnection = RunService.Heartbeat:Connect(function()
         local time = tick() * 0.05
         MovingBackground.Position = UDim2.new(
@@ -561,7 +671,6 @@ local function StartBackgroundAnimations()
         MovingGradient.Rotation = (MovingGradient.Rotation or 0) + 0.1
     end)
     
-    -- Pulsación del brillo
     local GlowConnection = RunService.Heartbeat:Connect(function()
         local breath = math.sin(tick() * 2) * 0.1 + 0.2
         BackgroundGlow.BackgroundTransparency = breath
@@ -571,13 +680,9 @@ local function StartBackgroundAnimations()
 end
 
 --// ========== SECUENCIA DE CARGA ==========
--- 1. Reproducir animación de carga
 local WaveConnection = PlayLoadingAnimation()
-
--- 2. Esperar 4 segundos (carga completa)
 task.wait(4)
 
--- 3. Desaparecer con efecto profesional
 local FadeOut = TweenService:Create(LoadingUI, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
     BackgroundTransparency = 1,
     Size = UDim2.new(0, 200, 0, 100),
@@ -585,7 +690,6 @@ local FadeOut = TweenService:Create(LoadingUI, TweenInfo.new(0.8, Enum.EasingSty
 })
 FadeOut:Play()
 
--- Desconectar ondas
 if WaveConnection then
     WaveConnection:Disconnect()
 end
@@ -593,22 +697,18 @@ end
 task.wait(0.8)
 LoadingUI:Destroy()
 
--- 4. Mostrar menú principal con animación
 MainUI.Visible = true
 MainUI.Size = UDim2.new(0, 300, 0, 400)
 MainUI.Position = UDim2.new(0.5, -150, 0.5, -200)
 
--- Animación de entrada con rebote
 local TweenOpen = TweenService:Create(MainUI, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
     Size = UDim2.new(0, 350, 0, 450),
     Position = UDim2.new(0.5, -175, 0.5, -225)
 })
 TweenOpen:Play()
 
--- 5. Iniciar animaciones de fondo
 local BgConnection, GlowConnection = StartBackgroundAnimations()
 
--- 6. Limpiar conexiones cuando se cierre la GUI
 ScreenGui.AncestryChanged:Connect(function()
     if not ScreenGui.Parent then
         if BgConnection then BgConnection:Disconnect() end
@@ -616,4 +716,4 @@ ScreenGui.AncestryChanged:Connect(function()
     end
 end)
 
-print("✅ Script Cargado - Mansion Tycoon v2.0 Optimizado")
+print("✅ Script Cargado - Mansion Tycoon v2.0 Especial")
