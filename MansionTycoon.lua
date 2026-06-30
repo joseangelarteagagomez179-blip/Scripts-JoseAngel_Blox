@@ -1,100 +1,112 @@
--- Script para Mansion Tycoon | Auto Collect & Auto Buy
--- Creado para ti ❤️
+--// SCRIPT COMPLETO PARA MANSION TYCOON 🏰❤️
+--// Creado especialmente para ti 🥰
+--// Compatible con Delta, Hydrogen, Fluxus, Arceus X
 
--- Cargar la interfaz bonita
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+--// SERVICIOS
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
 
--- Crear ventana principal
-local Window = Rayfield:CreateWindow({
-    Name = "🏰 Mansion Tycoon | Script",
-    LoadingTitle = "Cargando...",
-    LoadingSubtitle = "Hecho con amor para ti ❤️",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "MansionTycoon",
-        FileName = "Settings"
-    }
-})
-
--- Crear pestañas
-local MainTab = Window:CreateTab("🏠 Principal", 4483362458)
-local MiscTab = Window:CreateTab("⚙️ Extras", 4483362458)
-
--- Variables principales
-local Player = game.Players.LocalPlayer
+local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- 🔹 Auto Collect Money
-MainTab:CreateToggle({
-    Name = "💰 Recoger Dinero Automático",
-    CurrentValue = false,
-    Callback = function(Value)
-        getgenv().AutoCollect = Value
-        if Value then
-            spawn(function()
-                while getgenv().AutoCollect do
-                    for _, v in pairs(workspace:GetChildren()) do
-                        if v:FindFirstChild("Money") then
-                            firetouchinterest(Character.HumanoidRootPart, v.Money, 0)
-                        end
-                    end
-                    wait(0.5)
+--// CONFIGURACIÓN (Puedes cambiar los valores si quieres)
+local Config = {
+    AutoBuild = true,      -- Auto Construir
+    AutoCollect = true,    -- Auto Recolectar Dinero
+    Speed = 75,            -- Velocidad normal
+    FlySpeed = 120,        -- Velocidad volando
+    EnableFly = true       -- Activar Fly
+}
+
+--// FUNCIÓN DE NOTIFICACIÓN
+local function Notify(title, text)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = text;
+        Duration = 3;
+    })
+end
+
+Notify("✅ Script Cargado", "Bienvenido "..Player.Name)
+
+--// 🏗️ AUTO CONSTRUIR
+spawn(function()
+    while Config.AutoBuild and task.wait(0.5) do
+        pcall(function()
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v:FindFirstChild("ClickDetector") and v.Name:find("Build") or v.Name:find("Buy") then
+                    fireclickdetector(v.ClickDetector)
+                    task.wait(0.1)
                 end
-            end)
-        end
+            end
+        end)
     end
-})
+end)
 
--- 🔹 Auto Buy Upgrades
-MainTab:CreateToggle({
-    Name = "🛒 Comprar Mejoras Automático",
-    CurrentValue = false,
-    Callback = function(Value)
-        getgenv().AutoBuy = Value
-        if Value then
-            spawn(function()
-                while getgenv().AutoBuy do
-                    for _, v in pairs(workspace:GetChildren()) do
-                        if v:FindFirstChild("Button") then
-                            fireclickdetector(v.Button.ClickDetector)
-                        end
-                    end
-                    wait(1)
+--// 💰 AUTO RECOLECTAR DINERO
+spawn(function()
+    while Config.AutoCollect and task.wait(0.2) do
+        pcall(function()
+            for _, item in pairs(Workspace:GetChildren()) do
+                if item.Name:find("Money") or item.Name:find("Cash") then
+                    item:Destroy()
+                    Player.leaderstats.Money.Value += 1000 -- Aumenta dinero
                 end
-            end)
+            end
+        end)
+    end
+end)
+
+--// ⚡ VELOCIDAD Y SALTO
+Humanoid.WalkSpeed = Config.Speed
+Humanoid.JumpPower = 100
+
+--// 🚀 FLY (VOLAR)
+if Config.EnableFly then
+    local Camera = Workspace.CurrentCamera
+    local Keys = {W=false, A=false, S=false, D=false, Space=false, LeftControl=false}
+
+    -- Detectar teclas
+    game:GetService("UserInputService").InputBegan:Connect(function(Input, GP)
+        if not GP then
+            if Input.KeyCode == Enum.KeyCode.W then Keys.W = true end
+            if Input.KeyCode == Enum.KeyCode.A then Keys.A = true end
+            if Input.KeyCode == Enum.KeyCode.S then Keys.S = true end
+            if Input.KeyCode == Enum.KeyCode.D then Keys.D = true end
+            if Input.KeyCode == Enum.KeyCode.Space then Keys.Space = true end
+            if Input.KeyCode == Enum.KeyCode.LeftControl then Keys.LeftControl = true end
         end
-    end
-})
+    end)
 
--- 🔹 Velocidad Extra
-MiscTab:CreateSlider({
-    Name = "⚡ Velocidad",
-    Range = {16, 100},
-    Increment = 1,
-    CurrentValue = 16,
-    Callback = function(Value)
-        Humanoid.WalkSpeed = Value
-    end
-})
-
--- 🔹 Salto Alto
-MiscTab:CreateToggle({
-    Name = "🦘 Salto Alto",
-    CurrentValue = false,
-    Callback = function(Value)
-        if Value then
-            Humanoid.JumpPower = 100
-        else
-            Humanoid.JumpPower = 50
+    game:GetService("UserInputService").InputEnded:Connect(function(Input, GP)
+        if not GP then
+            if Input.KeyCode == Enum.KeyCode.W then Keys.W = false end
+            if Input.KeyCode == Enum.KeyCode.A then Keys.A = false end
+            if Input.KeyCode == Enum.KeyCode.S then Keys.S = false end
+            if Input.KeyCode == Enum.KeyCode.D then Keys.D = false end
+            if Input.KeyCode == Enum.KeyCode.Space then Keys.Space = false end
+            if Input.KeyCode == Enum.KeyCode.LeftControl then Keys.LeftControl = false end
         end
-    end
-})
+    end)
 
--- Notificación de inicio
-Rayfield:Notify({
-    Title = "¡Script Listo!",
-    Content = "Disfruta construyendo tu mansión ❤️",
-    Duration = 5,
-    Image = 4483362458
-})
+    -- Moverse volando
+    RunService.RenderStepped:Connect(function()
+        local CF = Camera.CFrame
+        local Direction = Vector3.new()
+
+        if Keys.W then Direction += CF.LookVector end
+        if Keys.S then Direction -= CF.LookVector end
+        if Keys.A then Direction -= CF.RightVector end
+        if Keys.D then Direction += CF.RightVector end
+        if Keys.Space then Direction += Vector3.new(0,1,0) end
+        if Keys.LeftControl then Direction -= Vector3.new(0,1,0) end
+
+        RootPart.Velocity = Direction * Config.FlySpeed
+    end)
+end
+
+Notify("🎉 ¡Todo activado!", "Disfruta el juego mi amor 😘")
