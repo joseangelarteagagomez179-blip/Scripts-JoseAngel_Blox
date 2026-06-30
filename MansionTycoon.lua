@@ -4,13 +4,70 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
-local Camera = workspace.CurrentCamera
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
 --// DESTROY OLD UI
 if PlayerGui:FindFirstChild("MansionTycoonUI") then 
     PlayerGui.MansionTycoonUI:Destroy() 
 end
+
+--// ========== SISTEMA DE CONTROL DE PROCESOS ==========
+local ProcessManager = {
+    processes = {},
+    
+    -- Iniciar un proceso
+    Start = function(self, processId, callback, interval)
+        if self.processes[processId] then
+            self:Stop(processId)
+        end
+        
+        local running = true
+        local connection
+        
+        -- Usar task.wait para mejor rendimiento
+        connection = RunService.Heartbeat:Connect(function()
+            if not running then
+                connection:Disconnect()
+                return
+            end
+            pcall(callback)
+        end)
+        
+        self.processes[processId] = {
+            running = running,
+            connection = connection
+        }
+        
+        return true
+    end,
+    
+    -- Detener un proceso
+    Stop = function(self, processId)
+        local process = self.processes[processId]
+        if process then
+            process.running = false
+            if process.connection then
+                process.connection:Disconnect()
+                process.connection = nil
+            end
+            self.processes[processId] = nil
+            return true
+        end
+        return false
+    end,
+    
+    -- Verificar si un proceso está activo
+    IsRunning = function(self, processId)
+        return self.processes[processId] ~= nil
+    end,
+    
+    -- Detener todos los procesos
+    StopAll = function(self)
+        for id, _ in pairs(self.processes) do
+            self:Stop(id)
+        end
+    end
+}
 
 --// VARIABLES
 local ScreenGui = Instance.new("ScreenGui")
@@ -221,7 +278,7 @@ Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
 Title.TextColor3 = Color3.new(1,1,1)
 Title.TextSize = 20
-Title.Text = "🏰 Mansion Tycoon v2.0"
+Title.Text = "🏰 Mansion Tycoon v3.0"
 Title.Parent = MainUI
 
 local TitleCorner = Instance.new("UICorner")
@@ -382,7 +439,7 @@ InfoLabel.Size = UDim2.new(1, 0, 0, 50)
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.TextColor3 = Color3.new(1,1,1)
 InfoLabel.TextSize = 13
-InfoLabel.Text = "👑 Creador: JoseAngel_Blox\n📅 Versión: 2.0 - Especial Mansion"
+InfoLabel.Text = "👑 Creador: JoseAngel_Blox\n📅 Versión: 3.0 - Optimizado"
 InfoLabel.TextWrapped = true
 InfoLabel.Parent = InfoSection
 
@@ -390,183 +447,180 @@ local MainSection = CreateCollapsibleSection("⚙️ Main")
 local AutoSection = CreateCollapsibleSection("🤖 Automatización")
 
 --// =============================================
---// FUNCIONES ESPECÍFICAS PARA MANSION TYCOON
+--// FUNCIONES OPTIMIZADAS PARA MANSION TYCOON
 --// =============================================
 
---// 1. AUTO RECOGER DINERO (FUNCIONAL)
+--// Función auxiliar para encontrar dinero (optimizada)
+local function FindMoney()
+    local results = {}
+    local playerChar = Player.Character
+    if not playerChar then return results end
+    
+    local hrp = playerChar:FindFirstChild("HumanoidRootPart")
+    if not hrp then return results end
+    
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and obj:IsDescendantOf(workspace) and obj.CanCollide then
+            local name = string.lower(obj.Name or "")
+            if name:find("money") or name:find("cash") or name:find("coin") or 
+               name:find("drop") or name:find("dollar") or name:find("peso") or
+               name:find("oro") or name:find("gold") or name:find("billete") then
+                table.insert(results, obj)
+            end
+        end
+    end
+    return results
+end
+
+--// 1. AUTO RECOGER DINERO (OPTIMIZADO)
 CreateToggle(AutoSection, "💰 Auto Recoger", function(state)
-    local running = false
-    local connection
+    local processId = "AutoRecoger"
     
     if state then
-        running = true
-        connection = RunService.Heartbeat:Connect(function()
-            if not running then return end
-            pcall(function()
-                local char = Player.Character
-                if not char then return end
-                local hrp = char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-                
-                -- Buscar objetos de dinero en el juego
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") and not obj:IsA("Terrain") then
-                        local name = string.lower(obj.Name or "")
-                        -- Nombres comunes de dinero en Mansion Tycoon
-                        if name:find("money") or name:find("cash") or name:find("coin") or 
-                           name:find("drop") or name:find("dollar") or name:find("peso") or
-                           name:find("oro") or name:find("gold") then
-                            -- Mover el dinero al jugador
-                            if obj:IsA("Part") and obj.CanCollide then
-                                obj.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
-                            end
-                        end
-                    end
+        ProcessManager:Start(processId, function()
+            local char = Player.Character
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+            
+            local moneyParts = FindMoney()
+            for _, part in pairs(moneyParts) do
+                if part and part:IsA("Part") and part:IsDescendantOf(workspace) then
+                    part.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
                 end
-            end)
-        end)
+            end
+        end, 0.1)
     else
-        running = false
-        if connection then 
-            connection:Disconnect()
-            connection = nil
-        end
+        ProcessManager:Stop(processId)
     end
 end)
 
---// 2. AUTO CONSTRUIR (FUNCIONAL PARA MANSION TYCOON)
+--// 2. AUTO CONSTRUIR (OPTIMIZADO)
 CreateToggle(AutoSection, "🔨 Auto Construir", function(state)
-    local running = false
-    local connection
+    local processId = "AutoConstruir"
     
     if state then
-        running = true
-        connection = RunService.Heartbeat:Connect(function()
-            if not running then return end
-            pcall(function()
-                -- Buscar en todas las GUI del juego
-                for _, gui in pairs(PlayerGui:GetChildren()) do
-                    -- Buscar botones de construcción
-                    for _, button in pairs(gui:GetDescendants()) do
-                        if button:IsA("TextButton") or button:IsA("ImageButton") then
-                            if button.Visible and button.Active then
-                                local name = string.lower(button.Name or "")
-                                local text = string.lower(button.Text or "")
-                                
-                                -- Palabras clave para construcción en Mansion Tycoon
-                                if name:find("buy") or name:find("build") or name:find("claim") or
-                                   name:find("construir") or name:find("comprar") or name:find("purchase") or
-                                   text:find("comprar") or text:find("construir") or text:find("buy") or
-                                   text:find("build") then
-                                    button:MouseButton1Click()
-                                    task.wait(0.1)
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        end)
-    else
-        running = false
-        if connection then 
-            connection:Disconnect()
-            connection = nil
-        end
-    end
-end)
-
---// 3. AUTO MEJORAS (FUNCIONAL PARA MANSION TYCOON)
-CreateToggle(AutoSection, "⬆️ Auto Mejoras", function(state)
-    local running = false
-    local connection
-    
-    if state then
-        running = true
-        connection = RunService.Heartbeat:Connect(function()
-            if not running then return end
-            pcall(function()
-                -- Buscar ClickDetectors de mejoras
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("ClickDetector") then
-                        local parentName = string.lower(obj.Parent and obj.Parent.Name or "")
-                        local objName = string.lower(obj.Name or "")
+        ProcessManager:Start(processId, function()
+            for _, gui in pairs(PlayerGui:GetChildren()) do
+                for _, button in pairs(gui:GetDescendants()) do
+                    if button:IsA("TextButton") and button.Visible and button.Active then
+                        local name = string.lower(button.Name or "")
+                        local text = string.lower(button.Text or "")
                         
-                        -- Palabras clave para mejoras
-                        if parentName:find("upgrade") or parentName:find("mejora") or 
-                           parentName:find("improve") or parentName:find("level") or
-                           objName:find("upgrade") or objName:find("mejora") then
-                            fireclickdetector(obj)
+                        if name:find("buy") or name:find("build") or name:find("claim") or
+                           text:find("comprar") or text:find("construir") or text:find("build") then
+                            button:MouseButton1Click()
                             task.wait(0.05)
                         end
                     end
                 end
-                
-                -- También buscar botones de mejora en GUI
-                for _, gui in pairs(PlayerGui:GetChildren()) do
-                    for _, button in pairs(gui:GetDescendants()) do
-                        if button:IsA("TextButton") or button:IsA("ImageButton") then
-                            if button.Visible and button.Active then
-                                local name = string.lower(button.Name or "")
-                                local text = string.lower(button.Text or "")
-                                
-                                if name:find("upgrade") or name:find("mejora") or 
-                                   text:find("upgrade") or text:find("mejora") or
-                                   text:find("mejorar") then
-                                    button:MouseButton1Click()
-                                    task.wait(0.05)
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-        end)
+            end
+        end, 0.3)
     else
-        running = false
-        if connection then 
-            connection:Disconnect()
-            connection = nil
-        end
+        ProcessManager:Stop(processId)
     end
 end)
 
---// 4. AUTO REBAJAS (NUEVO - PARA COMPRAR REBAJAS)
-CreateToggle(AutoSection, "🛒 Auto Re bajas", function(state)
-    local running = false
-    local connection
+--// 3. AUTO MEJORAS (OPTIMIZADO)
+CreateToggle(AutoSection, "⬆️ Auto Mejoras", function(state)
+    local processId = "AutoMejoras"
     
     if state then
-        running = true
-        connection = RunService.Heartbeat:Connect(function()
-            if not running then return end
-            pcall(function()
-                for _, gui in pairs(PlayerGui:GetChildren()) do
-                    for _, button in pairs(gui:GetDescendants()) do
-                        if button:IsA("TextButton") or button:IsA("ImageButton") then
-                            if button.Visible and button.Active then
-                                local text = string.lower(button.Text or "")
-                                if text:find("reba") or text:find("ofert") or text:find("sale") or
-                                   text:find("descu") or text:find("discount") then
-                                    button:MouseButton1Click()
-                                    task.wait(0.1)
-                                end
-                            end
+        ProcessManager:Start(processId, function()
+            -- ClickDetectors
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("ClickDetector") then
+                    local parentName = string.lower(obj.Parent and obj.Parent.Name or "")
+                    if parentName:find("upgrade") or parentName:find("mejora") or 
+                       parentName:find("improve") then
+                        fireclickdetector(obj)
+                        task.wait(0.05)
+                    end
+                end
+            end
+            
+            -- Botones en GUI
+            for _, gui in pairs(PlayerGui:GetChildren()) do
+                for _, button in pairs(gui:GetDescendants()) do
+                    if button:IsA("TextButton") and button.Visible and button.Active then
+                        local name = string.lower(button.Name or "")
+                        local text = string.lower(button.Text or "")
+                        if name:find("upgrade") or text:find("upgrade") or 
+                           text:find("mejora") or text:find("mejorar") then
+                            button:MouseButton1Click()
+                            task.wait(0.05)
                         end
                     end
                 end
-            end)
-        end)
+            end
+        end, 0.4)
     else
-        running = false
-        if connection then 
-            connection:Disconnect()
-            connection = nil
-        end
+        ProcessManager:Stop(processId)
     end
 end)
 
---// 5. VELOCIDAD Y SALTO (FUNCIONAL)
+--// 4. AUTO REBAJAS (OPTIMIZADO)
+CreateToggle(AutoSection, "🛒 Auto Re bajas", function(state)
+    local processId = "AutoRebajas"
+    
+    if state then
+        ProcessManager:Start(processId, function()
+            for _, gui in pairs(PlayerGui:GetChildren()) do
+                for _, button in pairs(gui:GetDescendants()) do
+                    if button:IsA("TextButton") and button.Visible and button.Active then
+                        local text = string.lower(button.Text or "")
+                        if text:find("reba") or text:find("ofert") or text:find("descu") or
+                           text:find("sale") or text:find("discount") then
+                            button:MouseButton1Click()
+                            task.wait(0.05)
+                        end
+                    end
+                end
+            end
+        end, 0.5)
+    else
+        ProcessManager:Stop(processId)
+    end
+end)
+
+--// 5. AUTO FARM COMPLETO (OPTIMIZADO)
+CreateToggle(AutoSection, "⚡ Auto Farm", function(state)
+    local processId = "AutoFarm"
+    
+    if state then
+        ProcessManager:Start(processId, function()
+            local char = Player.Character
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+            
+            -- Recoger dinero
+            local moneyParts = FindMoney()
+            for _, part in pairs(moneyParts) do
+                if part and part:IsA("Part") then
+                    part.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
+                end
+            end
+            
+            -- Construir automáticamente
+            for _, gui in pairs(PlayerGui:GetChildren()) do
+                for _, button in pairs(gui:GetDescendants()) do
+                    if button:IsA("TextButton") and button.Visible and button.Active then
+                        local text = string.lower(button.Text or "")
+                        if text:find("comprar") or text:find("construir") or text:find("build") then
+                            button:MouseButton1Click()
+                            task.wait(0.05)
+                        end
+                    end
+                end
+            end
+        end, 0.15)
+    else
+        ProcessManager:Stop(processId)
+    end
+end)
+
+--// 6. VELOCIDAD (MEJORADO)
 CreateToggle(MainSection, "🏃 Velocidad x3", function(state)
     local function setSpeed()
         local char = Player.Character
@@ -574,7 +628,6 @@ CreateToggle(MainSection, "🏃 Velocidad x3", function(state)
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
                 humanoid.WalkSpeed = state and 50 or 16
-                humanoid.JumpPower = state and 70 or 50
             end
         end
     end
@@ -590,6 +643,7 @@ CreateToggle(MainSection, "🏃 Velocidad x3", function(state)
     end
 end)
 
+--// 7. SALTO EXTRA
 CreateToggle(MainSection, "🦘 Salto Extra", function(state)
     local function setJump()
         local char = Player.Character
@@ -612,50 +666,13 @@ CreateToggle(MainSection, "🦘 Salto Extra", function(state)
     end
 end)
 
---// 6. AUTO FARM (NUEVO - RECOGER TODO AUTOMÁTICAMENTE)
-CreateToggle(AutoSection, "⚡ Auto Farm", function(state)
-    local running = false
-    local connections = {}
-    
-    if state then
-        running = true
-        
-        -- Función para recoger todo
-        local function farm()
-            if not running then return end
-            pcall(function()
-                local char = Player.Character
-                if not char then return end
-                local hrp = char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-                
-                -- Recoger dinero
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("Part") and obj:IsDescendantOf(workspace) and obj.CanCollide then
-                        local name = string.lower(obj.Name or "")
-                        if name:find("money") or name:find("cash") or name:find("coin") or 
-                           name:find("drop") or name:find("dollar") then
-                            obj.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
-                        end
-                    end
-                end
-            end)
-        end
-        
-        -- Múltiples conexiones para farmeo rápido
-        table.insert(connections, RunService.Heartbeat:Connect(farm))
-        table.insert(connections, RunService.Stepped:Connect(function()
-            task.wait(0.1)
-            farm()
-        end))
-        
-    else
-        running = false
-        for _, conn in pairs(connections) do
-            conn:Disconnect()
-        end
-        connections = {}
+--// 8. NO GRAVEDAD (NUEVO)
+CreateToggle(MainSection, "🌌 No Gravedad", function(state)
+    local function setGravity()
+        workspace.Gravity = state and 0 or 196.2
     end
+    
+    setGravity()
 end)
 
 --// ========== INICIAR ANIMACIONES DE FONDO ==========
@@ -709,11 +726,13 @@ TweenOpen:Play()
 
 local BgConnection, GlowConnection = StartBackgroundAnimations()
 
+--// ========== LIMPIEZA AL CERRAR ==========
 ScreenGui.AncestryChanged:Connect(function()
     if not ScreenGui.Parent then
+        ProcessManager:StopAll()
         if BgConnection then BgConnection:Disconnect() end
         if GlowConnection then GlowConnection:Disconnect() end
     end
 end)
 
-print("✅ Script Cargado - Mansion Tycoon v2.0 Especial")
+print("✅ Script Cargado - Mansion Tycoon v3.0 Optimizado")
