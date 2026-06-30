@@ -63,7 +63,21 @@ local ProcessManager = {
     end
 }
 
---// ========== FUNCIONES DE UTILIDAD ==========
+--// ========== FUNCIONES ESPECÍFICAS PARA MANSION TYCOON ==========
+
+-- Buscar el buzón (mailbox)
+local function FindMailbox()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local name = string.lower(obj.Name or "")
+            if name:find("mail") or name:find("buzon") or name:find("mailbox") or 
+               name:find("collect") or name:find("recolect") or name:find("cash") then
+                return obj
+            end
+        end
+    end
+    return nil
+end
 
 -- Buscar todos los botones clickeables
 local function FindAllButtons()
@@ -91,26 +105,49 @@ local function FindAllClickDetectors()
     return detectors
 end
 
--- Buscar dinero
-local function FindAllMoney()
-    local money = {}
-    local char = Player.Character
-    if not char then return money end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return money end
+-- SIMULAR TOQUE EN EL BUZÓN (SIN MOVER AL JUGADOR)
+local function SimulateMailboxTouch()
+    local mailbox = FindMailbox()
+    if not mailbox then return false end
     
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and obj:IsDescendantOf(workspace) and obj.CanCollide then
-            local name = string.lower(obj.Name or "")
-            if name:find("money") or name:find("cash") or name:find("coin") or 
-               name:find("drop") or name:find("dollar") or name:find("peso") or
-               name:find("oro") or name:find("gold") or name:find("billete") or
-               name:find("moneda") then
-                table.insert(money, obj)
-            end
+    -- Método 1: FireClickDetector si el buzón tiene uno
+    local clickDetector = mailbox:FindFirstChildWhichIsA("ClickDetector")
+    if clickDetector then
+        pcall(function()
+            fireclickdetector(clickDetector)
+            return true
+        end)
+    end
+    
+    -- Método 2: Buscar ClickDetector en los hijos del buzón
+    for _, child in pairs(mailbox:GetDescendants()) do
+        if child:IsA("ClickDetector") then
+            pcall(function()
+                fireclickdetector(child)
+                return true
+            end)
         end
     end
-    return money
+    
+    -- Método 3: Simular toque con el personaje (sin moverlo permanentemente)
+    local char = Player.Character
+    if char then
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            -- Guardar posición original
+            local originalPos = hrp.Position
+            
+            -- Mover temporalmente al buzón y volver
+            pcall(function()
+                hrp.CFrame = CFrame.new(mailbox.Position + Vector3.new(0, 2, 0))
+                task.wait(0.05)
+                hrp.CFrame = CFrame.new(originalPos)
+                return true
+            end)
+        end
+    end
+    
+    return false
 end
 
 --// VARIABLES UI
@@ -147,7 +184,6 @@ local LoadingCorner = Instance.new("UICorner")
 LoadingCorner.CornerRadius = UDim.new(0, 20)
 LoadingCorner.Parent = LoadingUI
 
--- Fondo con ondas
 local WaveBackground = Instance.new("Frame")
 WaveBackground.Name = "WaveBackground"
 WaveBackground.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
@@ -170,7 +206,6 @@ WaveGradient.Color = ColorSequence.new{
 WaveGradient.Rotation = 0
 WaveGradient.Parent = WaveBackground
 
--- Texto principal
 LoadingText.Name = "LoadingText"
 LoadingText.BackgroundTransparency = 1
 LoadingText.Size = UDim2.new(1, 0, 0.6, 0)
@@ -186,7 +221,6 @@ LoadingText.TextStrokeTransparency = 0.3
 LoadingText.TextStrokeColor3 = Color3.fromRGB(80, 0, 180)
 LoadingText.Parent = LoadingUI
 
--- Subtítulo
 LoadingSubText.Name = "LoadingSubText"
 LoadingSubText.BackgroundTransparency = 1
 LoadingSubText.Size = UDim2.new(1, 0, 0.3, 0)
@@ -201,7 +235,6 @@ LoadingSubText.TextStrokeTransparency = 0.5
 LoadingSubText.TextStrokeColor3 = Color3.fromRGB(40, 0, 80)
 LoadingSubText.Parent = LoadingUI
 
--- Barra de carga
 LoadingBar.Name = "LoadingBar"
 LoadingBar.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
 LoadingBar.Size = UDim2.new(0.8, 0, 0, 6)
@@ -224,14 +257,12 @@ FillCorner.Parent = LoadingBarFill
 
 --// ========== ANIMACIONES DE CARGA ==========
 local function PlayLoadingAnimation()
-    -- Animación del texto principal
     local Tween1 = TweenService:Create(LoadingText, TweenInfo.new(1.2, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
         TextTransparency = 0,
         TextSize = 60
     })
     Tween1:Play()
     
-    -- Animación del subtítulo
     task.wait(0.3)
     local Tween2 = TweenService:Create(LoadingSubText, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         TextTransparency = 0,
@@ -239,11 +270,7 @@ local function PlayLoadingAnimation()
     })
     Tween2:Play()
     
-    -- Animación de la barra de carga
     local StartTime = tick()
-    local barConnection
-    
-    -- Función para actualizar la barra
     local function UpdateBar()
         local elapsed = tick() - StartTime
         local progress = math.min(elapsed / 3.5, 1)
@@ -260,16 +287,13 @@ local function PlayLoadingAnimation()
         end
         
         if progress < 1 then
-            -- Usar task.wait en lugar de RunService.Heartbeat
             task.wait(0.05)
             UpdateBar()
         end
     end
     
-    -- Iniciar la barra en un hilo separado
     coroutine.wrap(UpdateBar)()
     
-    -- Animación de ondas
     local WaveConnection
     WaveConnection = RunService.Heartbeat:Connect(function()
         WaveGradient.Rotation = (WaveGradient.Rotation or 0) + 0.3
@@ -297,7 +321,6 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainUI
 
--- Fondo en movimiento
 MovingBackground.Name = "MovingBackground"
 MovingBackground.BackgroundColor3 = Color3.fromRGB(20, 10, 40)
 MovingBackground.Size = UDim2.new(2, 0, 2, 0)
@@ -317,7 +340,6 @@ MovingGradient.Color = ColorSequence.new{
 MovingGradient.Rotation = 0
 MovingGradient.Parent = MovingBackground
 
--- Brillo
 BackgroundGlow.Name = "BackgroundGlow"
 BackgroundGlow.BackgroundColor3 = Color3.fromRGB(80, 0, 150)
 BackgroundGlow.Size = UDim2.new(1, 0, 1, 0)
@@ -331,21 +353,19 @@ local GlowCorner = Instance.new("UICorner")
 GlowCorner.CornerRadius = UDim.new(0, 16)
 GlowCorner.Parent = BackgroundGlow
 
--- Título
 Title.Name = "Title"
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
 Title.TextColor3 = Color3.new(1,1,1)
 Title.TextSize = 20
-Title.Text = "🏰 Mansion Tycoon v3.2"
+Title.Text = "🏰 Mansion Tycoon v4.1"
 Title.Parent = MainUI
 
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 10)
 TitleCorner.Parent = Title
 
--- Contenedor
 Container.Name = "Container"
 Container.BackgroundTransparency = 1
 Container.Size = UDim2.new(1, -16, 1, -60)
@@ -500,7 +520,7 @@ InfoLabel.Size = UDim2.new(1, 0, 0, 50)
 InfoLabel.Font = Enum.Font.GothamBold
 InfoLabel.TextColor3 = Color3.new(1,1,1)
 InfoLabel.TextSize = 13
-InfoLabel.Text = "👑 Creador: JoseAngel_Blox\n📅 Versión: 3.2 - Mansion Tycoon"
+InfoLabel.Text = "👑 Creador: JoseAngel_Blox\n📅 Versión: 4.1 - Mansion Tycoon"
 InfoLabel.TextWrapped = true
 InfoLabel.Parent = InfoSection
 
@@ -508,37 +528,41 @@ local MainSection = CreateCollapsibleSection("⚙️ Main")
 local AutoSection = CreateCollapsibleSection("🤖 Automatización")
 
 --// =============================================
---// FUNCIONES PARA MANSION TYCOON
+--// FUNCIONES ESPECÍFICAS PARA MANSION TYCOON
 --// =============================================
 
---// 1. AUTO RECOGER DINERO
+--// 1. AUTO RECOGER DINERO (SIMULA TOQUE AL BUZÓN SIN MOVER)
 CreateToggle(AutoSection, "💰 Auto Recoger", function(state)
     local processId = "AutoRecoger"
     
     if state then
         ProcessManager:Start(processId, function()
-            local char = Player.Character
-            if not char then return end
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
+            -- SIMULAR TOQUE AL BUZÓN
+            local success = SimulateMailboxTouch()
             
-            local moneyObjects = FindAllMoney()
-            for _, obj in pairs(moneyObjects) do
-                if obj and obj:IsA("BasePart") and obj:IsDescendantOf(workspace) then
-                    pcall(function()
-                        obj.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
-                    end)
+            -- Si no funciona con el buzón, buscar ClickDetectors de dinero
+            if not success then
+                local detectors = FindAllClickDetectors()
+                for _, detector in pairs(detectors) do
+                    local parentName = string.lower(detector.Parent and detector.Parent.Name or "")
+                    if parentName:find("mail") or parentName:find("cash") or 
+                       parentName:find("collect") or parentName:find("recolect") or
+                       parentName:find("buzon") or parentName:find("money") then
+                        pcall(function()
+                            fireclickdetector(detector)
+                        end)
+                    end
                 end
             end
-        end, 0.1)
+        end, 0.3) -- Cada 0.3 segundos
     else
         ProcessManager:Stop(processId)
     end
 end)
 
---// 2. AUTO CONSTRUIR
-CreateToggle(AutoSection, "🔨 Auto Construir", function(state)
-    local processId = "AutoConstruir"
+--// 2. AUTO COMPRAR
+CreateToggle(AutoSection, "🛒 Auto Comprar", function(state)
+    local processId = "AutoComprar"
     
     if state then
         ProcessManager:Start(processId, function()
@@ -548,8 +572,10 @@ CreateToggle(AutoSection, "🔨 Auto Construir", function(state)
                     local name = string.lower(button.Name or "")
                     local text = string.lower(button.Text or "")
                     
-                    if name:find("buy") or name:find("build") or name:find("claim") or
-                       text:find("comprar") or text:find("construir") or text:find("build") then
+                    if name:find("buy") or name:find("purchase") or name:find("comprar") or
+                       name:find("claim") or name:find("reclamar") or
+                       text:find("comprar") or text:find("buy") or text:find("claim") or
+                       text:find("reclamar") or text:find("adquirir") then
                         pcall(function()
                             button:MouseButton1Click()
                             task.wait(0.05)
@@ -586,58 +612,50 @@ CreateToggle(AutoSection, "⬆️ Auto Mejoras", function(state)
     end
 end)
 
---// 4. AUTO REBAJAS
-CreateToggle(AutoSection, "🛒 Auto Re bajas", function(state)
-    local processId = "AutoRebajas"
+--// 4. AUTO VIP
+CreateToggle(AutoSection, "👑 Auto VIP", function(state)
+    local processId = "AutoVIP"
     
     if state then
         ProcessManager:Start(processId, function()
             local allButtons = FindAllButtons()
             for _, button in pairs(allButtons) do
                 if button.Visible and button.Active then
+                    local name = string.lower(button.Name or "")
                     local text = string.lower(button.Text or "")
-                    if text:find("reba") or text:find("ofert") or text:find("descu") or
-                       text:find("sale") or text:find("discount") then
+                    if name:find("vip") or text:find("vip") or 
+                       text:find("premium") or name:find("premium") then
                         pcall(function()
                             button:MouseButton1Click()
-                            task.wait(0.05)
+                            task.wait(0.5)
                         end)
                     end
                 end
             end
-        end, 0.5)
+        end, 1)
     else
         ProcessManager:Stop(processId)
     end
 end)
 
---// 5. AUTO FARM
+--// 5. AUTO FARM COMPLETO
 CreateToggle(AutoSection, "⚡ Auto Farm", function(state)
     local processId = "AutoFarm"
     
     if state then
         ProcessManager:Start(processId, function()
-            local char = Player.Character
-            if not char then return end
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
+            -- 1. Recoger dinero (simular toque al buzón)
+            SimulateMailboxTouch()
             
-            -- Recoger dinero
-            local moneyObjects = FindAllMoney()
-            for _, obj in pairs(moneyObjects) do
-                if obj and obj:IsA("BasePart") then
-                    pcall(function()
-                        obj.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
-                    end)
-                end
-            end
-            
-            -- Construir
+            -- 2. Comprar automáticamente
             local allButtons = FindAllButtons()
             for _, button in pairs(allButtons) do
                 if button.Visible and button.Active then
                     local text = string.lower(button.Text or "")
-                    if text:find("comprar") or text:find("construir") or text:find("build") then
+                    local name = string.lower(button.Name or "")
+                    if text:find("comprar") or text:find("buy") or 
+                       text:find("construir") or text:find("build") or
+                       name:find("buy") or name:find("build") then
                         pcall(function()
                             button:MouseButton1Click()
                             task.wait(0.05)
@@ -645,7 +663,7 @@ CreateToggle(AutoSection, "⚡ Auto Farm", function(state)
                     end
                 end
             end
-        end, 0.15)
+        end, 0.3)
     else
         ProcessManager:Stop(processId)
     end
@@ -708,7 +726,7 @@ CreateToggle(AutoSection, "🖱️ Auto Click", function(state)
                 if button.Visible and button.Active then
                     pcall(function()
                         button:MouseButton1Click()
-                        task.wait(0.01)
+                        task.wait(0.02)
                     end)
                 end
             end
@@ -778,4 +796,4 @@ ScreenGui.AncestryChanged:Connect(function()
     end
 end)
 
-print("✅ Script Cargado - Mansion Tycoon v3.2")
+print("✅ Script Cargado - Mansion Tycoon v4.1")
