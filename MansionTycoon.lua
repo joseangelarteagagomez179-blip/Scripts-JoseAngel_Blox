@@ -2,6 +2,7 @@
 🏰 Mansion Tycoon v2.1 🏰
 Creador: JoseAngel_Blox
 Fecha: 30/06/2026
+Compatible con PC y CELULAR 📱💻
 ]]
 
 -- Servicios
@@ -10,6 +11,7 @@ local RunService = game:GetService("RunService")
 local VirtualUser = game:GetService("VirtualUser")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
+local GuiService = game:GetService("GuiService")
 
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -24,6 +26,7 @@ local Head = Character:WaitForChild("Head")
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MenuPrincipal"
 ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
 -- Pantalla de Carga
 local LoadFrame = Instance.new("Frame")
@@ -33,6 +36,7 @@ LoadFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
 LoadFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 LoadFrame.BorderSizePixel = 0
 LoadFrame.Active = true
+LoadFrame.Modal = true -- IMPORTANTE PARA CELULAR
 LoadFrame.ClipsDescendants = true
 
 local LoadCorner = Instance.new("UICorner")
@@ -127,6 +131,7 @@ MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.Modal = true -- IMPORTANTE PARA CELULAR
 MainFrame.Visible = false -- Oculto hasta que cargue
 
 local MainCorner = Instance.new("UICorner")
@@ -164,6 +169,7 @@ InfoLabel.Text = "By: JoseAngel_Blox | 30/06/2026"
 InfoLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
 InfoLabel.Font = Enum.Font.Gotham
 InfoLabel.TextSize = 12
+InfoLabel.Parent = MainFrame
 
 -- Botón Flecha
 local ToggleButton = Instance.new("TextButton")
@@ -175,6 +181,7 @@ ToggleButton.Text = "▼ FUNCIONES ▼"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Font = Enum.Font.GothamBold
 ToggleButton.TextSize = 14
+ToggleButton.Parent = MainFrame
 
 local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(0, 8)
@@ -187,6 +194,7 @@ ContentFrame.Size = UDim2.new(1, -20, 0, 270)
 ContentFrame.Position = UDim2.new(0, 10, 0, 115)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.Visible = false
+ContentFrame.Parent = MainFrame
 
 -- =============================================
 -- 🎚️ SISTEMA DE INTERRUPTORES (TOGGLES)
@@ -196,7 +204,7 @@ local function CreateToggle(Name, Position, Callback)
     -- Contenedor del Toggle
     local ToggleContainer = Instance.new("Frame")
     ToggleContainer.Name = Name.."Container"
-    ToggleContainer.Size = UDim2.new(1, 0, 0, 40)
+    ToggleContainer.Size = UDim2.new(1, 0, 0, 45) -- MÁS ALTO PARA CELULAR
     ToggleContainer.Position = Position
     ToggleContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
     ToggleContainer.BorderSizePixel = 0
@@ -209,22 +217,23 @@ local function CreateToggle(Name, Position, Callback)
     -- Nombre
     local ToggleName = Instance.new("TextLabel")
     ToggleName.Name = "ToggleName"
-    ToggleName.Size = UDim2.new(0.7, 0, 1, 0)
+    ToggleName.Size = UDim2.new(0.65, 0, 1, 0)
     ToggleName.Position = UDim2.new(0, 15, 0, 0)
     ToggleName.BackgroundTransparency = 1
     ToggleName.Text = Name
     ToggleName.TextColor3 = Color3.fromRGB(255, 255, 255)
     ToggleName.Font = Enum.Font.Gotham
-    ToggleName.TextSize = 13
+    ToggleName.TextSize = 14 -- TEXTO MÁS GRANDE
     ToggleName.Parent = ToggleContainer
 
     -- Caja del Interruptor
-    local SwitchBox = Instance.new("Frame")
+    local SwitchBox = Instance.new("TextButton") -- AHORA ES BOTÓN
     SwitchBox.Name = "SwitchBox"
-    SwitchBox.Size = UDim2.new(0, 40, 0, 20)
-    SwitchBox.Position = UDim2.new(0.85, 0, 0.5, -10)
+    SwitchBox.Size = UDim2.new(0, 50, 0, 25) -- MÁS GRANDE
+    SwitchBox.Position = UDim2.new(0.88, 0, 0.5, -12)
     SwitchBox.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
     SwitchBox.BorderSizePixel = 0
+    SwitchBox.Text = ""
     SwitchBox.Parent = ToggleContainer
 
     local SwitchCorner = Instance.new("UICorner")
@@ -234,8 +243,8 @@ local function CreateToggle(Name, Position, Callback)
     -- Bola del Interruptor
     local SwitchButton = Instance.new("TextButton")
     SwitchButton.Name = "SwitchButton"
-    SwitchButton.Size = UDim2.new(0, 16, 0, 16)
-    SwitchButton.Position = UDim2.new(0, 2, 0, 2)
+    SwitchButton.Size = UDim2.new(0, 20, 0, 20) -- MÁS GRANDE
+    SwitchButton.Position = UDim2.new(0, 2.5, 0, 2.5)
     SwitchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     SwitchButton.BorderSizePixel = 0
     SwitchButton.Text = ""
@@ -253,11 +262,11 @@ local function CreateToggle(Name, Position, Callback)
         Enabled = not Enabled
         if Enabled then
             TweenService:Create(SwitchBox, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 200, 120)}):Play()
-            TweenService:Create(SwitchButton, TweenInfo.new(0.2), {Position = UDim2.new(0, 22, 0, 2)}):Play()
+            TweenService:Create(SwitchButton, TweenInfo.new(0.2), {Position = UDim2.new(0, 27.5, 0, 2.5)}):Play()
             Callback(true)
         else
             TweenService:Create(SwitchBox, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 80)}):Play()
-            TweenService:Create(SwitchButton, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0, 2)}):Play()
+            TweenService:Create(SwitchButton, TweenInfo.new(0.2), {Position = UDim2.new(0, 2.5, 0, 2.5)}):Play()
             Callback(false)
         end
     end
@@ -275,7 +284,7 @@ local TycoonLocation = nil
 for _, Tycoon in pairs(Workspace.Tycoons:GetChildren()) do
     if Tycoon:FindFirstChild("Mansion") then
         local Mansion = Tycoon.Mansion
-        local CollectorGui = Mansion.Collectors and Mansion.Collectors.Collector and Mansion.Collectors.Collector.CollectorGui
+        local CollectorGui = Mansion:FindFirstChild("Collectors") and Mansion.Collectors:FindFirstChild("Collector") and Mansion.Collectors.Collector:FindFirstChild("CollectorGui")
         if CollectorGui then
             local TitleText = CollectorGui.MainFrame.Title.Text
             if TitleText:sub(-10) == "'s Mansion" then
@@ -316,7 +325,7 @@ CreateToggle("💰 Auto Collect Cash", UDim2.new(0,0,0,0), function(state)
 end)
 
 -- Auto Buy
-CreateToggle("🛒 Auto Comprar / Mejorar", UDim2.new(0,0,0,45), function(state)
+CreateToggle("🛒 Auto Comprar / Mejorar", UDim2.new(0,0,0,50), function(state)
     AB_On = state
     if state then
         spawn(function()
@@ -336,7 +345,7 @@ CreateToggle("🛒 Auto Comprar / Mejorar", UDim2.new(0,0,0,45), function(state)
 end)
 
 -- NoClip
-CreateToggle("👻 NoClip", UDim2.new(0,0,0,90), function(state)
+CreateToggle("👻 NoClip", UDim2.new(0,0,0,100), function(state)
     NC_On = state
     if state then
         spawn(function()
@@ -351,7 +360,7 @@ CreateToggle("👻 NoClip", UDim2.new(0,0,0,90), function(state)
 end)
 
 -- Velocidad Max
-CreateToggle("⚡ Velocidad y Salto Max", UDim2.new(0,0,0,135), function(state)
+CreateToggle("⚡ Velocidad y Salto Max", UDim2.new(0,0,0,150), function(state)
     if state then
         Humanoid.WalkSpeed = 350
         Humanoid.JumpPower = 350
@@ -362,7 +371,7 @@ CreateToggle("⚡ Velocidad y Salto Max", UDim2.new(0,0,0,135), function(state)
 end)
 
 -- Anti AFK
-CreateToggle("🛡️ Anti AFK", UDim2.new(0,0,0,180), function(state)
+CreateToggle("🛡️ Anti AFK", UDim2.new(0,0,0,200), function(state)
     if state then
         Player.Idled:Connect(function()
             VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
@@ -373,7 +382,7 @@ CreateToggle("🛡️ Anti AFK", UDim2.new(0,0,0,180), function(state)
 end)
 
 -- B-Tools
-CreateToggle("🧰 Herramientas B-Tools", UDim2.new(0,0,0,225), function(state)
+CreateToggle("🧰 Herramientas B-Tools", UDim2.new(0,0,0,250), function(state)
     if state then
         local backpack = Player.Backpack
         local h = Instance.new("HopperBin") h.Name="Hammer" h.BinType=4 h.Parent=backpack
@@ -392,7 +401,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     if Open then
         ContentFrame.Visible = true
         ToggleButton.Text = "▲ FUNCIONES ▲"
-        MainFrame:TweenSize(UDim2.new(0, 320, 0, 420), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+        MainFrame:TweenSize(UDim2.new(0, 320, 0, 520), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
     else
         ContentFrame.Visible = false
         ToggleButton.Text = "▼ FUNCIONES ▼"
@@ -404,10 +413,6 @@ end)
 -- ✅ FINALIZAR
 -- =============================================
 
-InfoLabel.Parent = MainFrame
-ToggleButton.Parent = MainFrame
-ContentFrame.Parent = MainFrame
-Title.Parent = MainFrame
 MainFrame.Parent = ScreenGui
 
-print("✅ Script Cargado - JoseAngel_Blox")
+print("✅ Script Cargado - JoseAngel_Blox | PC & MOBILE")
