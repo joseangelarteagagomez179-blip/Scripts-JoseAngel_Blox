@@ -1,123 +1,96 @@
---[[
-🏰 MANSION TYCOON - SCRIPT PERSONALIZADO
-Basado en las rutas encontradas en tu juego
-]]
-
--- Servicios
+-- // Services
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
 
--- Variables
+-- // Variables
 local LocalPlayer = Players.LocalPlayer
-local Character = nil
-local HumanoidRootPart = nil
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Actualizar personaje
-local function UpdateCharacter()
-    Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+-- // Settings (Puedes modificar los tiempos si quieres)
+local Settings = {
+    AutoFarm = true,
+    AutoBuy = true,
+    AntiAFK = true,
+    DelayFarm = 0.1, -- Tiempo entre cada recolección
+    DelayBuy = 0.5   -- Tiempo entre cada compra
+}
+
+-- // Funciones Auxiliares (Manejo de errores)
+local function SafeWaitForChild(parent, childName, timeout)
+    timeout = timeout or 5
+    local found = nil
+    local startTime = tick()
+    while not found and tick() - startTime < timeout do
+        found = parent:FindFirstChild(childName)
+        task.wait()
+    end
+    return found
 end
-UpdateCharacter()
-LocalPlayer.CharacterAdded:Connect(UpdateCharacter)
 
--- =============================================
--- 🟢 CONFIGURACIÓN
--- =============================================
-local AutoCollect = true   -- Recolectar dinero
-local AutoBuy = true       -- Comprar mejoras de dinero
-local AutoClaim = true     -- Reclamar recompensas
-local SpeedBoost = true    -- Velocidad extra
-
--- =============================================
--- 💰 AUTO RECOLECTAR DINERO (Collectors)
--- =============================================
-task.spawn(function()
-    while task.wait(0.1) do
-        if AutoCollect and HumanoidRootPart then
-            -- Busca en la ruta de recolectores
-            local Collectors = Workspace:FindFirstChild("Collectors")
-            if Collectors then
-                for _, collector in pairs(Collectors:GetDescendants()) do
-                    -- Busca las partes que dicen "CashToCollect" o similares
-                    if collector.Name:find("Cash") or collector.Name:find("Money") then
-                        if collector:IsA("Part") or collector:IsA("Model") then
-                            -- Teletransporta el dinero hacia ti
-                            collector.CFrame = HumanoidRootPart.CFrame
-                        end
+-- // 1. AUTO FARM
+if Settings.AutoFarm then
+    task.spawn(function()
+        while task.wait(Settings.DelayFarm) do
+            -- Buscamos los Givers/Dispensers de dinero dentro de la base
+            for _, obj in pairs(workspace:GetChildren()) do
+                if obj.Name:lower():find("giver") or obj.Name:lower():find("collect") or obj.Name:lower():find("money") then
+                    -- Verificamos que sea parte de nuestro tycoon
+                    if obj:IsA("Part") or obj:IsA("MeshPart") then
+                        -- Simulamos el toque
+                        firetouchinterest(HumanoidRootPart, obj, 0)
+                        firetouchinterest(HumanoidRootPart, obj, 1)
                     end
                 end
             end
         end
-    end
-end)
+    end)
+end
 
--- =============================================
--- 🛒 AUTO COMPRAR MEJORAS (MoneyButtons)
--- =============================================
-task.spawn(function()
-    while task.wait(0.5) do
-        if AutoBuy then
-            -- Busca en la ruta exacta que viste: Tycoons > Plot > ... > GlobalMoneyButtons
-            local Tycoons = Workspace:FindFirstChild("Tycoons")
-            if Tycoons then
-                for _, plot in pairs(Tycoons:GetChildren()) do
-                    local MoneyButtons = plot:FindFirstChild("Mansion") and plot.Mansion:FindFirstChild("GlobalMoneyButtons")
-                    if MoneyButtons then
-                        for _, button in pairs(MoneyButtons:GetChildren()) do
-                            -- Si tiene ClickDetector, lo clickeamos
-                            if button:FindFirstChildOfClass("ClickDetector") then
-                                fireclickdetector(button.ClickDetector)
-                            end
-                            -- Si es un botón GUI dentro del objeto
-                            if button:FindFirstChildOfClass("ProximityPrompt") then
-                                fireproximityprompt(button.ProximityPrompt)
-                            end
-                        end
-                    end
+-- // 2. AUTO BUY MEJORAS
+if Settings.AutoBuy then
+    task.spawn(function()
+        while task.wait(Settings.DelayBuy) do
+            local buttonsToBuy = {}
+            
+            -- Buscamos todos los botones de compra
+            for _, button in pairs(workspace:GetChildren()) do
+                if button:IsA("Part") and (button.Name:lower():find("buy") or button.Name:lower():find("upgrade")) then
+                    table.insert(buttonsToBuy, button)
+                end
+            end
+            
+            -- Intentamos clickearlos
+            for _, btn in pairs(buttonsToBuy) do
+                if btn then
+                    firetouchinterest(HumanoidRootPart, btn, 0)
+                    firetouchinterest(HumanoidRootPart, btn, 1)
+                    task.wait(0.1) -- Pequeña pausa para no saturar
                 end
             end
         end
-    end
+    end)
+end
+
+-- // 3. ANTI AFK
+if Settings.AntiAFK then
+    LocalPlayer.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+        print("[AntiAFK] Activado - Evitando desconexión...")
+    end)
+end
+
+-- // 4. PROTECCIÓN Y RECONEXIÓN DE PERSONAJE
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 end)
 
--- =============================================
--- 🎁 AUTO RECLAMAR BOTONES GUI
--- =============================================
-task.spawn(function()
-    while task.wait(1) do
-        if AutoClaim then
-            local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
-            if PlayerGui then
-                -- Busca botones que digan "Claim", "Collect", "Ok", "Buy"
-                for _, gui in pairs(PlayerGui:GetDescendants()) do
-                    if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-                        local text = gui.Text:upper() or gui.Name:upper()
-                        if text:find("CLAIM") or text:find("COLLECT") or text:find("OK") or text:find("BUY") then
-                            -- Simular click
-                            fireclickdetector(gui)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
--- =============================================
--- ⚡ VELOCIDAD Y SALTO
--- =============================================
-task.spawn(function()
-    while task.wait() do
-        if SpeedBoost and Character then
-            local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-            if Humanoid then
-                Humanoid.WalkSpeed = 60
-                Humanoid.JumpHeight = 15
-            end
-        end
-    end
-end)
-
-print("✅ SCRIPT CARGADO Y LISTO!")
-print("🔹 Rutas detectadas: Collectors y GlobalMoneyButtons")
+print("====================================")
+print("🎮 MEGA MANSION TYCOON SCRIPT LOADED")
+print("✅ AutoFarm: Activado")
+print("✅ AutoBuy: Activado")
+print("✅ AntiAFK: Activado")
+print("====================================")
