@@ -1,5 +1,5 @@
--- Script para Mansion Tycoon | Funcional y actualizado
--- Características: Auto Recolectar Dinero, Auto Comprar Mejoras, Teletransportes
+-- Script ACTUALIZADO para Mansion Tycoon | Funciona con el buzón y botones
+-- Características: Auto Recolectar Buzón, Auto Comprar Botones, Teletransportes
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -37,7 +37,7 @@ Title.Text = "🏰 Mansion Tycoon Hub"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 
--- Auto Recolectar Dinero
+-- Auto Recolectar Dinero (Buzón)
 AutoCollect.Name = "AutoCollect"
 AutoCollect.Parent = MainFrame
 AutoCollect.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
@@ -93,14 +93,14 @@ TeleportMoney.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TeleportMoney.Position = UDim2.new(0.05, 0, 0.49, 0)
 TeleportMoney.Size = UDim2.new(0.9, 0, 0, 30)
 TeleportMoney.Font = Enum.Font.Gotham
-TeleportMoney.Text = "📍 Ir a Dinero"
+TeleportMoney.Text = "📍 Ir al Buzón"
 TeleportMoney.TextColor3 = Color3.fromRGB(255, 255, 255)
 TeleportMoney.TextSize = 14
 
 TeleportMoney.MouseButton1Click:Connect(function()
-    -- Busca la zona de dinero y teletransporta
-    for _, v in pairs(workspace:GetChildren()) do
-        if v.Name:lower():find("money") or v.Name:lower():find("cash") then
+    -- Busca el buzón
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v.Name:lower():find("mailbox") or v.Name:lower():find("buzon") or v.Name:lower():find("collect") then
             HumanoidRootPart.CFrame = v.CFrame + Vector3.new(0, 3, 0)
             break
         end
@@ -119,9 +119,9 @@ TeleportBuild.TextColor3 = Color3.fromRGB(255, 255, 255)
 TeleportBuild.TextSize = 14
 
 TeleportBuild.MouseButton1Click:Connect(function()
-    -- Busca la zona de construcción y teletransporta
-    for _, v in pairs(workspace:GetChildren()) do
-        if v.Name:lower():find("build") or v.Name:lower():find("construct") then
+    -- Busca zona de construir
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v.Name:lower():find("build") or v.Name:lower():find("buy") or v.Name:lower():find("upgrade") then
             HumanoidRootPart.CFrame = v.CFrame + Vector3.new(0, 3, 0)
             break
         end
@@ -129,33 +129,38 @@ TeleportBuild.MouseButton1Click:Connect(function()
 end)
 
 -- Bucle principal
-while task.wait(0.5) do
-    -- Auto Recolectar
+while task.wait(0.1) do
+    -- Auto Recolectar (Buzón y dinero en el suelo)
     if CollectEnabled then
-        for _, item in pairs(workspace:GetChildren()) do
-            if item:IsA("Part") or item:IsA("Model") then
-                if item.Name:lower():find("money") or item.Name:lower():find("cash") or item.Name:lower():find("coin") then
-                    firetouchinterest(HumanoidRootPart, item, 0)
-                    firetouchinterest(HumanoidRootPart, item, 1)
+        -- Buscar y tocar el buzón
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj.Name:lower():find("mailbox") or obj.Name:lower():find("collect") then
+                if obj:FindFirstChildOfClass("ClickDetector") then
+                    fireclickdetector(obj:FindFirstChildOfClass("ClickDetector"))
                 end
+            end
+            -- Recoger dinero en el suelo
+            if obj:IsA("Part") and (obj.Name:lower():find("money") or obj.Name:lower():find("cash")) then
+                firetouchinterest(HumanoidRootPart, obj, 0)
+                firetouchinterest(HumanoidRootPart, obj, 1)
             end
         end
     end
 
-    -- Auto Comprar
+    -- Auto Comprar / Mejorar
     if BuyEnabled then
         for _, button in pairs(workspace:GetDescendants()) do
-            if button:IsA("ClickDetector") or button:IsA("ProximityPrompt") then
+            if button:IsA("ClickDetector") then
                 local parent = button.Parent
-                if parent.Name:lower():find("buy") or parent.Name:lower():find("upgrade") or parent.Name:lower():find("build") then
-                    if button:IsA("ClickDetector") then
-                        fireclickdetector(button)
-                    elseif button:IsA("ProximityPrompt") then
-                        button:InputHoldBegin()
-                        task.wait(0.1)
-                        button:InputHoldEnd()
-                    end
+                -- Busca nombres comunes de botones de compra
+                if parent.Name:lower():find("buy") or parent.Name:lower():find("upgrade") or parent.Name:lower():find("build") or parent.Name:lower():find("comprar") then
+                    fireclickdetector(button)
+                    task.wait(0.05) -- Pequeña pausa para no spamear demasiado
                 end
+            elseif button:IsA("ProximityPrompt") then
+                button:InputHoldBegin()
+                task.wait(0.1)
+                button:InputHoldEnd()
             end
         end
     end
