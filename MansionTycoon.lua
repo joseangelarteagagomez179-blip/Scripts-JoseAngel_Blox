@@ -1,304 +1,160 @@
--- SERVICIOS
+--[[
+███╗   ███╗██╗███╗   ██╗██╗███████╗██╗     ███████╗
+████╗ ████║██║████╗  ██║██║██╔════╝██║     ██╔════╝
+██╔████╔██║██║██╔██╗ ██║██║█████╗  ██║     █████╗  
+██║╚██╔╝██║██║██║╚██╗██║██║██╔══╝  ██║     ██╔══╝  
+██║ ╚═╝ ██║██║██║ ╚████║██║███████╗███████╗███████╗
+╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝╚══════╝╚══════╝╚══════╝
+            Mansion Tycoon Script | CARS
+]]
+
+-- Servicios
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
--- LOCAL
-local LP = Players.LocalPlayer
-local Char = LP.Character or LP.CharacterAdded:Wait()
-local Hum = Char:WaitForChild("Humanoid")
-local HRP = Char.HumanoidRootPart
+local Player = Players.LocalPlayer
+local Mouse = Player:GetMouse()
+local Camera = workspace.CurrentCamera
 
--- ENCONTRAR TU TYCOON
-local MyTycoon = nil
+-- =============================================
+-- 🎨 CREAR LA INTERFAZ (MENU)
+-- =============================================
 
-for _, obj in pairs(Workspace:GetChildren()) do
-    if obj.Name:find(LP.Name) or obj.Name:find("Mansion") and obj:FindFirstChild("Owner") then
-        if obj.Owner.Value == LP then
-            MyTycoon = obj
-            break
-        end
-    end
-end
-
-if not MyTycoon then
-    local Tycoons = Workspace:FindFirstChild("Tycoons") or Workspace:FindFirstChild("Mansions")
-    if Tycoons then
-        for _, v in pairs(Tycoons:GetChildren()) do
-            if v:FindFirstChild("Owner") and v.Owner.Value == LP then
-                MyTycoon = v
-                break
-            end
-        end
-    end
-end
-
--- CREAR MENU
-local PlayerGui = LP.PlayerGui
-if PlayerGui:FindFirstChild("MansionMenu") then PlayerGui.MansionMenu:Destroy() end
-
-local Menu = Instance.new("ScreenGui")
-Menu.Name = "MansionMenu"
-Menu.Parent = PlayerGui
-
--- == BURBUJA REDONDA LOGO ==
-local BtnMin = Instance.new("TextButton")
-BtnMin.Size = UDim2.new(0, 50, 0, 50)
-BtnMin.Position = UDim2.new(0.02, 0, 0.1, 0)
-BtnMin.BackgroundColor3 = Color3.new(0, 0.4, 1)
-BtnMin.BorderColor3 = Color3.new(1,1,1)
-BtnMin.BorderSizePixel = 1
-BtnMin.Text = "MT"
-BtnMin.TextColor3 = Color3.new(1,1,1)
-BtnMin.Font = Enum.Font.GothamBold
-BtnMin.TextSize = 20
-local c1 = Instance.new("UICorner", BtnMin)
-c1.CornerRadius = UDim.new(1,0)
-BtnMin.Parent = Menu
-
--- == MARCO PRINCIPAL ==
-local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 260, 0, 350)
-Main.Position = UDim2.new(0.02, 0, 0.17, 0)
-Main.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-Main.BorderColor3 = Color3.new(0, 0.5, 1)
-Main.BorderSizePixel = 1
-Main.Draggable = true
-Main.Active = true
-local c2 = Instance.new("UICorner", Main)
-c2.CornerRadius = UDim.new(0,10)
-Main.Parent = Menu
-
--- TITULO
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundTransparency = 1
-Title.Text = "MANSION TYCOON"
-Title.TextColor3 = Color3.new(1, 0.7, 0.2)
-Title.Font = Enum.Font.FredokaOne
-Title.TextSize = 14
-Title.Parent = Main
-
--- BOTONES DE PESTAÑAS
-local BtnInfo = Instance.new("TextButton")
-BtnInfo.Size = UDim2.new(0.5, -2, 0, 25)
-BtnInfo.Position = UDim2.new(0, 0, 1, -25)
-BtnInfo.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
-BtnInfo.BorderColor3 = Color3.new(1,1,1)
-BtnInfo.BorderSizePixel = 1
-local ci1 = Instance.new("UICorner", BtnInfo)
-ci1.CornerRadius = UDim.new(0,6)
-BtnInfo.Text = "INFO"
-BtnInfo.TextColor3 = Color3.new(1,1,1)
-BtnInfo.Font = Enum.Font.GothamBold
-BtnInfo.TextSize = 12
-BtnInfo.Parent = Main
-
-local BtnMain = Instance.new("TextButton")
-BtnMain.Size = UDim2.new(0.5, -2, 0, 25)
-BtnMain.Position = UDim2.new(0.5, 2, 1, -25)
-BtnMain.BackgroundColor3 = Color3.new(0.15,0.15,0.15)
-BtnMain.BorderColor3 = Color3.new(1,1,1)
-BtnMain.BorderSizePixel = 1
-local ci2 = Instance.new("UICorner", BtnMain)
-ci2.CornerRadius = UDim.new(0,6)
-BtnMain.Text = "MAIN"
-BtnMain.TextColor3 = Color3.new(1,1,1)
-BtnMain.Font = Enum.Font.GothamBold
-BtnMain.TextSize = 12
-BtnMain.Parent = Main
-
--- == PESTAÑA INFO ==
-local InfoFrame = Instance.new("ScrollingFrame")
-InfoFrame.Size = UDim2.new(1, -20, 1, -65)
-InfoFrame.Position = UDim2.new(0, 10, 0, 35)
-InfoFrame.BackgroundTransparency = 1
-InfoFrame.BorderSizePixel = 0
-InfoFrame.ScrollBarThickness = 4
-InfoFrame.CanvasSize = UDim2.new(0,0, 2, 0)
-InfoFrame.Parent = Main
-
-local Texto = Instance.new("TextLabel")
-Texto.Size = UDim2.new(1, 0, 1, 0)
-Texto.BackgroundTransparency = 1
-Texto.Text = [[
-Creador: JoseAngel_Blox
-Versión: COMPLETA
-
-Funciones:
-✅ Auto Collect Cash
-✅ Auto Build
-✅ Velocidad
-✅ Anti AFK
-
-Disfruta el script!
-]]
-Texto.TextColor3 = Color3.new(1,1,1)
-Texto.Font = Enum.Font.Gotham
-Texto.TextSize = 11
-Texto.TextWrapped = true
-Texto.Parent = InfoFrame
-
--- PESTAÑA MAIN
+local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(1, -20, 1, -65)
-MainFrame.Position = UDim2.new(0, 10, 0, 35)
-MainFrame.BackgroundTransparency = 1
-MainFrame.Visible = false
-MainFrame.Parent = Main
+local Title = Instance.new("TextLabel")
+local AutoBuildToggle = Instance.new("TextButton")
+local AutoCollectToggle = Instance.new("TextButton")
+local AntiAFKToggle = Instance.new("TextButton")
 
--- VARIABLES
-local CollectON = false
-local BuildON = false
-local SpeedON = false
-local AntiAFK_ON = false
-local Visible = true
+-- Propiedades de la GUI
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local ConnectionCollect = nil
-local ConnectionBuild = nil
-local Connection_AFK = nil
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.BorderSizePixel = 2
+MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 180)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Para mover la ventana
 
--- FUNCION PARA CREAR BOTONES
-local function MakeBtn(name, pos)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 38)
-    btn.Position = pos
-    btn.BackgroundColor3 = Color3.new(0.15,0.15,0.15)
-    btn.BorderColor3 = Color3.new(1,0,0)
-    btn.BorderSizePixel = 2
-    local c = Instance.new("UICorner", btn)
-    c.CornerRadius = UDim.new(0,8)
-    btn.Text = name
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 13
-    btn.Parent = MainFrame
-    return btn
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Title.BorderSizePixel = 0
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Mansion Tycoon | CARS"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+
+-- Función para crear botones estilo Toggle
+local function CreateToggle(name, pos, parent)
+    local Button = Instance.new("TextButton")
+    Button.Parent = parent
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.BorderSizePixel = 0
+    Button.Position = pos
+    Button.Size = UDim2.new(1, -10, 0, 30)
+    Button.Font = Enum.Font.Gotham
+    Button.Text = name .. " [ OFF ]"
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 12
+    return Button
 end
 
--- CREAR BOTONES
-local Btn1 = MakeBtn("AUTO COLLECT CASH", UDim2.new(0,0,0,0))
-local Btn2 = MakeBtn("AUTO BUILD", UDim2.new(0,0,0,45))
-local Btn3 = MakeBtn("VELOCIDAD", UDim2.new(0,0,0,90))
-local Btn4 = MakeBtn("ANTI AFK", UDim2.new(0,0,0,135))
+-- Crear los botones
+AutoBuildToggle = CreateToggle("Auto Build", UDim2.new(0, 5, 0, 40), MainFrame)
+AutoCollectToggle = CreateToggle("Auto Collect Cash", UDim2.new(0, 5, 0, 80), MainFrame)
+AntiAFKToggle = CreateToggle("Anti AFK", UDim2.new(0, 5, 0, 120), MainFrame)
 
--- FUNCION MINIMIZAR
-BtnMin.MouseButton1Click:Connect(function()
-    Visible = not Visible
-    Main.Visible = Visible
+-- =============================================
+-- ⚙️ VARIABLES DE ESTADO (ON/OFF)
+-- =============================================
+
+local AutoBuild_Enabled = false
+local AutoCollect_Enabled = false
+local AntiAFK_Enabled = false
+
+-- =============================================
+-- 🔘 LÓGICA DE LOS BOTONES
+-- =============================================
+
+AutoBuildToggle.MouseButton1Click:Connect(function()
+    AutoBuild_Enabled = not AutoBuild_Enabled
+    AutoBuildToggle.Text = "Auto Build [ " .. (AutoBuild_Enabled and "ON ]" or "OFF ]")
+    AutoBuildToggle.BackgroundColor3 = AutoBuild_Enabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 50)
 end)
 
--- CAMBIAR PESTAÑAS
-BtnInfo.MouseButton1Click:Connect(function()
-    InfoFrame.Visible = true
-    MainFrame.Visible = false
-    BtnInfo.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
-    BtnMain.BackgroundColor3 = Color3.new(0.15,0.15,0.15)
+AutoCollectToggle.MouseButton1Click:Connect(function()
+    AutoCollect_Enabled = not AutoCollect_Enabled
+    AutoCollectToggle.Text = "Auto Collect Cash [ " .. (AutoCollect_Enabled and "ON ]" or "OFF ]")
+    AutoCollectToggle.BackgroundColor3 = AutoCollect_Enabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 50)
 end)
 
-BtnMain.MouseButton1Click:Connect(function()
-    InfoFrame.Visible = false
-    MainFrame.Visible = true
-    BtnInfo.BackgroundColor3 = Color3.new(0.15,0.15,0.15)
-    BtnMain.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
+AntiAFKToggle.MouseButton1Click:Connect(function()
+    AntiAFK_Enabled = not AntiAFK_Enabled
+    AntiAFKToggle.Text = "Anti AFK [ " .. (AntiAFK_Enabled and "ON ]" or "OFF ]")
+    AntiAFKToggle.BackgroundColor3 = AntiAFK_Enabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 50)
 end)
 
--- === AUTO COLLECT CASH ===
-Btn1.MouseButton1Click:Connect(function()
-    CollectON = not CollectON
-    if CollectON then
-        Btn1.Text = "AUTO COLLECT CASH [ON]"
-        Btn1.BorderColor3 = Color3.new(0,1,0)
-        ConnectionCollect = RunService.Heartbeat:Connect(function()
-            pcall(function()
-                if MyTycoon then
-                    for _, obj in pairs(MyTycoon:GetDescendants()) do
-                        if obj:IsA("Part") then
-                            local name = string.lower(obj.Name)
-                            if name:find("collect") or name:find("buzon") or name:find("drop") or name:find("money") or name:find("cash") then
-                                firetouchinterest(obj, HRP, 0)
-                                firetouchinterest(obj, HRP, 1)
-                            end
-                        end
-                    end
+-- =============================================
+-- 🛠️ FUNCIÓN: AUTO BUILD
+-- =============================================
+
+spawn(function()
+    while wait() do
+        if AutoBuild_Enabled then
+            -- Aquí va la lógica para buscar botones y construir
+            -- Ejemplo básico:
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ClickDetector") and (v.Parent.Name:find("Build") or v.Parent.Name:find("Buy")) then
+                    fireclickdetector(v)
+                    wait(0.1)
                 end
-            end)
-            task.wait(0.1)
-        end)
-    else
-        Btn1.Text = "AUTO COLLECT CASH"
-        Btn1.BorderColor3 = Color3.new(1,0,0)
-        if ConnectionCollect then ConnectionCollect:Disconnect() end
-    end
-end)
-
--- === AUTO BUILD ===
-Btn2.MouseButton1Click:Connect(function()
-    BuildON = not BuildON
-    if BuildON then
-        Btn2.Text = "AUTO BUILD [ON]"
-        Btn2.BorderColor3 = Color3.new(0,1,0)
-        ConnectionBuild = RunService.Heartbeat:Connect(function()
-            pcall(function()
-                if MyTycoon then
-                    for _, obj in pairs(MyTycoon:GetDescendants()) do
-                        if obj:IsA("Part") or obj:IsA("MeshPart") then
-                            if obj.BrickColor then
-                                if obj.BrickColor.Name == "Bright green" or obj.BrickColor.Name == "Lime green" or obj.BrickColor.Name == "Forest green" then
-                                    firetouchinterest(obj, HRP, 0)
-                                    firetouchinterest(obj, HRP, 1)
-                                end
-                            end
-                            if obj:FindFirstChildOfClass("ClickDetector") then
-                                obj.ClickDetector:MouseClick()
-                            end
-                        end
-                    end
-                end
-            end)
-            task.wait(0.2)
-        end)
-    else
-        Btn2.Text = "AUTO BUILD"
-        Btn2.BorderColor3 = Color3.new(1,0,0)
-        if ConnectionBuild then ConnectionBuild:Disconnect() end
-    end
-end)
-
--- === VELOCIDAD ===
-Btn3.MouseButton1Click:Connect(function()
-    SpeedON = not SpeedON
-    if SpeedON then
-        Btn3.Text = "VELOCIDAD [ON]"
-        Btn3.BorderColor3 = Color3.new(0,1,0)
-        Hum.WalkSpeed = 70
-    else
-        Btn3.Text = "VELOCIDAD"
-        Btn3.BorderColor3 = Color3.new(1,0,0)
-        Hum.WalkSpeed = 16
-    end
-end)
-
--- === ANTI AFK ===
-Btn4.MouseButton1Click:Connect(function()
-    AntiAFK_ON = not AntiAFK_ON
-    if AntiAFK_ON then
-        Btn4.Text = "ANTI AFK [ON]"
-        Btn4.BorderColor3 = Color3.new(0,1,0)
-        Connection_AFK = RunService.Heartbeat:Connect(function()
-            pcall(function()
-                local Cam = Workspace.CurrentCamera
-                Cam.CFrame = Cam.CFrame * CFrame.Angles(math.rad(0.1), math.rad(0.1), 0)
-            end)
-            if Hum then
-                Hum:ChangeState(Enum.HumanoidStateType.Jumping)
             end
-        end)
-    else
-        Btn4.Text = "ANTI AFK"
-        Btn4.BorderColor3 = Color3.new(1,0,0)
-        if Connection_AFK then Connection_AFK:Disconnect() end
+        end
     end
 end)
 
-print("✅ Script Mansion Tycoon cargado perfecto!")
+-- =============================================
+-- 💰 FUNCIÓN: AUTO COLLECT CASH
+-- =============================================
+
+spawn(function()
+    while wait() do
+        if AutoCollect_Enabled then
+            -- Aquí va la lógica para recoger dinero
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("Part") and (v.Name:find("Cash") or v.Name:find("Money")) then
+                    -- Simula tocar el objeto
+                    firetouchinterest(Player.Character.HumanoidRootPart, v, 0)
+                    firetouchinterest(Player.Character.HumanoidRootPart, v, 1)
+                end
+            end
+        end
+    end
+end)
+
+-- =============================================
+-- 🛡️ FUNCIÓN: ANTI AFK
+-- =============================================
+
+spawn(function()
+    while wait(60) do -- Cada minuto
+        if AntiAFK_Enabled and Player.Character then
+            -- Hace un pequeño salto o movimiento
+            local Humanoid = Player.Character:FindChildOfClass("Humanoid")
+            if Humanoid then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end
+end)
+
+print("✅ Script cargado exitosamente!")
