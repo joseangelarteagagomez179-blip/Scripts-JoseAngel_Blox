@@ -1,10 +1,10 @@
 --[[
-    SCRIPT FINAL PARA MANSION TYCOON
-    Con Teletransporte Automático a Botones y Buzón
+    SCRIPT CORREGIDO PARA MANSION TYCOON
+    Solución al error de BrickColor
 ]]
 
 local Services = setmetatable({}, {__index = function(s, i) return game:GetService(i) end})
-local Workspace, Players, TweenService = Services.Workspace, Services.Players, Services.TweenService
+local Workspace, Players = Services.Workspace, Services.Players
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -14,53 +14,58 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local Config = {
     AutoCollect = false,
     AutoBuy = false,
-    Delay = 0.1
+    Delay = 0.2
 }
 
 -- ===== FUNCIÓN PRINCIPAL =====
 spawn(function()
     while wait(Config.Delay) do
-        -- 1. AUTO RECOLECTAR (IR AL BUZÓN)
+        -- 1. AUTO RECOLECTAR (BUSCAR BUZÓN)
         if Config.AutoCollect then
             for _, objeto in pairs(Workspace:GetDescendants()) do
-                -- Busca el buzón o zona de recolección
                 if objeto:IsA("Part") then
                     local nombre = string.lower(objeto.Name)
-                    if nombre:find("buzon") or nombre:find("collect") or nombre:find("recolect") or nombre:find("mail") then
-                        -- Teletransportar personaje al buzón
-                        HumanoidRootPart.CFrame = objeto.CFrame + Vector3.new(0, 2, 0)
+                    -- Busca palabras clave del buzón
+                    if nombre:find("collect") or nombre:find("recolect") or nombre:find("mail") or nombre:find("buzon") or nombre:find("drop") then
+                        -- Ir al buzón
+                        HumanoidRootPart.CFrame = objeto.CFrame + Vector3.new(0, 3, 0)
                         wait(0.1)
-                        -- Simular toque
-                        firetouchinterest(HumanoidRootPart, objeto, 0)
-                        firetouchinterest(HumanoidRootPart, objeto, 1)
+                        -- Tocar para cobrar
+                        if objeto:FindFirstChildOfClass("ClickDetector") then
+                            objeto.ClickDetector:MouseClick()
+                        end
                         break
                     end
                 end
             end
         end
 
-        -- 2. AUTO COMPRAR (IR A LOS BOTONES VERDES)
+        -- 2. AUTO COMPRAR (BUSCAR BOTONES VERDES)
         if Config.AutoBuy then
             for _, objeto in pairs(Workspace:GetDescendants()) do
-                -- Busca botones verdes o con precio
-                if objeto:IsA("Part") and objeto.BrickColor.Name == "Bright green" or objeto.BrickColor.Name == "Forest green" then
-                    if objeto:FindFirstChild("ClickDetector") then
-                        -- Teletransportar personaje al botón
-                        HumanoidRootPart.CFrame = objeto.CFrame + Vector3.new(0, 3, 0)
-                        wait(0.1)
-                        -- Hacer clic
-                        objeto.ClickDetector:MouseClick()
-                        wait(0.2)
+                if objeto:IsA("Part") then
+                    -- Buscar por COLOR VERDE (corregido)
+                    local color = objeto.BrickColor
+                    if color.Name == "Bright green" or color.Name == "Forest green" or color.Name == "Lime green" then
+                        if objeto:FindFirstChildOfClass("ClickDetector") then
+                            -- Ir al botón
+                            HumanoidRootPart.CFrame = objeto.CFrame + Vector3.new(0, 3, 0)
+                            wait(0.15)
+                            -- Clickear
+                            objeto.ClickDetector:MouseClick()
+                            wait(0.3)
+                        end
                     end
-                end
-                -- También busca por nombre "Buy" o "Comprar"
-                local nombre = string.lower(objeto.Name)
-                if objeto:IsA("Part") and (nombre:find("buy") or nombre:find("comprar")) then
-                     if objeto:FindFirstChild("ClickDetector") then
-                        HumanoidRootPart.CFrame = objeto.CFrame + Vector3.new(0, 3, 0)
-                        wait(0.1)
-                        objeto.ClickDetector:MouseClick()
-                        wait(0.2)
+                    
+                    -- Buscar por NOMBRE "Buy" o "Comprar"
+                    local nombre = string.lower(objeto.Name)
+                    if nombre:find("buy") or nombre:find("comprar") or nombre:find("button") then
+                         if objeto:FindFirstChildOfClass("ClickDetector") then
+                            HumanoidRootPart.CFrame = objeto.CFrame + Vector3.new(0, 3, 0)
+                            wait(0.15)
+                            objeto.ClickDetector:MouseClick()
+                            wait(0.3)
+                        end
                     end
                 end
             end
@@ -136,4 +141,4 @@ BtnBuy.MouseButton1Click:Connect(function()
     end
 end)
 
-print("✅ Script listo! Ahora se mueve solo.")
+print("✅ SCRIPT CORREGIDO Y LISTO!")
