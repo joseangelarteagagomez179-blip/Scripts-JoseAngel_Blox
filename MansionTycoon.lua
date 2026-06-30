@@ -1,74 +1,109 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local runService = game:GetService("RunService")
+--[[
+    Script Completo para Mansion Tycoon
+    Creado por Dola
+]]
 
--- Configuraciones
-local speedValue = 100            -- Velocidad del jugador
-local jumpPowerValue = 150        -- Potencia de salto
-local autoBuildInterval = 5       -- Segundos entre construcciones automáticas
-local autoFarmInterval = 3        -- Segundos entre acciones de farm
+local Services = setmetatable({}, {__index = function(s, i) return game:GetService(i) end})
+local Workspace, Players, TweenService, RunService = Services.Workspace, Services.Players, Services.TweenService, Services.RunService
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Función para recolectar dinero automáticamente
-local function autoCollectMoney()
-    for _, item in pairs(workspace:GetChildren()) do
-        if item.Name == "Money" or item.Name == "Coin" then
-            if item:IsA("BasePart") and (item.Position - character.HumanoidRootPart.Position).magnitude < 100 then
-                item.CFrame = character.HumanoidRootPart.CFrame  -- Teletransporta la moneda al jugador
+-- ===== CONFIGURACIÓN =====
+local Config = {
+    AutoCollect = true,
+    AutoBuy = true,
+    AutoOpen = true,
+    Delay = 0.05 -- Velocidad (menos = más rápido)
+}
+
+-- ===== FUNCIÓN PRINCIPAL =====
+spawn(function()
+    while wait(Config.Delay) do
+        -- 1. AUTO RECOLECTAR DINERO
+        if Config.AutoCollect then
+            for _, Money in pairs(Workspace:GetChildren()) do
+                if Money:IsA("Part") or Money:IsA("MeshPart") then
+                    if string.find(string.lower(Money.Name), "money") or string.find(string.lower(Money.Name), "cash") then
+                        -- Simular toque
+                        firetouchinterest(HumanoidRootPart, Money, 0)
+                        firetouchinterest(HumanoidRootPart, Money, 1)
+                    end
+                end
             end
         end
-    end
-end
 
--- Función para construir automáticamente
--- Este ejemplo asume que hay un RemoteEvent para construir que se llama "BuildEvent"
--- Cambia el nombre y parámetros según el juego
-local function autoBuild()
-    local buildEvent = game:GetService("ReplicatedStorage"):FindFirstChild("BuildEvent")
-    if buildEvent then
-        -- Ejemplo: construir una parte de mansion en posición relativa
-        local buildPosition = character.HumanoidRootPart.Position + Vector3.new(5, 0, 0)
-        buildEvent:FireServer("Wall", buildPosition)  -- Los parámetros dependen del juego
-    end
-end
-
--- Función de auto farm simple (depende del juego)
-local function autoFarm()
-    -- Esto depende directamente de cómo funciona el "farm" dentro del juego
-    -- Por ejemplo, activar algún objeto o teletransportarse a zonas para farmear
-    -- Aquí un ejemplo genérico:
-    local farmArea = workspace:FindFirstChild("FarmArea")
-    if farmArea then
-        character.HumanoidRootPart.CFrame = farmArea.CFrame
-    end
-end
-
--- Ajustar velocidad y salto
-local function setSpeedAndJump()
-    humanoid.WalkSpeed = speedValue
-    humanoid.JumpPower = jumpPowerValue
-end
-
-setSpeedAndJump()
-
--- Ejecutar tareas periódicas
-spawn(function()
-    while true do
-        autoCollectMoney()
-        wait(0.1)
+        -- 2. AUTO COMPRAR / MEJORAR DROPPERS
+        if Config.AutoBuy then
+            for _, Dropper in pairs(Workspace:GetChildren()) do
+                if Dropper:FindFirstChildOfClass("ClickDetector") then
+                    if string.find(string.lower(Dropper.Name), "dropper") or string.find(string.lower(Dropper.Name), "collector") or string.find(string.lower(Dropper.Name), "button") then
+                        Dropper.ClickDetector:MouseClick()
+                    end
+                end
+            end
+        end
+        
+        -- 3. AUTO ABRIR CAJAS / OBJETOS
+        if Config.AutoOpen then
+            for _, Item in pairs(Workspace:GetChildren()) do
+                if Item:FindFirstChildOfClass("ClickDetector") then
+                    if string.find(string.lower(Item.Name), "crate") or string.find(string.lower(Item.Name), "chest") or string.find(string.lower(Item.Name), "box") then
+                        Item.ClickDetector:MouseClick()
+                    end
+                end
+            end
+        end
+        
     end
 end)
 
-spawn(function()
-    while true do
-        autoFarm()
-        wait(autoFarmInterval)
+-- ===== MENÚ / INTERFAZ =====
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local TextButton = Instance.new("TextButton")
+
+ScreenGui.Parent = LocalPlayer.PlayerGui
+
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Puedes mover la ventana
+
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(0, 200, 0, 30)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Mansion Tycoon Script"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 14
+
+TextButton.Parent = MainFrame
+TextButton.BackgroundColor3 = Color3.new(0, 0.5, 0)
+TextButton.Size = UDim2.new(0, 180, 0, 40)
+TextButton.Position = UDim2.new(0, 10, 0, 40)
+TextButton.Font = Enum.Font.GothamBold
+TextButton.Text = "ACTIVADO ✅"
+TextButton.TextColor3 = Color3.new(1, 1, 1)
+TextButton.TextSize = 14
+
+-- Función del botón
+local Enabled = true
+TextButton.MouseButton1Click:Connect(function()
+    Enabled = not Enabled
+    Config.AutoCollect = Enabled
+    Config.AutoBuy = Enabled
+    Config.AutoOpen = Enabled
+    if Enabled then
+        TextButton.Text = "ACTIVADO ✅"
+        TextButton.BackgroundColor3 = Color3.new(0, 0.5, 0)
+    else
+        TextButton.Text = "PAUSADO ⏸️"
+        TextButton.BackgroundColor3 = Color3.new(0.5, 0.5, 0)
     end
 end)
 
-spawn(function()
-    while true do
-        autoBuild()
-        wait(autoBuildInterval)
-    end
-end)
+print("✅ Script cargado completamente!")
