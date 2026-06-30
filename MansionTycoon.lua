@@ -9,12 +9,10 @@ local Char = LP.Character or LP.CharacterAdded:Wait()
 local Hum = Char:WaitForChild("Humanoid")
 local HRP = Char.HumanoidRootPart
 
--- ENCONTRAR TU TYCOON (ADAPTADO PARA MANSION TYCOON)
+-- ENCONTRAR TU TYCOON
 local MyTycoon = nil
 
--- Buscamos la carpeta principal del juego
 for _, obj in pairs(Workspace:GetChildren()) do
-    -- Buscamos el modelo que tenga tu nombre o que sea tu base
     if obj.Name:find(LP.Name) or obj.Name:find("Mansion") and obj:FindFirstChild("Owner") then
         if obj.Owner.Value == LP then
             MyTycoon = obj
@@ -23,7 +21,6 @@ for _, obj in pairs(Workspace:GetChildren()) do
     end
 end
 
--- Si no lo encuentra arriba, busca en la carpeta general
 if not MyTycoon then
     local Tycoons = Workspace:FindFirstChild("Tycoons") or Workspace:FindFirstChild("Mansions")
     if Tycoons then
@@ -61,7 +58,7 @@ BtnMin.Parent = Menu
 
 -- == MARCO PRINCIPAL ==
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 260, 0, 300)
+Main.Size = UDim2.new(0, 260, 0, 350)
 Main.Position = UDim2.new(0.02, 0, 0.17, 0)
 Main.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
 Main.BorderColor3 = Color3.new(0, 0.5, 1)
@@ -126,31 +123,13 @@ Texto.Size = UDim2.new(1, 0, 1, 0)
 Texto.BackgroundTransparency = 1
 Texto.Text = [[
 Creador: JoseAngel_Blox
-Adaptado para: Mansion Tycoon
+Versión: COMPLETA
 
-Manual:
-hola a todos aquí un
-tutorial fácil de como
-usar el script bueno
-como puedes ver en la
-parte de abajo tiene
-dos botones en info es
-aqui donde estas leyendo
-esto y en la segunda
-opción donde dice Main
-están las funciones.
-
-1) auto recojer dinero:
-Busca el buzón o zona
-de cobro y recolecta.
-
-2) auto construir:
-Esta opcion te compra
-los botones verdes y
-mejoras automáticamente.
-
-3) velocidad:
-Para correr mas rapido.
+Funciones:
+✅ Auto Collect Cash
+✅ Auto Build
+✅ Velocidad
+✅ Anti AFK
 
 Disfruta el script!
 ]]
@@ -170,12 +149,14 @@ MainFrame.Parent = Main
 
 -- VARIABLES
 local CollectON = false
-local BuyON = false
+local BuildON = false
 local SpeedON = false
+local AntiAFK_ON = false
 local Visible = true
 
 local ConnectionCollect = nil
-local ConnectionBuy = nil
+local ConnectionBuild = nil
+local Connection_AFK = nil
 
 -- FUNCION PARA CREAR BOTONES
 local function MakeBtn(name, pos)
@@ -196,9 +177,10 @@ local function MakeBtn(name, pos)
 end
 
 -- CREAR BOTONES
-local Btn1 = MakeBtn("AUTO COLLECT", UDim2.new(0,0,0,0))
-local Btn2 = MakeBtn("AUTO COMPRAR", UDim2.new(0,0,0,45))
+local Btn1 = MakeBtn("AUTO COLLECT CASH", UDim2.new(0,0,0,0))
+local Btn2 = MakeBtn("AUTO BUILD", UDim2.new(0,0,0,45))
 local Btn3 = MakeBtn("VELOCIDAD", UDim2.new(0,0,0,90))
+local Btn4 = MakeBtn("ANTI AFK", UDim2.new(0,0,0,135))
 
 -- FUNCION MINIMIZAR
 BtnMin.MouseButton1Click:Connect(function()
@@ -221,31 +203,19 @@ BtnMain.MouseButton1Click:Connect(function()
     BtnMain.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
 end)
 
--- === AUTO COLLECT (BUSCA EL BUZON) ===
+-- === AUTO COLLECT CASH ===
 Btn1.MouseButton1Click:Connect(function()
     CollectON = not CollectON
     if CollectON then
-        Btn1.Text = "AUTO COLLECT [ON]"
+        Btn1.Text = "AUTO COLLECT CASH [ON]"
         Btn1.BorderColor3 = Color3.new(0,1,0)
         ConnectionCollect = RunService.Heartbeat:Connect(function()
             pcall(function()
                 if MyTycoon then
-                    -- Busca dentro de tu base lo que sea para cobrar
                     for _, obj in pairs(MyTycoon:GetDescendants()) do
                         if obj:IsA("Part") then
                             local name = string.lower(obj.Name)
-                            if name:find("collect") or name:find("buzon") or name:find("drop") or name:find("money") then
-                                firetouchinterest(obj, HRP, 0)
-                                firetouchinterest(obj, HRP, 1)
-                            end
-                        end
-                    end
-                else
-                    -- Si no encuentra base, busca en todo el mapa
-                    for _, obj in pairs(Workspace:GetDescendants()) do
-                        if obj:IsA("Part") then
-                            local name = string.lower(obj.Name)
-                            if name:find("collect") or name:find("buzon") or name:find("drop") then
+                            if name:find("collect") or name:find("buzon") or name:find("drop") or name:find("money") or name:find("cash") then
                                 firetouchinterest(obj, HRP, 0)
                                 firetouchinterest(obj, HRP, 1)
                             end
@@ -256,30 +226,29 @@ Btn1.MouseButton1Click:Connect(function()
             task.wait(0.1)
         end)
     else
-        Btn1.Text = "AUTO COLLECT"
+        Btn1.Text = "AUTO COLLECT CASH"
         Btn1.BorderColor3 = Color3.new(1,0,0)
         if ConnectionCollect then ConnectionCollect:Disconnect() end
     end
 end)
 
--- === AUTO COMPRAR (BUSCA BOTONES VERDES) ===
+-- === AUTO BUILD ===
 Btn2.MouseButton1Click:Connect(function()
-    BuyON = not BuyON
-    if BuyON then
-        Btn2.Text = "AUTO COMPRAR [ON]"
+    BuildON = not BuildON
+    if BuildON then
+        Btn2.Text = "AUTO BUILD [ON]"
         Btn2.BorderColor3 = Color3.new(0,1,0)
-        ConnectionBuy = RunService.Heartbeat:Connect(function()
+        ConnectionBuild = RunService.Heartbeat:Connect(function()
             pcall(function()
                 if MyTycoon then
-                    -- Busca TODO lo clicable dentro de TU base
                     for _, obj in pairs(MyTycoon:GetDescendants()) do
                         if obj:IsA("Part") or obj:IsA("MeshPart") then
-                            -- Click en botones verdes
-                            if obj.BrickColor.Name == "Bright green" or obj.BrickColor.Name == "Lime green" then
-                                firetouchinterest(obj, HRP, 0)
-                                firetouchinterest(obj, HRP, 1)
+                            if obj.BrickColor then
+                                if obj.BrickColor.Name == "Bright green" or obj.BrickColor.Name == "Lime green" or obj.BrickColor.Name == "Forest green" then
+                                    firetouchinterest(obj, HRP, 0)
+                                    firetouchinterest(obj, HRP, 1)
+                                end
                             end
-                            -- Click en cualquier boton
                             if obj:FindFirstChildOfClass("ClickDetector") then
                                 obj.ClickDetector:MouseClick()
                             end
@@ -290,9 +259,9 @@ Btn2.MouseButton1Click:Connect(function()
             task.wait(0.2)
         end)
     else
-        Btn2.Text = "AUTO COMPRAR"
+        Btn2.Text = "AUTO BUILD"
         Btn2.BorderColor3 = Color3.new(1,0,0)
-        if ConnectionBuy then ConnectionBuy:Disconnect() end
+        if ConnectionBuild then ConnectionBuild:Disconnect() end
     end
 end)
 
@@ -310,4 +279,26 @@ Btn3.MouseButton1Click:Connect(function()
     end
 end)
 
-print("✅ Script Mansion Tycoon cargado por JoseAngel_Blox")
+-- === ANTI AFK ===
+Btn4.MouseButton1Click:Connect(function()
+    AntiAFK_ON = not AntiAFK_ON
+    if AntiAFK_ON then
+        Btn4.Text = "ANTI AFK [ON]"
+        Btn4.BorderColor3 = Color3.new(0,1,0)
+        Connection_AFK = RunService.Heartbeat:Connect(function()
+            pcall(function()
+                local Cam = Workspace.CurrentCamera
+                Cam.CFrame = Cam.CFrame * CFrame.Angles(math.rad(0.1), math.rad(0.1), 0)
+            end)
+            if Hum then
+                Hum:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end)
+    else
+        Btn4.Text = "ANTI AFK"
+        Btn4.BorderColor3 = Color3.new(1,0,0)
+        if Connection_AFK then Connection_AFK:Disconnect() end
+    end
+end)
+
+print("✅ Script Mansion Tycoon cargado perfecto!")
