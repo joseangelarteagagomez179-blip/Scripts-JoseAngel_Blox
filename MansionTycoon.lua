@@ -1,6 +1,10 @@
--- MOSTRAR TODOS LOS OBJETOS EN WORKSPACE
-print("=== LISTA DE OBJETOS EN WORKSPACE ===")
-for _, objeto in pairs(game.Workspace:GetChildren()) do
-    print("📦 " .. objeto.Name)
+-- VER LO QUE HAY DENTRO DE TYCOONS
+print("=== CONTENIDO DE TYCOONS ===")
+local Tycoons = game.Workspace:FindFirstChild("Tycoons")
+if Tycoons then
+    for _, cosa in pairs(Tycoons:GetChildren()) do
+        print("📂 " .. cosa.Name)
+    end
+else
+    print("❌ No se encontró la carpeta Tycoons")
 end
-print("======================================")
