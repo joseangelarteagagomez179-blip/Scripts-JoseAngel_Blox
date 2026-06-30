@@ -15,7 +15,6 @@ local MainUI = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local Container = Instance.new("Frame")
 local UIListLayout = Instance.new("UIListLayout")
-local LoadingUI = Instance.new("Frame")
 local LoadingText = Instance.new("TextLabel")
 
 --// Properties
@@ -23,27 +22,25 @@ ScreenGui.Name = "MansionTycoonUI"
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
---// Loading Screen
-LoadingUI.Name = "LoadingUI"
-LoadingUI.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-LoadingUI.Size = UDim2.new(0, 350, 0, 180)
-LoadingUI.Position = UDim2.new(0.5, -175, 0.5, -90)
-LoadingUI.AnchorPoint = Vector2.new(0.5, 0.5)
-LoadingUI.BorderSizePixel = 0
-LoadingUI.Parent = ScreenGui
-
-local LoadingCorner = Instance.new("UICorner", LoadingUI)
-LoadingCorner.CornerRadius = UDim.new(0, 20)
-
+--// ANIMACIÓN DE CARGA (Solo letras con colores)
 LoadingText.Name = "LoadingText"
 LoadingText.BackgroundTransparency = 1
-LoadingText.Size = UDim2.new(1, 0, 1, 0)
-LoadingText.Font = Enum.Font.GothamBold
-LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoadingText.TextSize = 24
+LoadingText.Size = UDim2.new(0, 600, 0, 150)
+LoadingText.Position = UDim2.new(0.5, -300, 0.5, -75)
+LoadingText.AnchorPoint = Vector2.new(0.5, 0.5)
+LoadingText.Font = Enum.Font.FredokaOne -- Fuente más bonita y gruesa
+LoadingText.TextColor3 = Color3.new(1,1,1)
+LoadingText.TextSize = 45
 LoadingText.TextWrapped = true
 LoadingText.Text = "Bienvenidos a\nScripts JoseAngel_Blox"
-LoadingText.Parent = LoadingUI
+LoadingText.TextTransparency = 1
+LoadingText.Parent = ScreenGui
+
+--// EFECTO DE COLORES GIRANDO
+local ColorConnection = game:GetService("RunService").RenderStepped:Connect(function()
+    local Hue = tick() % 5 / 5 -- Cambia el color suavemente
+    LoadingText.TextColor3 = Color3.fromHSV(Hue, 0.7, 1)
+end)
 
 --// Main UI (Hidden at start)
 MainUI.Name = "MainUI"
@@ -150,8 +147,7 @@ local function CreateToggle(parent, text, callback)
 	ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	ToggleButton.Size = UDim2.new(0, 50, 0, 25)
 	ToggleButton.Position = UDim2.new(1, -55, 0.5, -12.5)
-	ToggleButton.Parent = ToggleButton
-    ToggleButton.Parent = ToggleFrame
+	ToggleButton.Parent = ToggleFrame
 
 	ToggleCorner.CornerRadius = UDim.new(0, 12)
 	ToggleCorner.Parent = ToggleButton
@@ -247,7 +243,7 @@ CreateToggle(MainSection, "Auto Comprar Mejoras", function(state)
 				pcall(function()
 					-- Codigo aqui
 				end)
-			end
+			end)
 		end)
 	else
 		print("Auto Mejoras OFF")
@@ -262,18 +258,17 @@ CreateToggle(MainSection, "Velocidad Extra", function(state)
 	end
 end)
 
---// ANIMACIÓN DE CARGA
-task.wait(0.1)
-TweenService:Create(LoadingUI, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
-TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+--// SECUENCIA DE ANIMACIÓN
+TweenService:Create(LoadingText, TweenInfo.new(1), {TextTransparency = 0, TextSize = 50}):Play()
 
-task.wait(3) -- Tiempo de espera
+task.wait(3) -- Tiempo que dura el efecto
 
-TweenService:Create(LoadingUI, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+-- Desaparecer suavemente
+TweenService:Create(LoadingText, TweenInfo.new(0.8), {TextTransparency = 1, TextSize = 10}):Play()
+ColorConnection:Disconnect() -- Detener el cambio de color
 
-task.wait(0.5)
-LoadingUI:Destroy()
+task.wait(0.8)
+LoadingText:Destroy()
 
 -- Aparece el menú principal
 MainUI.Visible = true
