@@ -1,10 +1,18 @@
--- VER LO QUE HAY DENTRO DE PLOT1
-print("=== CONTENIDO DE PLOT1 ===")
-local Plot = game.Workspace.Tycoons:FindFirstChild("Plot1") -- Cambia a Plot2 o Plot3 si no estás en el 1
-if Plot then
-    for _, objeto in pairs(Plot:GetChildren()) do
-        print("📦 " .. objeto.Name)
+-- BUSCAR DINERO EN TODOS LOS TYCOONS
+print("=== BUSCANDO DINERO... ===")
+local Tycoons = game.Workspace:FindFirstChild("Tycoons")
+if Tycoons then
+    for _, tycoon in pairs(Tycoons:GetChildren()) do
+        -- Buscamos dentro de cada Tycoon
+        for _, objeto in pairs(tycoon:GetDescendants()) do
+            -- Buscamos palabras clave en el nombre
+            if string.find(objeto.Name:lower(), "money") or string.find(objeto.Name:lower(), "cash") or string.find(objeto.Name:lower(), "collect") or string.find(objeto.Name:lower(), "drop") or string.find(objeto.Name:lower(), "coin") then
+                print("✅ ENCONTRADO: " .. objeto.Name)
+                print("📍 RUTA: " .. objeto:GetFullName())
+            end
+        end
     end
+    print("=== BUSQUEDA FINALIZADA ===")
 else
-    print("❌ No se encontró el Plot")
+    print("❌ No se encontró la carpeta Tycoons")
 end
