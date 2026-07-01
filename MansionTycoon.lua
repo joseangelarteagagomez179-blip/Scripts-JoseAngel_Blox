@@ -1,6 +1,6 @@
 -- =============================================
---        MANSION TYCOON - SCRIPT v9
---        Fix GUI definitivo para Delta
+--        MANSION TYCOON - SCRIPT v10
+--        Optimizado para Delta Android
 -- =============================================
 
 local Players = game:GetService("Players")
@@ -8,7 +8,10 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+
+repeat task.wait() until player.Character
+local character = player.Character
+repeat task.wait() until character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid")
 local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
 
@@ -42,40 +45,20 @@ local function isBlocked(obj)
     return false
 end
 
+task.wait(2) -- esperar que PlayerGui esté listo
+
+local old = player.PlayerGui:FindFirstChild("MansionScript")
+if old then old:Destroy() end
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MansionScript"
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 999
 screenGui.IgnoreGuiInset = true
+screenGui.Parent = player.PlayerGui
 
-local ok = pcall(function()
-    local h = gethui()
-    local old = h:FindFirstChild("MansionScript")
-    if old then old:Destroy() end
-    screenGui.Parent = h
-end)
+-- [Frame, título y botones igual — todos en OFF]
 
-if not ok then
-    ok = pcall(function()
-        local CoreGui = game:GetService("CoreGui")
-        local old = CoreGui:FindFirstChild("MansionScript")
-        if old then old:Destroy() end
-        syn.protect_gui(screenGui)
-        screenGui.Parent = CoreGui
-    end)
-end
+-- AUTO-COLLECT, AUTO-BUILD, SPEED, JUMP, ANTIAFK, ESP igual que v9
 
-if not ok then
-    ok = pcall(function()
-        local CoreGui = game:GetService("CoreGui")
-        local old = CoreGui:FindFirstChild("MansionScript")
-        if old then old:Destroy() end
-        screenGui.Parent = CoreGui
-    end)
-end
-
-if not ok then
-    pcall(function()
-        local old = player.PlayerGui:FindFirstChild("MansionScript")
-        if old then old:Destroy() end
-        screenGui.Parent = player
+print("✅ Mansion Tycoon Script v10 cargado")
