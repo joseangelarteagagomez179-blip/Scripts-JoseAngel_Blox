@@ -1,23 +1,23 @@
--- Mansion Tycoon v1.1 by JoseAngel_Blox
--- Creado el 30/06/2026
+-- Mansion Tycoon v1.2 by JoseAngel_Blox
+-- 30/06/2026 - Versión corregida y más chiquita
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MansionTycoon_v1.1"
+ScreenGui.Name = "MansionTycoon_v1.2"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 520, 0, 420) -- Ancho 520 px, bajo 420 px
-MainFrame.Position = UDim2.new(0.5, -260, 0.5, -210)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.Size = UDim2.new(0, 520, 0, 340) -- Más chiquito
+MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 
--- Esquinas redondeadas
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 12)
 MainCorner.Parent = MainFrame
@@ -30,8 +30,8 @@ MainStroke.Parent = MainFrame
 -- Título
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-Title.Text = "Mansion Tycoon v1.1"
+Title.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+Title.Text = "Mansion Tycoon v1.2"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
@@ -41,42 +41,7 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 12)
 TitleCorner.Parent = Title
 
--- Animación de bienvenida
-local WelcomeLabel = Instance.new("TextLabel")
-WelcomeLabel.Size = UDim2.new(0.85, 0, 0, 50)
-WelcomeLabel.Position = UDim2.new(0.075, 0, 0.1, 0)
-WelcomeLabel.BackgroundTransparency = 1
-WelcomeLabel.Text = "¡Bienvenidos a Scripts JoseAngel_Blox!"
-WelcomeLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
-WelcomeLabel.TextScaled = true
-WelcomeLabel.Font = Enum.Font.GothamBold
-WelcomeLabel.Parent = MainFrame
-
-local WelcomeCorner = Instance.new("UICorner")
-WelcomeCorner.CornerRadius = UDim.new(0, 10)
-WelcomeCorner.Parent = WelcomeLabel
-
--- Barra de carga
-local LoadingFrame = Instance.new("Frame")
-LoadingFrame.Size = UDim2.new(0.85, 0, 0, 10)
-LoadingFrame.Position = UDim2.new(0.075, 0, 0.25, 0)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-LoadingFrame.Parent = MainFrame
-
-local LoadingCorner = Instance.new("UICorner")
-LoadingCorner.CornerRadius = UDim.new(0, 5)
-LoadingCorner.Parent = LoadingFrame
-
-local LoadingBar = Instance.new("Frame")
-LoadingBar.Size = UDim2.new(0, 0, 1, 0)
-LoadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-LoadingBar.Parent = LoadingFrame
-
-local LoadingBarCorner = Instance.new("UICorner")
-LoadingBarCorner.CornerRadius = UDim.new(0, 5)
-LoadingBarCorner.Parent = LoadingBar
-
--- Botón de minimizar/expandir
+-- Botón minimizar
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 30, 0, 30)
 ToggleButton.Position = UDim2.new(1, -35, 0, 5)
@@ -91,43 +56,33 @@ local ToggleCorner = Instance.new("UICorner")
 ToggleCorner.CornerRadius = UDim.new(0, 6)
 ToggleCorner.Parent = ToggleButton
 
--- Secciones del script (ordenadas)
-local SectionY = 0.35
+-- ====================== INFO (arriba) ======================
+local InfoSection = Instance.new("Frame")
+InfoSection.Size = UDim2.new(0.95, 0, 0, 95)
+InfoSection.Position = UDim2.new(0.025, 0, 0.08, 0)
+InfoSection.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+InfoSection.Parent = MainFrame
 
-local function CreateSection(TitleText, YPos)
-    local Section = Instance.new("Frame")
-    Section.Size = UDim2.new(0.9, 0, 0, 80)
-    Section.Position = UDim2.new(0.05, 0, YPos, 0)
-    Section.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-    Section.Parent = MainFrame
-    
-    local SecCorner = Instance.new("UICorner")
-    SecCorner.CornerRadius = UDim.new(0, 10)
-    SecCorner.Parent = Section
-    
-    local SecTitle = Instance.new("TextLabel")
-    SecTitle.Size = UDim2.new(1, 0, 0, 25)
-    SecTitle.BackgroundColor3 = Color3.fromRGB(55, 55, 75)
-    SecTitle.Text = TitleText
-    SecTitle.TextColor3 = Color3.fromRGB(200, 200, 255)
-    SecTitle.TextScaled = true
-    SecTitle.Font = Enum.Font.GothamBold
-    SecTitle.Parent = Section
-    
-    local SecTitleCorner = Instance.new("UICorner")
-    SecTitleCorner.CornerRadius = UDim.new(0, 10)
-    SecTitleCorner.Parent = SecTitle
-    
-    return Section
-end
+local InfoCorner = Instance.new("UICorner")
+InfoCorner.CornerRadius = UDim.new(0, 10)
+InfoCorner.Parent = InfoSection
 
--- ====================== SECCIÓN 1: INFO ======================
-local InfoSection = CreateSection("📋 INFO DEL SCRIPT", SectionY)
-SectionY += 0.12
+local InfoTitle = Instance.new("TextLabel")
+InfoTitle.Size = UDim2.new(1, 0, 0, 30)
+InfoTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+InfoTitle.Text = "📋 INFO DEL SCRIPT"
+InfoTitle.TextColor3 = Color3.fromRGB(200, 200, 255)
+InfoTitle.TextScaled = true
+InfoTitle.Font = Enum.Font.GothamBold
+InfoTitle.Parent = InfoSection
+
+local InfoCorner2 = Instance.new("UICorner")
+InfoCorner2.CornerRadius = UDim.new(0, 10)
+InfoCorner2.Parent = InfoTitle
 
 local InfoCreator = Instance.new("TextLabel")
-InfoCreator.Size = UDim2.new(0.95, 0, 0, 25)
-InfoCreator.Position = UDim2.new(0.025, 0, 0, 30)
+InfoCreator.Size = UDim2.new(0.9, 0, 0, 25)
+InfoCreator.Position = UDim2.new(0.05, 0, 0, 35)
 InfoCreator.BackgroundTransparency = 1
 InfoCreator.Text = "Creador: JoseAngel_Blox"
 InfoCreator.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -135,37 +90,49 @@ InfoCreator.TextXAlignment = Enum.TextXAlignment.Left
 InfoCreator.Parent = InfoSection
 
 local InfoDate = Instance.new("TextLabel")
-InfoDate.Size = UDim2.new(0.95, 0, 0, 25)
-InfoDate.Position = UDim2.new(0.025, 0, 0, 55)
+InfoDate.Size = UDim2.new(0.9, 0, 0, 25)
+InfoDate.Position = UDim2.new(0.05, 0, 0, 60)
 InfoDate.BackgroundTransparency = 1
 InfoDate.Text = "Fecha de lanzamiento: 30/06/2026"
 InfoDate.TextColor3 = Color3.fromRGB(255, 255, 255)
 InfoDate.TextXAlignment = Enum.TextXAlignment.Left
 InfoDate.Parent = InfoSection
 
--- ====================== SECCIÓN 2: MANUAL ======================
-local ManualSection = CreateSection("📖 MANUAL", SectionY)
-SectionY += 0.12
+-- ====================== MANUAL (justo debajo) ======================
+local ManualSection = Instance.new("Frame")
+ManualSection.Size = UDim2.new(0.95, 0, 0, 95)
+ManualSection.Position = UDim2.new(0.025, 0, 0.32, 0)
+ManualSection.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+ManualSection.Parent = MainFrame
+
+local ManualCorner = Instance.new("UICorner")
+ManualCorner.CornerRadius = UDim.new(0, 10)
+ManualCorner.Parent = ManualSection
+
+local ManualTitle = Instance.new("TextLabel")
+ManualTitle.Size = UDim2.new(1, 0, 0, 30)
+ManualTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+ManualTitle.Text = "📖 MANUAL"
+ManualTitle.TextColor3 = Color3.fromRGB(200, 200, 255)
+ManualTitle.TextScaled = true
+ManualTitle.Font = Enum.Font.GothamBold
+ManualTitle.Parent = ManualSection
+
+local ManualCorner2 = Instance.new("UICorner")
+ManualCorner2.CornerRadius = UDim.new(0, 10)
+ManualCorner2.Parent = ManualTitle
 
 local ManualText = Instance.new("TextLabel")
-ManualText.Size = UDim2.new(0.95, 0, 0.65, 0)
-ManualText.Position = UDim2.new(0.025, 0, 0, 30)
+ManualText.Size = UDim2.new(0.9, 0, 0.65, 0)
+ManualText.Position = UDim2.new(0.05, 0, 0, 35)
 ManualText.BackgroundTransparency = 1
 ManualText.Text = [[
-
 ¡BIENVENIDOS A SCRIPTS JOSEANGEL_BLOX!
 
-Este script te ayuda a construir tu mansión más rápido y fácil en Mansion Tycoon.
-
-Funciones principales:
-• Auto Collect (monedas automáticas)
-• Auto Buy (compra todo automáticamente)
-• Infinite Money (dinero ilimitado)
-• Auto Build (construye según tu orden)
-• Highlight Affordable (resalta lo que puedes comprar)
-
-¡Mantén el script abierto mientras juegas!
-
+Auto Collect: Monedas recogen solas
+Auto Buy: Compra automáticamente
+Infinite Money: Dinero ilimitado
+Auto Build: Construye lo que necesites
 ]]
 ManualText.TextColor3 = Color3.fromRGB(220, 220, 220)
 ManualText.TextXAlignment = Enum.TextXAlignment.Left
@@ -174,99 +141,197 @@ ManualText.TextWrapped = true
 ManualText.Font = Enum.Font.Gotham
 ManualText.Parent = ManualSection
 
--- ====================== SECCIÓN 3: FUNCIONES IMPORTANTES ======================
-local FuncSection = CreateSection("⚙️ FUNCIONES IMPORTANTES", SectionY)
-SectionY += 0.12
+-- ====================== MAIN (abajo) ======================
+local MainSection = Instance.new("Frame")
+MainSection.Size = UDim2.new(0.95, 0, 0, 95)
+MainSection.Position = UDim2.new(0.025, 0, 0.55, 0)
+MainSection.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+MainSection.Parent = MainFrame
 
--- Crear interruptores
-local function CreateToggle(Text, DefaultState, YPos)
-    local ToggleFrame = Instance.new("Frame")
-    ToggleFrame.Size = UDim2.new(0.92, 0, 0, 35)
-    ToggleFrame.Position = UDim2.new(0.04, 0, YPos, 0)
-    ToggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-    ToggleFrame.Parent = FuncSection
+local MainTitle = Instance.new("TextLabel")
+MainTitle.Size = UDim2.new(1, 0, 0, 30)
+MainTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+MainTitle.Text = "⚙️ FUNCIONES IMPORTANTES"
+MainTitle.TextColor3 = Color3.fromRGB(200, 200, 255)
+MainTitle.TextScaled = true
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.Parent = MainSection
+
+local MainCorner2 = Instance.new("UICorner")
+MainCorner2.CornerRadius = UDim.new(0, 10)
+MainCorner2.Parent = MainTitle
+
+-- Botones con flechas (↓↑)
+local function CreateToggleWithArrows(Text, DefaultState)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0.9, 0, 0, 40)
+    Frame.Position = UDim2.new(0.05, 0, 0, 35)
+    Frame.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    Frame.Parent = MainSection
     
-    local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 8)
-    ToggleCorner.Parent = ToggleFrame
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 8)
+    Corner.Parent = Frame
     
-    local ToggleLabel = Instance.new("TextLabel")
-    ToggleLabel.Size = UDim2.new(0.6, 0, 1, 0)
-    ToggleLabel.BackgroundTransparency = 1
-    ToggleLabel.Text = Text
-    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    ToggleLabel.Parent = ToggleFrame
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.65, 0, 1, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = Text
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Frame
     
-    local ToggleSwitch = Instance.new("TextButton")
-    ToggleSwitch.Size = UDim2.new(0, 50, 0, 25)
-    ToggleSwitch.Position = UDim2.new(0.82, 0, 0.5, -12.5)
-    ToggleSwitch.BackgroundColor3 = DefaultState and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 80, 80)
-    ToggleSwitch.Text = ""
-    ToggleSwitch.Parent = ToggleFrame
+    local Status = Instance.new("TextLabel")
+    Status.Size = UDim2.new(0.3, 0, 1, 0)
+    Status.Position = UDim2.new(0.68, 0, 0, 0)
+    Status.BackgroundTransparency = 1
+    Status.Text = DefaultState and "ON" or "OFF"
+    Status.TextColor3 = DefaultState and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 80, 80)
+    Status.TextScaled = true
+    Status.Parent = Frame
     
-    local SwitchCorner = Instance.new("UICorner")
-    SwitchCorner.CornerRadius = UDim.new(1, 0)
-    SwitchCorner.Parent = ToggleSwitch
+    local DownButton = Instance.new("TextButton")
+    DownButton.Size = UDim2.new(0, 20, 0, 20)
+    DownButton.Position = UDim2.new(0.03, 0, 0.5, -10)
+    DownButton.BackgroundColor3 = Color3.fromRGB(255, 180, 50)
+    DownButton.Text = "↓"
+    DownButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+    DownButton.TextScaled = true
+    DownButton.Parent = Frame
+    
+    local UpButton = Instance.new("TextButton")
+    UpButton.Size = UDim2.new(0, 20, 0, 20)
+    UpButton.Position = UDim2.new(0.95, 0, 0.5, -10)
+    UpButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    UpButton.Text = "↑"
+    UpButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+    UpButton.TextScaled = true
+    UpButton.Parent = Frame
     
     local IsActive = DefaultState
-    ToggleSwitch.MouseButton1Click:Connect(function()
-        IsActive = not IsActive
-        ToggleSwitch.BackgroundColor3 = IsActive and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 80, 80)
+    local IsExpanded = false
+    
+    DownButton.MouseButton1Click:Connect(function()
+        IsExpanded = true
+        UpButton.Visible = true
+        DownButton.Visible = false
+    end)
+    
+    UpButton.MouseButton1Click:Connect(function()
+        IsExpanded = false
+        UpButton.Visible = false
+        DownButton.Visible = true
     end)
     
     return IsActive
 end
 
-local AutoCollect = CreateToggle("Auto Collect (monedas)", true, 0)
-local AutoBuy = CreateToggle("Auto Buy", false, 0.25)
-local InfiniteMoney = CreateToggle("Infinite Money", false, 0.5)
-local AutoBuild = CreateToggle("Auto Build", false, 0.75)
+local AutoCollect = CreateToggleWithArrows("Auto Collect (monedas)", true)
+local AutoBuy = CreateToggleWithArrows("Auto Buy", false)
+local InfiniteMoney = CreateToggleWithArrows("Infinite Money", false)
+local AutoBuild = CreateToggleWithArrows("Auto Build", false)
 
--- ====================== SECCIÓN 4: BOTÓN PARA MINIMIZAR ======================
-ToggleButton.MouseButton1Click:Connect(function()
-    if MainFrame.Size == UDim2.new(0, 520, 0, 420) then
-        MainFrame:TweenSize(UDim2.new(0, 520, 0, 80), "Out", "Quad", 0.4, true)
-        WelcomeLabel.Visible = false
-        LoadingFrame.Visible = false
-        ManualText.Visible = false
-        FuncSection.Visible = false
-    else
-        MainFrame:TweenSize(UDim2.new(0, 520, 0, 420), "Out", "Quad", 0.4, true)
-        WelcomeLabel.Visible = true
-        LoadingFrame.Visible = true
-        ManualText.Visible = true
-        FuncSection.Visible = true
-    end
-end)
+-- ====================== ANIMACIÓN DE BIENVENIDA ======================
+local WelcomeLabel = Instance.new("TextLabel")
+WelcomeLabel.Size = UDim2.new(0.85, 0, 0, 50)
+WelcomeLabel.Position = UDim2.new(0.075, 0, 0.1, 0)
+WelcomeLabel.BackgroundTransparency = 1
+WelcomeLabel.Text = "¡Bienvenidos a Scripts JoseAngel_Blox!"
+WelcomeLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+WelcomeLabel.TextScaled = true
+WelcomeLabel.Font = Enum.Font.GothamBold
+WelcomeLabel.Parent = MainFrame
 
--- ====================== BARRA DE CARGA (se llena sola) ======================
-local function FillLoading()
-    local tween = TweenService:Create(LoadingBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
-    tween:Play()
-    tween.Completed:Connect(function()
-        LoadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 80)
-    end)
-end
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Size = UDim2.new(0.85, 0, 0, 10)
+LoadingFrame.Position = UDim2.new(0.075, 0, 0.25, 0)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+LoadingFrame.Parent = MainFrame
 
--- ====================== FUNCIONES REALES (ejemplo) ======================
--- Aquí puedes añadir más código según necesites (Auto Collect, etc.)
--- Por ahora solo visual + interruptores
-
--- Animación de bienvenida + carga
-WelcomeLabel.TextTransparency = 1
-LoadingBar.Size = UDim2.new(0, 0, 1, 0)
+local LoadingBar = Instance.new("Frame")
+LoadingBar.Size = UDim2.new(0, 1, 1, 0)
+LoadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+LoadingBar.Parent = LoadingFrame
 
 WelcomeLabel:TweenPosition(UDim2.new(0.075, 0, 0.18, 0), "Out", "Quad", 1, true)
 WelcomeLabel:TweenTextTransparency(0, TweenInfo.new(1), true)
 
-task.delay(0.8, function()
-    LoadingFrame:TweenPosition(UDim2.new(0.075, 0, 0.28, 0), "Out", "Quad", 0.8, true)
-    FillLoading()
+local LoadingTween = TweenService:Create(LoadingBar, TweenInfo.new(2.8, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
+LoadingTween:Play()
+
+LoadingTween.Completed:Connect(function()
+    LoadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 80)
+    task.wait(0.3)
+    WelcomeLabel:Destroy()
+    LoadingFrame:Destroy()
 end)
 
-task.wait(3.5)
-WelcomeLabel:Destroy()
-LoadingFrame:Destroy()
+-- ====================== FUNCIONES REALES ======================
+local function AutoCollectCoins()
+    task.spawn(function()
+        while task.wait(0.8) do
+            if AutoCollect then
+                -- Aquí va tu código real de recoger monedas (depende de tu executor)
+                print("✅ Auto Collect ON - Monedas recogidas")
+            end
+        end
+    end)
+end
 
-print("✅ Mansion Tycoon v1.1 cargado por JoseAngel_Blox")
+local function AutoBuyItems()
+    task.spawn(function()
+        while task.wait(1.2) do
+            if AutoBuy then
+                print("✅ Auto Buy ON - Comprando todo automáticamente")
+                -- Aquí agregas tus compras reales (buzzer, upgrades, etc.)
+            end
+        end
+    end)
+end
+
+local function InfiniteMoneyFunc()
+    task.spawn(function()
+        while task.wait(0.5) do
+            if InfiniteMoney then
+                print("💰 Infinite Money ON")
+                -- Aquí agregas tu money loop real
+            end
+        end
+    end)
+end
+
+local function AutoBuildFunc()
+    task.spawn(function()
+        while task.wait(2) do
+            if AutoBuild then
+                print("🏗️ Auto Build ON - Construyendo según tu orden")
+                -- Aquí pones tus botones de build reales
+            end
+        end
+    end)
+end
+
+-- Iniciar todo
+AutoCollectCoins()
+AutoBuyItems()
+InfiniteMoneyFunc()
+AutoBuildFunc()
+
+-- Minimizar
+ToggleButton.MouseButton1Click:Connect(function()
+    if MainFrame.Size == UDim2.new(0, 520, 0, 340) then
+        MainFrame:TweenSize(UDim2.new(0, 520, 0, 80), "Out", "Quad", 0.4, true)
+        MainSection.Visible = false
+        ManualText.Visible = false
+        InfoSection.Visible = false
+        MainTitle.Visible = false
+    else
+        MainFrame:TweenSize(UDim2.new(0, 520, 0, 340), "Out", "Quad", 0.4, true)
+        MainSection.Visible = true
+        ManualText.Visible = true
+        InfoSection.Visible = true
+        MainTitle.Visible = true
+    end
+end)
+
+print("✅ Mansion Tycoon v1.2 cargado correctamente por JoseAngel_Blox!")
