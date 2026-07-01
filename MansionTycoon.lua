@@ -11,7 +11,126 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- ===================== GUI =====================
+-- ===================== PANTALLA DE CARGA =====================
+local LoadGui = Instance.new("ScreenGui")
+LoadGui.Name = "LoadScreen"
+LoadGui.ResetOnSpawn = false
+LoadGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+LoadGui.Parent = gethui and gethui() or player.PlayerGui
+
+local LoadBG = Instance.new("Frame")
+LoadBG.Size = UDim2.new(1, 0, 1, 0)
+LoadBG.BackgroundColor3 = Color3.fromRGB(5, 5, 15)
+LoadBG.BorderSizePixel = 0
+LoadBG.ZIndex = 100
+LoadBG.Parent = LoadGui
+
+local TopLine = Instance.new("Frame")
+TopLine.Size = UDim2.new(0, 0, 0, 2)
+TopLine.Position = UDim2.new(0.5, 0, 0.08, 0)
+TopLine.AnchorPoint = Vector2.new(0.5, 0)
+TopLine.BackgroundColor3 = Color3.fromRGB(120, 80, 255)
+TopLine.BorderSizePixel = 0
+TopLine.ZIndex = 101
+TopLine.Parent = LoadBG
+
+local WelcomeLabel = Instance.new("TextLabel")
+WelcomeLabel.Text = ""
+WelcomeLabel.Size = UDim2.new(0.8, 0, 0, 40)
+WelcomeLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
+WelcomeLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+WelcomeLabel.BackgroundTransparency = 1
+WelcomeLabel.TextColor3 = Color3.fromRGB(180, 180, 200)
+WelcomeLabel.Font = Enum.Font.Gotham
+WelcomeLabel.TextScaled = true
+WelcomeLabel.ZIndex = 101
+WelcomeLabel.Parent = LoadBG
+
+local TitleLoadLabel = Instance.new("TextLabel")
+TitleLoadLabel.Text = ""
+TitleLoadLabel.Size = UDim2.new(0.9, 0, 0, 70)
+TitleLoadLabel.Position = UDim2.new(0.5, 0, 0.42, 0)
+TitleLoadLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+TitleLoadLabel.BackgroundTransparency = 1
+TitleLoadLabel.TextColor3 = Color3.fromRGB(180, 120, 255)
+TitleLoadLabel.Font = Enum.Font.GothamBold
+TitleLoadLabel.TextScaled = true
+TitleLoadLabel.ZIndex = 101
+TitleLoadLabel.Parent = LoadBG
+
+local TitleGradient = Instance.new("UIGradient")
+TitleGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 100, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 180, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 80, 255)),
+})
+TitleGradient.Rotation = 45
+TitleGradient.Parent = TitleLoadLabel
+
+local SubLabel = Instance.new("TextLabel")
+SubLabel.Text = ""
+SubLabel.Size = UDim2.new(0.7, 0, 0, 28)
+SubLabel.Position = UDim2.new(0.5, 0, 0.54, 0)
+SubLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+SubLabel.BackgroundTransparency = 1
+SubLabel.TextColor3 = Color3.fromRGB(140, 100, 200)
+SubLabel.Font = Enum.Font.GothamItalic
+SubLabel.TextScaled = true
+SubLabel.ZIndex = 101
+SubLabel.Parent = LoadBG
+
+local BarBG = Instance.new("Frame")
+BarBG.Size = UDim2.new(0.6, 0, 0, 12)
+BarBG.Position = UDim2.new(0.5, 0, 0.68, 0)
+BarBG.AnchorPoint = Vector2.new(0.5, 0.5)
+BarBG.BackgroundColor3 = Color3.fromRGB(25, 20, 40)
+BarBG.BorderSizePixel = 0
+BarBG.ZIndex = 101
+BarBG.Parent = LoadBG
+Instance.new("UICorner", BarBG).CornerRadius = UDim.new(1, 0)
+local BarStroke = Instance.new("UIStroke")
+BarStroke.Color = Color3.fromRGB(80, 50, 150)
+BarStroke.Thickness = 1
+BarStroke.Parent = BarBG
+
+local BarFill = Instance.new("Frame")
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(120, 60, 255)
+BarFill.BorderSizePixel = 0
+BarFill.ZIndex = 102
+BarFill.Parent = BarBG
+Instance.new("UICorner", BarFill).CornerRadius = UDim.new(1, 0)
+
+local BarGlow = Instance.new("UIGradient")
+BarGlow.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 50, 220)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 150, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 50, 220)),
+})
+BarGlow.Parent = BarFill
+
+local PctLabel = Instance.new("TextLabel")
+PctLabel.Text = "0%"
+PctLabel.Size = UDim2.new(0.6, 0, 0, 24)
+PctLabel.Position = UDim2.new(0.5, 0, 0.75, 0)
+PctLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+PctLabel.BackgroundTransparency = 1
+PctLabel.TextColor3 = Color3.fromRGB(160, 120, 255)
+PctLabel.Font = Enum.Font.GothamBold
+PctLabel.TextScaled = true
+PctLabel.ZIndex = 101
+PctLabel.Parent = LoadBG
+
+local BotLine = Instance.new("Frame")
+BotLine.Size = UDim2.new(0, 0, 0, 2)
+BotLine.Position = UDim2.new(0.5, 0, 0.88, 0)
+BotLine.AnchorPoint = Vector2.new(0.5, 0)
+BotLine.BackgroundColor3 = Color3.fromRGB(120, 80, 255)
+BotLine.BorderSizePixel = 0
+BotLine.ZIndex = 101
+BotLine.Parent = LoadBG
+
+-- ===================== GUI PRINCIPAL (oculta hasta que cargue) =====================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MansionTycoonGUI"
 ScreenGui.ResetOnSpawn = false
@@ -26,6 +145,7 @@ MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.Visible = false  -- oculto hasta que termine la animación
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
@@ -75,10 +195,7 @@ MinBtn.Font = Enum.Font.GothamBold
 MinBtn.TextScaled = true
 MinBtn.BorderSizePixel = 0
 MinBtn.Parent = TitleBar
-
-local MinCorner = Instance.new("UICorner")
-MinCorner.CornerRadius = UDim.new(0, 8)
-MinCorner.Parent = MinBtn
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 8)
 
 -- ===================== TABS =====================
 local TabBar = Instance.new("Frame")
@@ -87,10 +204,7 @@ TabBar.Position = UDim2.new(0, 10, 0, 50)
 TabBar.BackgroundColor3 = Color3.fromRGB(20, 10, 40)
 TabBar.BorderSizePixel = 0
 TabBar.Parent = MainFrame
-
-local TabCorner = Instance.new("UICorner")
-TabCorner.CornerRadius = UDim.new(0, 10)
-TabCorner.Parent = TabBar
+Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 10)
 
 local TabLayout = Instance.new("UIListLayout")
 TabLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -119,10 +233,7 @@ local function createTabPage(name)
     btn.TextScaled = true
     btn.BorderSizePixel = 0
     btn.Parent = TabBar
-
-    local bc = Instance.new("UICorner")
-    bc.CornerRadius = UDim.new(0, 8)
-    bc.Parent = btn
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
 
     local page = Instance.new("ScrollingFrame")
     page.Size = UDim2.new(1, 0, 1, 0)
@@ -137,7 +248,6 @@ local function createTabPage(name)
     layout.Padding = UDim.new(0, 8)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     layout.Parent = page
-
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
     end)
@@ -152,9 +262,7 @@ for _, name in ipairs(tabNames) do
 end
 
 local function switchTab(name)
-    for n, page in pairs(tabContents) do
-        page.Visible = (n == name)
-    end
+    for n, page in pairs(tabContents) do page.Visible = (n == name) end
     for n, btn in pairs(tabButtons) do
         if n == name then
             btn.BackgroundColor3 = Color3.fromRGB(100, 50, 220)
@@ -167,11 +275,8 @@ local function switchTab(name)
 end
 
 for name, btn in pairs(tabButtons) do
-    btn.MouseButton1Click:Connect(function()
-        switchTab(name)
-    end)
+    btn.MouseButton1Click:Connect(function() switchTab(name) end)
 end
-
 switchTab("Info")
 
 -- ===================== HELPERS =====================
@@ -186,7 +291,6 @@ local function createLabel(parent, txt, color)
     lbl.TextScaled = true
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Parent = parent
-    return lbl
 end
 
 local function createSectionLabel(parent, txt)
@@ -198,7 +302,6 @@ local function createSectionLabel(parent, txt)
     lbl.Font = Enum.Font.GothamBold
     lbl.TextScaled = true
     lbl.Parent = parent
-    return lbl
 end
 
 local function createToggle(parent, labelText, callback)
@@ -207,10 +310,7 @@ local function createToggle(parent, labelText, callback)
     holder.BackgroundColor3 = Color3.fromRGB(25, 15, 45)
     holder.BorderSizePixel = 0
     holder.Parent = parent
-
-    local hc = Instance.new("UICorner")
-    hc.CornerRadius = UDim.new(0, 10)
-    hc.Parent = holder
+    Instance.new("UICorner", holder).CornerRadius = UDim.new(0, 10)
 
     local lbl = Instance.new("TextLabel")
     lbl.Text = labelText
@@ -230,10 +330,7 @@ local function createToggle(parent, labelText, callback)
     toggleBtn.Text = ""
     toggleBtn.BorderSizePixel = 0
     toggleBtn.Parent = holder
-
-    local tc = Instance.new("UICorner")
-    tc.CornerRadius = UDim.new(1, 0)
-    tc.Parent = toggleBtn
+    Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1, 0)
 
     local knob = Instance.new("Frame")
     knob.Size = UDim2.new(0, 18, 0, 18)
@@ -241,10 +338,7 @@ local function createToggle(parent, labelText, callback)
     knob.BackgroundColor3 = Color3.fromRGB(180, 180, 200)
     knob.BorderSizePixel = 0
     knob.Parent = toggleBtn
-
-    local kc = Instance.new("UICorner")
-    kc.CornerRadius = UDim.new(1, 0)
-    kc.Parent = knob
+    Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
 
     local state = false
     toggleBtn.MouseButton1Click:Connect(function()
@@ -276,26 +370,37 @@ createSectionLabel(mainPage, "Auto Farm")
 
 local autoBuildEnabled = false
 local autoCollectEnabled = false
+local touchParts = {}
+local collectorTouchParts = {}
 
-local touchParts = {}          -- botones de construcción (gratis)
-local collectorTouchParts = {} -- Touch dentro de Collector (buzón)
+local ROBUX_PARENTS = {
+    "DoubleCash","AutoCollect","VIP","StarterPack","SpeedBoost",
+    "VelocidadAdicional","ExtraSpeed","MochilaCohete",
+    "PaqueteCochesExoticos","GoldifyButton","Goldify",
+    "Gold","Robux","Premium","Gamepass","MoneyTier",
+}
 
--- Verifica si un Touch es de Robux
 local function isRobuxButton(part)
     local parent = part.Parent
     if not parent then return false end
     local gui = parent:FindFirstChild("ButtonGui")
     if gui and gui.ClassName == "ObjectValue" then
-        local guiName = gui.Value and gui.Value.Name or ""
-        if guiName:find("Gold") or guiName:find("Goldify") then
-            return true
-        end
+        local n = gui.Value and gui.Value.Name or ""
+        if n:find("Gold") or n:find("Goldify") then return true end
     end
-    if parent.Name:find("Gold") then return true end
+    local pName = parent.Name
+    for _, kw in ipairs(ROBUX_PARENTS) do
+        if pName:find(kw) then return true end
+    end
+    local anc = parent.Parent
+    while anc and anc ~= workspace do
+        local an = anc.Name
+        if an=="Shop" or an=="Store" or an=="Gamepasses" or an=="GamepassShop" or an=="RobuxShop" then return true end
+        anc = anc.Parent
+    end
     return false
 end
 
--- Verifica si un Touch está dentro de Collector (buzón de dinero)
 local function isCollectorTouch(part)
     local p = part.Parent
     while p and p ~= workspace do
@@ -322,23 +427,17 @@ end
 workspace.DescendantAdded:Connect(function(v)
     task.wait()
     if v:IsA("BasePart") and v.Name == "Touch" then
-        if isCollectorTouch(v) then
-            table.insert(collectorTouchParts, v)
-        elseif not isRobuxButton(v) then
-            table.insert(touchParts, v)
-        end
+        if isCollectorTouch(v) then table.insert(collectorTouchParts, v)
+        elseif not isRobuxButton(v) then table.insert(touchParts, v) end
     end
 end)
 
 workspace.DescendantRemoving:Connect(function(v)
-    if v:IsA("BasePart") and v.Name == "Touch" then
-        refreshParts()
-    end
+    if v:IsA("BasePart") and v.Name == "Touch" then refreshParts() end
 end)
 
 refreshParts()
 
--- AUTO BUILD: solo botones gratis de construcción
 createToggle(mainPage, "🏗️ Auto Build", function(state)
     autoBuildEnabled = state
     if state then
@@ -351,13 +450,12 @@ createToggle(mainPage, "🏗️ Auto Build", function(state)
                         firetouchinterest(rootPart, v, 1)
                     end
                 end
-                task.wait(0.1)
+                task.wait(0.3)
             end
         end)
     end
 end)
 
--- AUTO COLLECT: toca el Touch dentro del Collector (buzón de dinero)
 createToggle(mainPage, "💰 Auto Collect Money", function(state)
     autoCollectEnabled = state
     if state then
@@ -387,16 +485,12 @@ local espObjects = {}
 
 createToggle(playerPage, "⚡ Speed Hack", function(state)
     speedEnabled = state
-    if humanoid then
-        humanoid.WalkSpeed = state and 60 or 16
-    end
+    if humanoid then humanoid.WalkSpeed = state and 60 or 16 end
 end)
 
 createToggle(playerPage, "🦘 Salto Alto", function(state)
     jumpEnabled = state
-    if humanoid then
-        humanoid.JumpPower = state and 120 or 50
-    end
+    if humanoid then humanoid.JumpPower = state and 120 or 50 end
 end)
 
 createToggle(playerPage, "👻 Noclip", function(state)
@@ -406,9 +500,7 @@ end)
 RunService.Stepped:Connect(function()
     if noclipEnabled and character then
         for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
+            if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 end)
@@ -427,14 +519,14 @@ local function createESP()
             local char = plr.Character
             local root = char:FindFirstChild("HumanoidRootPart")
             if root then
-                local highlight = Instance.new("SelectionBox")
-                highlight.Color3 = Color3.fromRGB(255, 50, 50)
-                highlight.LineThickness = 0.05
-                highlight.SurfaceTransparency = 0.6
-                highlight.SurfaceColor3 = Color3.fromRGB(255, 80, 80)
-                highlight.Adornee = char
-                highlight.Parent = workspace
-                table.insert(espObjects, highlight)
+                local hl = Instance.new("SelectionBox")
+                hl.Color3 = Color3.fromRGB(255, 50, 50)
+                hl.LineThickness = 0.05
+                hl.SurfaceTransparency = 0.6
+                hl.SurfaceColor3 = Color3.fromRGB(255, 80, 80)
+                hl.Adornee = char
+                hl.Parent = workspace
+                table.insert(espObjects, hl)
 
                 local bb = Instance.new("BillboardGui")
                 bb.Size = UDim2.new(0, 120, 0, 50)
@@ -451,7 +543,7 @@ local function createESP()
                 nameLbl.Font = Enum.Font.GothamBold
                 nameLbl.TextScaled = true
                 nameLbl.TextStrokeTransparency = 0
-                nameLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                nameLbl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                 nameLbl.Parent = bb
 
                 local distLbl = Instance.new("TextLabel")
@@ -462,7 +554,7 @@ local function createESP()
                 distLbl.Font = Enum.Font.Gotham
                 distLbl.TextScaled = true
                 distLbl.TextStrokeTransparency = 0
-                distLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                distLbl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
                 distLbl.Parent = bb
                 table.insert(espObjects, bb)
 
@@ -483,32 +575,4 @@ createToggle(playerPage, "🔍 ESP Jugadores", function(state)
     if state then
         createESP()
         task.spawn(function()
-            while espEnabled do
-                task.wait(3)
-                if espEnabled then createESP() end
-            end
-        end)
-    else
-        clearESP()
-    end
-end)
-
--- ===================== MINIMIZAR =====================
-local minimized = false
-MinBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    PageHolder.Visible = not minimized
-    TabBar.Visible = not minimized
-    MainFrame.Size = minimized and UDim2.new(0, 380, 0, 50) or UDim2.new(0, 380, 0, 480)
-    MinBtn.Text = minimized and "+" or "—"
-end)
-
-player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-    humanoid = newChar:WaitForChild("Humanoid")
-    rootPart = newChar:WaitForChild("HumanoidRootPart")
-    if speedEnabled then humanoid.WalkSpeed = 60 end
-    if jumpEnabled then humanoid.JumpPower = 120 end
-end)
-
-print("✅ Mansion Tycoon v1.1 cargado | by JoseAngel_Blox")
+            while 
