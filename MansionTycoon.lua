@@ -1,6 +1,6 @@
 -- =============================================
---        MANSION TYCOON - SCRIPT COMPLETO
---        Por Zapia | Roblox Lua Script
+--        MANSION TYCOON - SCRIPT v2
+--        Botones OFF por defecto | Auto-Collect/Farm mejorados
 -- =============================================
 
 local Players = game:GetService("Players")
@@ -13,18 +13,17 @@ local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
 
 -- =============================================
--- CONFIGURACION
+-- CONFIGURACION (todos en false = OFF por defecto)
 -- =============================================
 local config = {
-    AutoCollect  = true,
-    AutoFarm     = true,
-    SpeedHack    = true,
-    InfiniteJump = true,
-    AntiAFK      = true,
-    ESP          = true,
-    WalkSpeed    = 50,        -- velocidad normal: 16
-    JumpPower    = 80,        -- salto normal: 50
-    CollectInterval = 0.5     -- segundos entre cada collect
+    AutoCollect  = false,
+    AutoFarm     = false,
+    SpeedHack    = false,
+    InfiniteJump = false,
+    AntiAFK      = false,
+    ESP          = false,
+    WalkSpeed    = 50,
+    CollectRadius = 40
 }
 
 -- =============================================
@@ -62,8 +61,7 @@ local titleCorner = Instance.new("UICorner")
 titleCorner.CornerRadius = UDim.new(0, 10)
 titleCorner.Parent = title
 
--- Función para crear botones toggle
-local function createToggle(name, configKey, yPos, state)
+local function createToggle(name, configKey, yPos)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.85, 0, 0, 32)
     btn.Position = UDim2.new(0.075, 0, 0, yPos)
@@ -77,10 +75,8 @@ local function createToggle(name, configKey, yPos, state)
     btnCorner.CornerRadius = UDim.new(0, 6)
     btnCorner.Parent = btn
 
-    local enabled = state
-
     local function updateColor()
-        if enabled then
+        if config[configKey] then
             btn.BackgroundColor3 = Color3.fromRGB(60, 180, 90)
             btn.Text = "✅ " .. name .. ": ON"
         else
@@ -92,20 +88,17 @@ local function createToggle(name, configKey, yPos, state)
     updateColor()
 
     btn.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        config[configKey] = enabled
+        config[configKey] = not config[configKey]
         updateColor()
     end)
-
-    return btn
 end
 
-createToggle("Auto-Collect",  "AutoCollect",  45,  config.AutoCollect)
-createToggle("Auto-Farm",     "AutoFarm",     85,  config.AutoFarm)
-createToggle("Speed Hack",    "SpeedHack",    125, config.SpeedHack)
-createToggle("Infinite Jump", "InfiniteJump", 165, config.InfiniteJump)
-createToggle("Anti-AFK",      "AntiAFK",      205, config.AntiAFK)
-createToggle("ESP",           "ESP",          245, config.ESP)
+createToggle("Auto-Collect",  "AutoCollect",  45)
+createToggle("Auto-Farm",     "AutoFarm",     85)
+createToggle("Speed Hack",    "SpeedHack",    125)
+createToggle("Infinite Jump", "InfiniteJump", 165)
+createToggle("Anti-AFK",      "AntiAFK",      205)
+createToggle("ESP",           "ESP",          245)
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(1, 0, 0, 25)
@@ -118,21 +111,27 @@ statusLabel.TextSize = 11
 statusLabel.Parent = mainFrame
 
 -- =============================================
--- 1. AUTO-COLLECT (recolecta drops/billetes)
+-- 1. AUTO-COLLECT
 -- =============================================
 task.spawn(function()
     while true do
-        task.wait(config.CollectInterval)
+        task.wait(0.3)
         if config.AutoCollect and rootPart then
             for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") or obj:IsA("MeshPart") then
-                    local n = obj.Name:lower()
-                    if n:find("collect") or n:find("drop") or n:find("money")
-                       or n:find("cash") or n:find("coin") or n:find("bill") then
-                        local dist = (rootPart.Position - obj.Position).Magnitude
-                        if dist < 30 then
-                            rootPart.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
-                            task.wait(0.1)
+                if obj:IsA("BasePart") and obj.CanTouch and not obj.Locked then
+                    local dist = (rootPart.Position - obj.Position).Magnitude
+                    if dist < config.CollectRadius then
+                        pcall(function()
+                            firetouchinterest(rootPart, obj, 0)
+                            firetouchinterest(rootPart, obj, 1)
+                        end)
+                        local cd = obj:FindFirstChildOfClass("ClickDetector")
+                        if cd then
+                            pcall(function() fireClickDetector(cd) end)
+                        end
+                        local pp = obj:FindFirstChildOfClass("ProximityPrompt")
+                        if pp then
+                            pcall(function() fireproximityprompt(pp) end)
                         end
                     end
                 end
@@ -142,29 +141,41 @@ task.spawn(function()
 end)
 
 -- =============================================
--- 2. AUTO-FARM (activa botones/colectores)
+-- 2. AUTO-FARM
 -- =============================================
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.5)
         if config.AutoFarm and rootPart then
             for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") or obj:IsA("MeshPart") then
-                    local n = obj.Name:lower()
-                    if n:find("button") or n:find("collect") or n:find("tycoon")
-                       or n:find("dropper") or n:find("conveyor") then
+                if obj:IsA("BasePart") or obj:IsA("UnionOperation") or obj:IsA("MeshPart") then
+                    local pp = obj:FindFirstChildOfClass("ProximityPrompt")
+                    if pp then
                         local dist = (rootPart.Position - obj.Position).Magnitude
-                        if dist < 20 then
-                            local clickDetector = obj:FindFirstChildOfClass("ClickDetector")
-                            if clickDetector then
-                                fireClickDetector(clickDetector)
-                            end
-                            local touchInterest = obj:FindFirstChild("TouchInterest")
-                            if touchInterest then
+                        if dist < 50 then
+                            pcall(function() fireproximityprompt(pp) end)
+                        end
+                    end
+                    local cd = obj:FindFirstChildOfClass("ClickDetector")
+                    if cd then
+                        local dist = (rootPart.Position - obj.Position).Magnitude
+                        if dist < 50 then
+                            pcall(function() fireClickDetector(cd) end)
+                        end
+                    end
+                end
+            end
+
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and obj.CanTouch then
+                    local size = obj.Size
+                    if size.X < 5 and size.Y < 5 and size.Z < 5 then
+                        local dist = (rootPart.Position - obj.Position).Magnitude
+                        if dist > 3 and dist < 60 then
+                            pcall(function()
                                 firetouchinterest(rootPart, obj, 0)
-                                task.wait(0.05)
                                 firetouchinterest(rootPart, obj, 1)
-                            end
+                            end)
                         end
                     end
                 end
@@ -178,11 +189,7 @@ end)
 -- =============================================
 RunService.Heartbeat:Connect(function()
     if humanoid and humanoid.Parent then
-        if config.SpeedHack then
-            humanoid.WalkSpeed = config.WalkSpeed
-        else
-            humanoid.WalkSpeed = 16
-        end
+        humanoid.WalkSpeed = config.SpeedHack and config.WalkSpeed or 16
     end
 end)
 
@@ -208,7 +215,7 @@ player.Idled:Connect(function()
 end)
 
 -- =============================================
--- 6. ESP (ver jugadores a través de paredes)
+-- 6. ESP
 -- =============================================
 local function createESP(targetPlayer)
     if targetPlayer == player then return end
@@ -270,7 +277,6 @@ for _, p in ipairs(Players:GetPlayers()) do
 end
 Players.PlayerAdded:Connect(createESP)
 
--- Re-setup al respawnear
 player.CharacterAdded:Connect(function(newChar)
     character = newChar
     humanoid = newChar:WaitForChild("Humanoid")
@@ -280,4 +286,4 @@ player.CharacterAdded:Connect(function(newChar)
     end
 end)
 
-print("✅ Mansion Tycoon Script cargado correctamente")
+print("✅ Mansion Tycoon Script v2 cargado")
