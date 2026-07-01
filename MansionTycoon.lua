@@ -277,38 +277,75 @@ createSectionLabel(mainPage, "Auto Farm")
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
--- AUTO BUILD: botones verdes = "Touch" (parent: objeto a comprar)
+-- Caché de partes para no recorrer workspace en cada loop
+local touchParts = {}
+local collectorParts = {}
+
+local function refreshParts()
+    touchParts = {}
+    collectorParts = {}
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            if v.Name == "Touch" then
+                table.insert(touchParts, v)
+            elseif v.Name == "Collector" then
+                table.insert(collectorParts, v)
+            end
+        end
+    end
+end
+
+workspace.DescendantAdded:Connect(function(v)
+    if v:IsA("BasePart") then
+        if v.Name == "Touch" then table.insert(touchParts, v)
+        elseif v.Name == "Collector" then table.insert(collectorParts, v)
+        end
+    end
+end)
+
+workspace.DescendantRemoving:Connect(function(v)
+    if v:IsA("BasePart") and (v.Name == "Touch" or v.Name == "Collector") then
+        refreshParts()
+    end
+end)
+
+refreshParts()
+
+-- AUTO BUILD: activa todos los "Touch" al instante desde la caché
 createToggle(mainPage, "🏗️ Auto Build", function(state)
     autoBuildEnabled = state
     if state then
         task.spawn(function()
             while autoBuildEnabled do
-                for _, v in pairs(workspace:GetDescendants()) do
+                for _, v in pairs(touchParts) do
                     if not autoBuildEnabled then break end
-                    if v:IsA("BasePart") and v.Name == "Touch" then
+                    if v and v.Parent then
                         firetouchinterest(rootPart, v, 0)
-                        task.wait(0.05)
                         firetouchinterest(rootPart, v, 1)
-                        task.wait(0.1)
                     end
                 end
-                task.wait(0.5)
+                task.wait(0.1)
             end
         end)
     end
 end)
 
--- AUTO COLLECT: buzón = "Collector"
+-- AUTO COLLECT: activa "Collector" y sus hijos cada 0.5s
 createToggle(mainPage, "💰 Auto Collect Money", function(state)
     autoCollectEnabled = state
     if state then
         task.spawn(function()
             while autoCollectEnabled do
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("BasePart") and v.Name == "Collector" then
+                for _, v in pairs(collectorParts) do
+                    if v and v.Parent then
                         firetouchinterest(rootPart, v, 0)
-                        task.wait(0.05)
                         firetouchinterest(rootPart, v, 1)
+                        for _, child in pairs(v:GetDescendants()) do
+                            if child:IsA("BasePart") then
+                                firetouchinterest(rootPart, child, 0)
+                                firetouchinterest(rootPart, child, 1)
+                            end
+                        end
                     end
                 end
                 task.wait(0.5)
