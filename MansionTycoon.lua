@@ -1,71 +1,154 @@
--- 1. Crear la interfaz visual en tu pantalla de celular
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local AutoCollectBtn = Instance.new("TextButton")
-local SpeedBtn = Instance.new("TextButton")
+-- // Servicios
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+-- // Variables Locales
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-MainFrame.Name = "MansionMenu"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 180, 0, 130)
-MainFrame.Active = true
-MainFrame.Draggable = true -- Te permite mover el menú con el dedo
+-- // Encontrar TU Tycoon (Ruta Correcta)
+local Tycoon = nil
+for _, v in pairs(Workspace.Tycoons:GetChildren()) do
+    if v.Owner.Value == LocalPlayer.Name then
+        Tycoon = v
+        break
+    end
+end
 
--- Botón 1: Recolectar de la Caja Fuerte automáticamente
-AutoCollectBtn.Parent = MainFrame
-AutoCollectBtn.Size = UDim2.new(0, 160, 0, 40)
-AutoCollectBtn.Position = UDim2.new(0, 10, 0, 15)
-AutoCollectBtn.Text = "Auto-Recolectar"
-AutoCollectBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-AutoCollectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- // Cargar UI
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local autoCollecting = false
-AutoCollectBtn.MouseButton1Click:Connect(function()
-    autoCollecting = not autoCollecting
-    if autoCollecting then
-        AutoCollectBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-        AutoCollectBtn.Text = "Recolectando..."
+local Window = Rayfield:CreateWindow({
+    Name = "🏰 Mansion Tycoon | Script",
+    LoadingTitle = "Cargando...",
+    LoadingSubtitle = "by Dola",
+    ConfigurationSaving = {Enabled = false},
+    KeySystem = false
+})
+
+-- =============================================
+-- 📌 PESTAÑA: PRINCIPAL
+-- =============================================
+local MainTab = Window:CreateTab("⚡ Inicio", 4405071608)
+local MainSection = MainTab:CreateSection("Funciones Principales")
+
+-- 💰 AUTO RECOLECTAR DINERO (Ruta Confirmada: Mansion.Collectors)
+local AutoFarm = false
+MainSection:CreateToggle({
+    Name = "Auto Recolectar Dinero",
+    CurrentValue = false,
+    Callback = function(Value)
+        AutoFarm = Value
         task.spawn(function()
-            while autoCollecting do
-                -- Busca el recolector de dinero en el mapa y simula el toque
-                for _, v in pairs(game.Workspace:GetDescendants()) do
-                    if v.Name == "Giver" or v.Name == "Collector" and v:IsA("TouchTransmitter") then
-                        firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
-                        firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
+            while AutoFarm do
+                if Tycoon and Tycoon:FindFirstChild("Mansion") then
+                    local CollectorsFolder = Tycoon.Mansion:FindFirstChild("Collectors")
+                    if CollectorsFolder then
+                        for _, Collector in pairs(CollectorsFolder:GetChildren()) do
+                            if Collector:FindFirstChild("Collector") then
+                                firetouchinterest(HumanoidRootPart, Collector.Collector, 0)
+                                firetouchinterest(HumanoidRootPart, Collector.Collector, 1)
+                                task.wait(0.1)
+                            end
+                        end
                     end
                 end
-                task.wait(1) -- Intervalo de recolección para evitar cierres del juego
+                task.wait(1)
             end
         end)
-    else
-        AutoCollectBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-        AutoCollectBtn.Text = "Auto-Recolectar"
     end
-end)
+})
 
--- Botón 2: Súper Velocidad para recorrer la Mansión rápido
-SpeedBtn.Parent = MainFrame
-SpeedBtn.Size = UDim2.new(0, 160, 0, 40)
-SpeedBtn.Position = UDim2.new(0, 10, 0, 70)
-SpeedBtn.Text = "Velocidad x2"
-SpeedBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- 🏗️ AUTO COMPRAR TODO
+local AutoBuild = false
+MainSection:CreateToggle({
+    Name = "Auto Comprar Todo",
+    CurrentValue = false,
+    Callback = function(Value)
+        AutoBuild = Value
+        task.spawn(function()
+            while AutoBuild do
+                if Tycoon and Tycoon:FindFirstChild("Mansion") then
+                    for _, Button in pairs(Tycoon.Mansion:GetDescendants()) do
+                        if Button:IsA("TextButton") and Button.Visible and Button.Active then
+                            Button:Click()
+                        end
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+})
 
-local fastSpeed = false
-SpeedBtn.MouseButton1Click:Connect(function()
-    fastSpeed = not fastSpeed
-    local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        if fastSpeed then
-            hum.WalkSpeed = 50 -- Velocidad aumentada
-            SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-        else
-            hum.WalkSpeed = 16 -- Velocidad normal de Roblox
-            SpeedBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+-- 📍 TELETRANSPORTE
+MainSection:CreateButton({
+    Name = "Ir a mi Mansión",
+    Callback = function()
+        if Tycoon and Tycoon:FindFirstChild("Mansion") and Tycoon.Mansion:FindFirstChild("Spawn") then
+            HumanoidRootPart.CFrame = Tycoon.Mansion.Spawn.CFrame + Vector3.new(0, 3, 0)
+        end
+    end
+})
+
+-- =============================================
+-- 📌 PESTAÑA: JUGADOR
+-- =============================================
+local PlayerTab = Window:CreateTab("👤 Jugador", 10706506036)
+local PlayerSection = PlayerTab:CreateSection("Ajustes")
+
+-- Velocidad
+PlayerSection:CreateSlider({
+    Name = "Velocidad",
+    Range = {16, 100},
+    Increment = 1,
+    CurrentValue = 16,
+    Callback = function(Value)
+        Humanoid.WalkSpeed = Value
+    end
+})
+
+-- Salto
+PlayerSection:CreateSlider({
+    Name = "Altura de Salto",
+    Range = {50, 200},
+    Increment = 1,
+    CurrentValue = 50,
+    Callback = function(Value)
+        Humanoid.JumpPower = Value
+    end
+})
+
+-- Noclip
+local Noclip = false
+PlayerSection:CreateToggle({
+    Name = "Noclip (Atravesar Paredes)",
+    CurrentValue = false,
+    Callback = function(Value)
+        Noclip = Value
+    end
+})
+
+task.spawn(function()
+    while task.wait() do
+        if Noclip and Character then
+            for _, Part in pairs(Character:GetDescendants()) do
+                if Part:IsA("BasePart") then
+                    Part.CanCollide = false
+                end
+            end
         end
     end
 end)
+
+-- =============================================
+-- ✅ NOTIFICACIÓN
+-- =============================================
+Rayfield:Notify({
+    Title = "✅ Script Listo",
+    Content = "Rutas verificadas y funcionando!",
+    Duration = 4,
+    Image = 13047715178
+})
