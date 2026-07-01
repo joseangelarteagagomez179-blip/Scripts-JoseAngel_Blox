@@ -1,4 +1,4 @@
--- DETECTOR v2 - muestra el contenido de ButtonGui
+-- DETECTOR COLLECTOR
 local player = game.Players.LocalPlayer
 local rootPart = player.Character.HumanoidRootPart
 
@@ -20,30 +20,18 @@ txt.TextYAlignment = Enum.TextYAlignment.Top
 txt.TextWrapped = true
 
 game:GetService("RunService").Heartbeat:Connect(function()
-    local result = "BOTONES (30 studs):\n"
+    local result = "OBJETOS cerca (20 studs):\n\n"
     for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") and v.Name == "Touch" then
+        if v:IsA("BasePart") then
             local dist = (v.Position - rootPart.Position).Magnitude
-            if dist < 30 then
+            if dist < 20 then
+                local path = v.Name
                 local p = v.Parent
-                local info = "[" .. (p and p.Name or "?") .. "]\n"
-                if p then
-                    for _, child in pairs(p:GetChildren()) do
-                        if child.ClassName == "ObjectValue" or child.ClassName == "NumberValue" 
-                        or child.ClassName == "StringValue" or child.ClassName == "BoolValue"
-                        or child.ClassName == "IntValue" then
-                            local val = tostring(child.Value)
-                            info = info .. "  " .. child.Name .. "=" .. val .. "\n"
-                        elseif child.Name == "ButtonGui" then
-                            -- Entra adentro del ButtonGui
-                            for _, sub in pairs(child:GetChildren()) do
-                                local val2 = tostring(pcall(function() return sub.Value end) and sub.Value or "?")
-                                info = info .. "  ButtonGui>" .. sub.Name .. "(" .. sub.ClassName .. ")=" .. val2 .. "\n"
-                            end
-                        end
-                    end
+                while p and p ~= workspace do
+                    path = p.Name .. " > " .. path
+                    p = p.Parent
                 end
-                result = result .. info .. "\n"
+                result = result .. path .. "\n"
             end
         end
     end
