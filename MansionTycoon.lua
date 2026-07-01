@@ -277,26 +277,43 @@ createSectionLabel(mainPage, "Auto Farm")
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
+-- AUTO BUILD: usa firetouchinterest para simular el toque sin mover el personaje
 createToggle(mainPage, "🏗️ Auto Build", function(state)
     autoBuildEnabled = state
     if state then
         task.spawn(function()
             while autoBuildEnabled do
-                local tycoons = workspace:FindFirstChild("Tycoons")
-                if tycoons then
-                    for _, obj in pairs(tycoons:GetDescendants()) do
-                        if obj:IsA("BasePart") and (obj.Name == "Button" or obj.Name == "BuyButton" or obj.Name == "PurchaseButton") then
-                            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("BuyPlot", true)
-                                or game:GetService("ReplicatedStorage"):FindFirstChild("Purchase", true)
-                                or game:GetService("ReplicatedStorage"):FindFirstChild("BuyItem", true)
-                            if remote then
-                                if remote:IsA("RemoteEvent") then
-                                    remote:FireServer(obj)
-                                elseif remote:IsA("RemoteFunction") then
-                                    remote:InvokeServer(obj)
-                                end
+                local teamName = player.Team and player.Team.Name
+                local buttonsFolder = teamName
+                    and workspace:FindFirstChild("Tycoons")
+                    and workspace.Tycoons:FindFirstChild(teamName)
+                    and workspace.Tycoons[teamName]:FindFirstChild("ButtonsFolder")
+
+                if buttonsFolder then
+                    for _, v in pairs(buttonsFolder:GetDescendants()) do
+                        if v.Name == "Gamepass" then
+                            v.Parent:Destroy()
+                        end
+                    end
+                    task.wait(0.5)
+                    for _, v in pairs(buttonsFolder:GetDescendants()) do
+                        if not autoBuildEnabled then break end
+                        if v:IsA("TouchTransmitter") then
+                            firetouchinterest(rootPart, v.Parent, 0)
+                            firetouchinterest(rootPart, v.Parent, 1)
+                            task.wait(0.1)
+                        end
+                    end
+                else
+                    for _, v in pairs(workspace:GetDescendants()) do
+                        if not autoBuildEnabled then break end
+                        if v:IsA("TouchTransmitter") and v.Parent:IsA("BasePart") then
+                            local name = v.Parent.Name:lower()
+                            if name:find("button") or name:find("pad") or name:find("buy") then
+                                firetouchinterest(rootPart, v.Parent, 0)
+                                firetouchinterest(rootPart, v.Parent, 1)
+                                task.wait(0.1)
                             end
-                            task.wait(0.3)
                         end
                     end
                 end
@@ -306,25 +323,37 @@ createToggle(mainPage, "🏗️ Auto Build", function(state)
     end
 end)
 
+-- AUTO COLLECT: usa firetouchinterest en el buzón sin mover al jugador
 createToggle(mainPage, "💰 Auto Collect Money", function(state)
     autoCollectEnabled = state
     if state then
         task.spawn(function()
             while autoCollectEnabled do
-                local tycoons = workspace:FindFirstChild("Tycoons")
-                if tycoons then
-                    for _, obj in pairs(tycoons:GetDescendants()) do
-                        if obj:IsA("BasePart") and (obj.Name == "Collector" or obj.Name == "MoneyBag" or obj.Name == "Cash" or obj.Name == "Coin") then
-                            if (obj.Position - rootPart.Position).Magnitude < 200 then
-                                rootPart.CFrame = CFrame.new(obj.Position)
-                                task.wait(0.1)
-                            end
+                local teamName = player.Team and player.Team.Name
+                local collector = teamName
+                    and workspace:FindFirstChild("Tycoons")
+                    and workspace.Tycoons:FindFirstChild(teamName)
+                    and workspace.Tycoons[teamName]:FindFirstChild("StarterParts")
+                    and workspace.Tycoons[teamName].StarterParts:FindFirstChild("Collector")
+
+                if collector then
+                    for _, v in pairs(collector:GetDescendants()) do
+                        if v:IsA("TouchTransmitter") then
+                            firetouchinterest(rootPart, v.Parent, 0)
+                            task.wait(0.05)
+                            firetouchinterest(rootPart, v.Parent, 1)
                         end
                     end
-                    local collectRemote = game:GetService("ReplicatedStorage"):FindFirstChild("Collect", true)
-                        or game:GetService("ReplicatedStorage"):FindFirstChild("CollectMoney", true)
-                    if collectRemote and collectRemote:IsA("RemoteEvent") then
-                        collectRemote:FireServer()
+                else
+                    for _, v in pairs(workspace:GetDescendants()) do
+                        if v:IsA("TouchTransmitter") and v.Parent then
+                            local name = v.Parent.Name:lower()
+                            if name:find("collect") or name:find("mailbox") or name:find("collector") then
+                                firetouchinterest(rootPart, v.Parent, 0)
+                                task.wait(0.05)
+                                firetouchinterest(rootPart, v.Parent, 1)
+                            end
+                        end
                     end
                 end
                 task.wait(0.5)
@@ -382,24 +411,55 @@ local function createESP()
     clearESP()
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= player and plr.Character then
-            local root = plr.Character:FindFirstChild("HumanoidRootPart")
+            local char = plr.Character
+            local root = char:FindFirstChild("HumanoidRootPart")
             if root then
+                local highlight = Instance.new("SelectionBox")
+                highlight.Color3 = Color3.fromRGB(255, 50, 50)
+                highlight.LineThickness = 0.05
+                highlight.SurfaceTransparency = 0.6
+                highlight.SurfaceColor3 = Color3.fromRGB(255, 80, 80)
+                highlight.Adornee = char
+                highlight.Parent = workspace
+                table.insert(espObjects, highlight)
+
                 local bb = Instance.new("BillboardGui")
-                bb.Size = UDim2.new(0, 80, 0, 30)
-                bb.StudsOffset = Vector3.new(0, 3, 0)
+                bb.Size = UDim2.new(0, 120, 0, 50)
+                bb.StudsOffsetWorldSpace = Vector3.new(0, 4, 0)
                 bb.AlwaysOnTop = true
+                bb.MaxDistance = 2000
                 bb.Parent = root
 
-                local lbl = Instance.new("TextLabel")
-                lbl.Size = UDim2.new(1, 0, 1, 0)
-                lbl.BackgroundTransparency = 1
-                lbl.Text = plr.Name
-                lbl.TextColor3 = Color3.fromRGB(255, 80, 80)
-                lbl.Font = Enum.Font.GothamBold
-                lbl.TextScaled = true
-                lbl.Parent = bb
+                local nameLbl = Instance.new("TextLabel")
+                nameLbl.Size = UDim2.new(1, 0, 0.5, 0)
+                nameLbl.BackgroundTransparency = 1
+                nameLbl.Text = plr.Name
+                nameLbl.TextColor3 = Color3.fromRGB(255, 80, 80)
+                nameLbl.Font = Enum.Font.GothamBold
+                nameLbl.TextScaled = true
+                nameLbl.TextStrokeTransparency = 0
+                nameLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                nameLbl.Parent = bb
 
+                local distLbl = Instance.new("TextLabel")
+                distLbl.Size = UDim2.new(1, 0, 0.5, 0)
+                distLbl.Position = UDim2.new(0, 0, 0.5, 0)
+                distLbl.BackgroundTransparency = 1
+                distLbl.TextColor3 = Color3.fromRGB(255, 220, 80)
+                distLbl.Font = Enum.Font.Gotham
+                distLbl.TextScaled = true
+                distLbl.TextStrokeTransparency = 0
+                distLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                distLbl.Parent = bb
                 table.insert(espObjects, bb)
+
+                task.spawn(function()
+                    while espEnabled and root and root.Parent do
+                        local dist = math.floor((root.Position - rootPart.Position).Magnitude)
+                        distLbl.Text = dist .. " studs"
+                        task.wait(0.1)
+                    end
+                end)
             end
         end
     end
@@ -411,7 +471,7 @@ createToggle(playerPage, "🔍 ESP Jugadores", function(state)
         createESP()
         task.spawn(function()
             while espEnabled do
-                task.wait(2)
+                task.wait(3)
                 if espEnabled then createESP() end
             end
         end)
