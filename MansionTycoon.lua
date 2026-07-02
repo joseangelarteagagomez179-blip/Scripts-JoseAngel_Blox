@@ -1,121 +1,128 @@
---[[
-    Mansion Tycoon v1.1
-    Creador: JoseAngel_Blox
-    Fecha: 01/07/2026
-]]
+-- [[ Mansión Tycoon v1.1 ]] --
+-- Creador: JoseAngel_Blox
+-- Fecha de lanzamiento: 01/07/2026
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local UIS = game:GetService("UserInputService")
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local Title = Instance.new("TextLabel")
+local TabContainer = Instance.new("Frame")
+local ContentContainer = Instance.new("Frame")
 
--- 1. Crear la Interfaz Principal
-local ScreenGui = Instance.new("ScreenGui", Player.PlayerGui)
-ScreenGui.Name = "MansionTycoonV1"
-
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 300, 0, 400) -- Tamaño compacto
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+-- Configuración de la Ventana Principal (Ancha y Redondeada)
+ScreenGui.Parent = game.CoreGui
+MainFrame.Name = "MansionTycoonGui"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 500, 0, 320) -- Ancha y no tan alta
 MainFrame.Active = true
-MainFrame.Draggable = true -- Para que puedas moverlo con el mouse
+MainFrame.Draggable = true
 
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 15)
+UICorner.CornerRadius = UDim.new(0, 15) -- Esquinas redondeadas
+UICorner.Parent = MainFrame
 
--- Título
-local Title = Instance.new("TextLabel", MainFrame)
+Title.Parent = MainFrame
 Title.Text = "Mansión Tycoon v1.1"
 Title.Size = UDim2.new(1, 0, 0, 40)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.new(1, 1, 1)
 Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 20
 
--- Contenedor de Botones (Scrolling para que quepan todos)
-local ScrollingFrame = Instance.new("ScrollingFrame", MainFrame)
-ScrollingFrame.Size = UDim2.new(1, -20, 1, -60)
-ScrollingFrame.Position = UDim2.new(0, 10, 0, 50)
-ScrollingFrame.BackgroundTransparency = 1
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 1.5, 0) -- Espacio para scroll
-ScrollingFrame.ScrollBarThickness = 4
+-- Variables de funciones
+local Flags = {AutoCollect = false, AutoBuild = false, Speed = false, Noclip = false, Jump = false, InfJump = false, ESP = false}
 
-local UIListLayout = Instance.new("UIListLayout", ScrollingFrame)
-UIListLayout.Padding = UDim.new(0, 8)
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
--- Función para crear Botones/Interruptores
-local function CreateButton(text, callback)
-    local Button = Instance.new("TextButton", ScrollingFrame)
-    Button.Text = text
-    Button.Size = UDim2.new(0, 260, 0, 35)
+-- Función para crear botones/interruptores
+local function CreateToggle(name, parent, pos, callback)
+    local Button = Instance.new("TextButton")
+    Button.Name = name
+    Button.Parent = parent
+    Button.Size = UDim2.new(0, 180, 0, 35)
+    Button.Position = pos
     Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.Text = name .. ": OFF"
     Button.TextColor3 = Color3.new(1, 1, 1)
-    Button.Font = Enum.Font.Gotham
-    Button.TextSize = 14
     
-    local btnCorner = Instance.new("UICorner", Button)
+    local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = Button
 
-    local enabled = false
+    local state = false
     Button.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        if enabled then
-            Button.BackgroundColor3 = Color3.fromRGB(0, 170, 0) -- Verde (ON)
-        else
-            Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Gris (OFF)
-        end
-        callback(enabled)
+        state = not state
+        Button.Text = name .. (state and ": ON" or ": OFF")
+        Button.BackgroundColor3 = state and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 50)
+        callback(state)
     end)
 end
 
 -- --- 1) INFO ---
-print("¡Bienvenido! Creador: JoseAngel_Blox | Versión: 1.1")
+local InfoFrame = Instance.new("Frame", MainFrame)
+InfoFrame.Size = UDim2.new(1, -20, 1, -60)
+InfoFrame.Position = UDim2.new(0, 10, 0, 50)
+InfoFrame.BackgroundTransparency = 1
 
--- --- 2) MAIN ---
-CreateButton("Auto Collect [OFF]", function(state)
-    _G.AutoCollect = state
-    while _G.AutoCollect do
-        print("Recolectando...") -- Aquí va la lógica de fuego
+local InfoLabel = Instance.new("TextLabel", InfoFrame)
+InfoLabel.Size = UDim2.new(1, 0, 1, 0)
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+InfoLabel.Text = "Creador: JoseAngel_Blox\nLanzamiento: 01/07/2026\nVersión: 1.1\n\n¡Hola! Bienvenido al script.\nEspero que disfrutes estas funciones.\n\nGracias por usarlo. ¡Vuelve pronto!"
+InfoLabel.TextSize = 16
+InfoLabel.Font = Enum.Font.SourceSans
+
+-- --- 2) MAIN (Auto Collect & Build) ---
+-- (Aquí podrías crear más pestañas, pero he puesto las funciones principales para que sea funcional ya mismo)
+CreateToggle("Auto Collect", InfoFrame, UDim2.new(0, 280, 0, 10), function(s)
+    Flags.AutoCollect = s
+    while Flags.AutoCollect do
+        -- Lógica de recolección
+        pcall(function()
+            local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+            for _, v in pairs(game.Workspace:GetDescendants()) do
+                if v.Name == "Collect" and v:IsA("TouchTransmitter") then
+                    firetouchinterest(hrp, v.Parent, 0)
+                    firetouchinterest(hrp, v.Parent, 1)
+                end
+            end
+        end)
         task.wait(1)
     end
 end)
 
-CreateButton("Auto Build [OFF]", function(state)
-    _G.AutoBuild = state
-    print("Auto Build: " .. tostring(state))
-end)
-
 -- --- 3) PLAYER ---
-CreateButton("Speed (100) [OFF]", function(state)
-    Character.Humanoid.WalkSpeed = state and 100 or 16
+CreateToggle("Speed", InfoFrame, UDim2.new(0, 280, 0, 55), function(s)
+    Flags.Speed = s
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if Flags.Speed then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 60
+        else game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16 end
+    end)
 end)
 
-CreateButton("Jump 🦘 [OFF]", function(state)
-    Character.Humanoid.JumpPower = state and 100 or 50
+CreateToggle("Jump 🦘", InfoFrame, UDim2.new(0, 280, 0, 100), function(s)
+    if s then game.Players.LocalPlayer.Character.Humanoid.JumpPower = 100
+    else game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50 end
 end)
 
-CreateButton("Infinite Jump [OFF]", function(state)
-    _G.InfJump = state
-end)
-
--- Lógica Infinite Jump
-UIS.JumpRequest:Connect(function()
-    if _G.InfJump then
-        Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
+CreateToggle("Noclip", InfoFrame, UDim2.new(0, 280, 0, 145), function(s)
+    Flags.Noclip = s
+    game:GetService("RunService").Stepped:Connect(function()
+        if Flags.Noclip then
+            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end)
 end)
 
 -- --- 4) OPTIMIZACIÓN ---
-CreateButton("Optimizar Juego [OFF]", function(state)
-    if state then
-        for _, v in pairs(game:GetDescendants()) do
-            if v:IsA("PostProcessEffect") then v.Enabled = false end
+CreateToggle("Optimizar", InfoFrame, UDim2.new(0, 280, 0, 190), function(s)
+    if s then
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+            if v:IsA("Decal") then v:Destroy() end
         end
     end
 end)
 
--- Botón de Despedida/Cerrar
-CreateButton("Cerrar Script", function()
-    print("Gracias por usar el script de JoseAngel_Blox. ¡Hasta luego!")
-    ScreenGui:Destroy()
-end)
+print("Mansión Tycoon v1.1 cargado. Creado por JoseAngel_Blox")
