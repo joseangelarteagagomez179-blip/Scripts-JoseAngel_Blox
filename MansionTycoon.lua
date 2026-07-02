@@ -1,4 +1,4 @@
--- Mansion Tycoon v1.1 FINAL FIX
+-- Mansion Tycoon v1.1 ULTIMATE
 -- Creador: JoseAngel_Blox
 -- Fecha: 01/07/2026
 
@@ -16,7 +16,7 @@ for _, child in pairs(player:WaitForChild("PlayerGui"):GetChildren()) do
     if child.Name == "MansionTycoonGUI" or child.Name == "Load_JA" then child:Destroy() end
 end
 
--- ===================== PANTALLA DE CARGA =====================
+-- ===================== PANTALLA DE CARGA (LETRAS ANIMADAS) =====================
 local LoadGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 LoadGui.Name = "Load_JA"
 local Container = Instance.new("Frame", LoadGui)
@@ -31,6 +31,7 @@ WelcomeLabel.BackgroundTransparency = 1
 WelcomeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 WelcomeLabel.Font = Enum.Font.GothamBold
 WelcomeLabel.TextScaled = true
+WelcomeLabel.TextStrokeTransparency = 0
 
 local NameLabel = Instance.new("TextLabel", Container)
 NameLabel.Text = ""
@@ -40,6 +41,7 @@ NameLabel.BackgroundTransparency = 1
 NameLabel.TextColor3 = Color3.fromRGB(180, 100, 255)
 NameLabel.Font = Enum.Font.GothamBold
 NameLabel.TextScaled = true
+NameLabel.TextStrokeTransparency = 0
 
 -- ===================== GUI PRINCIPAL =====================
 local ScreenGui = Instance.new("ScreenGui")
@@ -211,65 +213,57 @@ local function createLabel(parent, txt)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
 end
 createLabel(tabContents["Info"], "👤 Creador: JoseAngel_Blox")
-createLabel(tabContents["Info"], "⚡ Versión: v1.1 FINAL")
+createLabel(tabContents["Info"], "⚡ Versión: v1.1 Premium")
 
--- MAIN
+-- MAIN (AUTO FARM)
 createSectionLabel(tabContents["Main"], "Auto Farm")
 
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
--- FILTRO EXTREMO ANTI-ROBUX
-local function isSafeToBuild(v)
+-- FILTRO ANTI-ROBUX REFORZADO
+local function isSafeToTouch(v)
     if not (v:IsA("BasePart") and v.Name == "Touch") then return false end
     local p = v.Parent
     if not p then return false end
     
-    -- Bloquear por GUIs de compra (Método más seguro)
     if p:FindFirstChild("GoldButtonGui") or p:FindFirstChild("RobuxGui") or p:FindFirstChild("ProductGui") or p:FindFirstChild("ButtonGui") then
         return false
     end
     
-    -- Bloquear por Texto (Carteles)
     for _, child in pairs(p:GetChildren()) do
         if child:IsA("BillboardGui") or child:IsA("SurfaceGui") then
             for _, t in pairs(child:GetDescendants()) do
                 if t:IsA("TextLabel") then
                     local txt = t.Text:lower()
-                    if txt:find("robux") or txt:find("r%$") or txt:find("premium") or txt:find("vip") or txt:find("pack") or txt:find("like") or txt:find("thumb") or txt:find("goldify") then
+                    if txt:find("robux") or txt:find("r%$") or txt:find("premium") or txt:find("vip") or txt:find("pack") or txt:find("like") or txt:find("goldify") then
                         return false
                     end
                 end
             end
         end
     end
-    
-    -- Bloquear por Nombre del Botón
+
     local n = p.Name:lower()
-    if n:find("robux") or n:find("vip") or n:find("pack") or n:find("like") or n:find("gold") or n:find("starter") or n:find("buycash") then
+    if n:find("robux") or n:find("vip") or n:find("pack") or n:find("gold") or n:find("starter") or n:find("buycash") or n:find("like") then
         return false
     end
-
-    -- SOLO CONSTRUIR SI ES PARTE DE UN TYCOON (BOTONES NORMALES)
-    if v:FindFirstAncestor("Buttons") or v:FindFirstAncestor("Unlocks") then
-        return true
-    end
     
-    return false
+    return true
 end
 
-createToggle(tabContents["Main"], "🏗️ Auto Build (SOLO CASH)", function(state)
+createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
     autoBuildEnabled = state
     task.spawn(function()
         while autoBuildEnabled do
             for _, v in pairs(workspace:GetDescendants()) do
                 if not autoBuildEnabled then break end
-                if isSafeToBuild(v) then
+                if isSafeToTouch(v) and v.Parent and v.Parent:FindFirstAncestor("Buttons") then
                     firetouchinterest(rootPart, v, 0)
                     firetouchinterest(rootPart, v, 1)
                 end
             end
-            task.wait(0.8)
+            task.wait(0.5)
         end
     end)
 end)
@@ -287,17 +281,25 @@ createToggle(tabContents["Main"], "💰 Auto Collect Money", function(state)
                     end
                 end
             end)
-            task.wait(1)
+            task.wait(0.5)
         end
     end)
 end)
 
--- PLAYER
-createSectionLabel(tabContents["Player"], "Player Options")
-createToggle(tabContents["Player"], "⚡ Speed Hack", function(state) humanoid.WalkSpeed = state and 60 or 16 end)
+-- PLAYER OPTIONS
+createSectionLabel(tabContents["Player"], "Opciones Jugador")
+createToggle(tabContents["Player"], "⚡ Velocidad (60)", function(state) humanoid.WalkSpeed = state and 60 or 16 end)
 createToggle(tabContents["Player"], "🦘 Salto Alto", function(state) humanoid.JumpPower = state and 120 or 50 end)
 
--- ANIMACIÓN Y CIERRE
+local noclip = false
+createToggle(tabContents["Player"], "👻 Noclip", function(state) noclip = state end)
+RunService.Stepped:Connect(function()
+    if noclip and character then
+        for _, p in pairs(character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
+    end
+end)
+
+-- ANIMACIÓN Y MOSTRAR GUI
 task.spawn(function()
     local t1 = "✨ Bienvenidos a"
     for i = 1, #t1 do WelcomeLabel.Text = t1:sub(1, i) task.wait(0.05) end
@@ -309,6 +311,12 @@ task.spawn(function()
     MainFrame.Visible = true
 end)
 
+-- MINIMIZAR (CORREGIDO)
+local isMinimized = false
 MinBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
+    isMinimized = not isMinimized
+    PageHolder.Visible = not isMinimized
+    TabBar.Visible = not isMinimized
+    MainFrame.Size = isMinimized and UDim2.new(0, 380, 0, 45) or UDim2.new(0, 380, 0, 480)
+    MinBtn.Text = isMinimized and "+" or "—"
 end)
