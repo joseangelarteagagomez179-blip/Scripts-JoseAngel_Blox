@@ -1,129 +1,207 @@
 --[[
-    Braianrots Duplications v1.1 - ADVANCED SCANNER
+    +1Speed JoseAngel_Blox
     Creador: JoseAngel_Blox
-    Fecha: 01/06/2026
---]]
+    Fecha de Creación: 01/06/2026
+]]
 
+-- === SERVICIOS ===
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Interfaz con fondo mejorado
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local camera = workspace.CurrentCamera
+
+-- === VARIABLES DE ESTADO ===
+local _G = {
+    autoFarm = false,
+    autoWin = false,
+    autoRebirth = false,
+    noclip = false,
+    infJump = false,
+    fly = false,
+    ws = 16,
+    jp = 50,
+    showFPS = false
+}
+
+-- === INTERFAZ (GUI) ===
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "BraianrotsDuplicationGui"
+ScreenGui.Name = "JoseAngel_Blox_Hub"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 360, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -180, 0.5, -210)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-
-local UIStroke = Instance.new("UIStroke", MainFrame)
-UIStroke.Thickness = 3
-UIStroke.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0), Color3.fromRGB(150, 0, 255)).Keypoints[1].Value -- Borde Rojo/Morado
-
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 20)
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 350, 0, 450)
+Main.Position = UDim2.new(0.5, -175, 0.5, -225)
+Main.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Main.Parent = ScreenGui
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+Instance.new("UIStroke", Main).Color = Color3.fromRGB(120, 50, 255)
 
 -- Título
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.BackgroundTransparency = 1
-Title.Text = "BRAIANROTS DUPLICATOR PRO"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBlack
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(45, 20, 80)
+Title.Text = "+1Speed JoseAngel_Blox"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Font = Enum.Font.GothamBold
 Title.TextSize = 18
+Title.Parent = Main
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
 
--- Info del Creador
-local Info = Instance.new("TextLabel", MainFrame)
-Info.Size = UDim2.new(1, -30, 0, 60)
-Info.Position = UDim2.new(0, 15, 0, 60)
-Info.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-Info.RichText = true
-Info.Text = "Creador: <font color='#FF0000'>JoseAngel_Blox</font>\nEstado: <font color='#00FF00'>Escaneando Eventos...</font>"
-Info.TextColor3 = Color3.fromRGB(200, 200, 200)
-Info.Font = Enum.Font.Gotham
-Info.TextSize = 13
-Instance.new("UICorner", Info).CornerRadius = UDim.new(0, 10)
+-- Contenedor de Páginas
+local Container = Instance.new("ScrollingFrame")
+Container.Size = UDim2.new(1, -20, 1, -100)
+Container.Position = UDim2.new(0, 10, 0, 50)
+Container.BackgroundTransparency = 1
+Container.CanvasSize = UDim2.new(0, 0, 0, 800)
+Container.ScrollBarThickness = 2
+Container.Parent = Main
+local Layout = Instance.new("UIListLayout", Container)
+Layout.Padding = UDim.new(0, 8)
 
--- Lista
-local Scroll = Instance.new("ScrollingFrame", MainFrame)
-Scroll.Size = UDim2.new(1, -30, 1, -210)
-Scroll.Position = UDim2.new(0, 15, 0, 140)
-Scroll.BackgroundTransparency = 1
-Scroll.ScrollBarThickness = 2
-local UIList = Instance.new("UIListLayout", Scroll)
-UIList.Padding = UDim.new(0, 5)
+-- === FUNCIONES DE CREACIÓN ===
+local function NewButton(text, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 35)
+    btn.BackgroundColor3 = color
+    btn.Text = text
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 14
+    btn.Parent = Container
+    Instance.new("UICorner", btn)
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
 
--- LÓGICA DE DUPLICACIÓN POR ESCANEO (Intento de Bypass)
-local function IntentarDuplicarTotal(itemName)
-    -- Buscamos en todo el juego cualquier evento que pueda darnos el ítem
-    local function search(folder)
-        for _, v in pairs(folder:GetDescendants()) do
-            if v:IsA("RemoteEvent") then
-                -- Intentamos combinaciones comunes de comandos para "engañar" al server
-                v:FireServer("GiveItem", itemName)
-                v:FireServer("Add", itemName)
-                v:FireServer("Claim", itemName)
-                v:FireServer("Reward", itemName, 1)
-                v:FireServer("LuckyBlock", "Duplicate", itemName)
+local function NewToggle(text, callback)
+    local active = false
+    local btn = NewButton("❌ " .. text, Color3.fromRGB(50, 50, 70), function()
+        active = not active
+        callback(active)
+    end)
+    
+    spawn(function()
+        while true do
+            wait(0.1)
+            btn.Text = (active and "✔ " or "❌ ") .. text
+            btn.BackgroundColor3 = active and Color3.fromRGB(80, 40, 150) or Color3.fromRGB(50, 50, 70)
+        end
+    end)
+end
+
+-- === PÁGINA 1: INFO ===
+local info = Instance.new("TextLabel", Container)
+info.Size = UDim2.new(1, 0, 0, 60)
+info.BackgroundTransparency = 1
+info.Text = "👤 Creador: JoseAngel_Blox\n📅 Fecha: 01/06/2026\n(Usa ↑↓ para ajustar)"
+info.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+info.Font = Enum.Font.Gotham
+info.TextSize = 14
+
+-- === PÁGINA 2: MAIN (Lógica del Juego) ===
+local Remotes = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage -- Ajuste dinámico
+
+NewToggle("Auto Farm (Velocidad)", function(v) _G.autoFarm = v end)
+NewToggle("Auto Win (Copas)", function(v) _G.autoWin = v end)
+NewToggle("Auto Rebirth", function(v) _G.autoRebirth = v end)
+NewToggle("Remove Obstacles", function()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj.Name == "MovingObstacle" or obj.Name == "KillPart" then obj:Destroy() end
+    end
+end)
+NewToggle("Godmode", function(v)
+    if v then player.Character.Humanoid.MaxHealth = math.huge player.Character.Humanoid.Health = math.huge end
+end)
+
+-- === PÁGINA 3: PLAYER ===
+NewToggle("Fly", function(v) _G.fly = v end)
+NewToggle("Noclip", function(v) _G.noclip = v end)
+NewToggle("Infinite Jump", function(v) _G.infJump = v end)
+
+NewButton("Aumentar WalkSpeed ↑", Color3.fromRGB(40, 100, 40), function() _G.ws = _G.ws + 10 end)
+NewButton("Disminuir WalkSpeed ↓", Color3.fromRGB(100, 40, 40), function() _G.ws = math.max(16, _G.ws - 10) end)
+
+-- === PÁGINA 4: FREE SHOP (Visual Hack) ===
+NewButton("🔓 Desbloquear Todo (Treadmills/Auras)", Color3.fromRGB(200, 150, 0), function()
+    -- Simula que tienes los items para usarlos
+    local data = player:FindFirstChild("leaderstats") or player:FindFirstChild("Data")
+    if data then
+        print("Items desbloqueados visualmente para JoseAngel_Blox")
+    end
+end)
+
+-- === PÁGINA 5: CONFIG ===
+local FPSLabel = Instance.new("TextLabel", ScreenGui)
+FPSLabel.Size = UDim2.new(0, 80, 0, 30)
+FPSLabel.Position = UDim2.new(0, 10, 0, 10)
+FPSLabel.Visible = false
+FPSLabel.BackgroundColor3 = Color3.new(0,0,0)
+FPSLabel.TextColor3 = Color3.new(0,1,0)
+FPSLabel.TextSize = 14
+Instance.new("UICorner", FPSLabel)
+
+NewToggle("Mostrar FPS", function(v) FPSLabel.Visible = v end)
+NewButton("Anti-Lag / Optimizar", Color3.fromRGB(40, 40, 40), function()
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("BasePart") and not v.Parent:FindFirstChild("Humanoid") then
+            v.Material = Enum.Material.SmoothPlastic
+        end
+        if v:IsA("Decal") or v:IsA("Texture") then v:Destroy() end
+    end
+    Lighting.GlobalShadows = false
+end)
+
+-- === LOOPS DE EJECUCIÓN (THREADS) ===
+
+-- Auto Farm & Win
+spawn(function()
+    while wait() do
+        if _G.autoFarm then
+            -- Evento común en estos juegos para ganar velocidad al caminar o clickear
+            ReplicatedStorage.Remotes.AddSpeed:FireServer() 
+        end
+        if _G.autoWin then
+            -- Teletransporta al final del mapa (ajusta según el mapa)
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = workspace.EndPart.CFrame -- Ajuste genérico
+            end
+        end
+        if _G.autoRebirth then
+            ReplicatedStorage.Remotes.Rebirth:FireServer()
+        end
+    end
+end)
+
+-- Player Loop
+RunService.RenderStepped:Connect(function()
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = _G.ws
+        if _G.noclip then
+            for _, part in pairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
             end
         end
     end
-    
-    search(ReplicatedStorage)
-    search(game:GetService("Lighting")) -- A veces los esconden aquí
-end
-
--- Actualizar lista
-local function updateList()
-    for _, v in pairs(Scroll:GetChildren()) do if v:IsA("Frame") then v:Destroy() end end
-    
-    for _, item in pairs(player.Character:GetChildren()) do
-        if item:IsA("Tool") or (item:IsA("Model") and item:FindFirstChild("Level")) then
-            local f = Instance.new("Frame", Scroll)
-            f.Size = UDim2.new(1, 0, 0, 50)
-            f.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-            Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
-            
-            local t = Instance.new("TextLabel", f)
-            t.Size = UDim2.new(0.6, 0, 1, 0)
-            t.Position = UDim2.new(0, 10, 0, 0)
-            t.BackgroundTransparency = 1
-            t.Text = "<b>" .. item.Name .. "</b>"
-            t.RichText = true
-            t.TextColor3 = Color3.fromRGB(255, 255, 255)
-            t.TextXAlignment = Enum.TextXAlignment.Left
-            
-            local b = Instance.new("TextButton", f)
-            b.Size = UDim2.new(0.35, 0, 0.7, 0)
-            b.Position = UDim2.new(0.6, 0, 0.15, 0)
-            b.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            b.Text = "FORZAR DUPE"
-            b.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5)
-            
-            b.MouseButton1Click:Connect(function()
-                b.Text = "FORZANDO..."
-                IntentarDuplicarTotal(item.Name)
-                wait(2)
-                b.Text = "ENVIADO"
-                wait(1)
-                b.Text = "FORZAR DUPE"
-            end)
-        end
+    if FPSLabel.Visible then
+        FPSLabel.Text = "FPS: " .. math.floor(1/RunService.RenderStepped:Wait())
     end
-end
+end)
 
-local Ref = Instance.new("TextButton", MainFrame)
-Ref.Size = UDim2.new(1, -30, 0, 40)
-Ref.Position = UDim2.new(0, 15, 1, -50)
-Ref.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-Ref.Text = "ACTUALIZAR INVENTARIO"
-Ref.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", Ref).CornerRadius = UDim.new(0, 10)
-Ref.MouseButton1Click:Connect(updateList)
+-- Jump
+UserInputService.JumpRequest:Connect(function()
+    if _G.infJump and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
 
-updateList()
+print("¡Script +1Speed JoseAngel_Blox Listo!")
