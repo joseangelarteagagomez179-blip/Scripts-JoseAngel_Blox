@@ -44,7 +44,7 @@ NameLabel.Font = Enum.Font.GothamBold
 NameLabel.TextScaled = true
 NameLabel.TextStrokeTransparency = 0
 
--- ===================== GUI PRINCIPAL =====================
+-- ===================== GUI PRINCIPAL (CON TODAS LAS FUNCIONES) =====================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MansionTycoonGUI"
 ScreenGui.ResetOnSpawn = false
@@ -234,41 +234,20 @@ createLabel(tabContents["Info"], "✨ Disfruta el script!", Color3.fromRGB(160, 
 
 -- MAIN
 createSectionLabel(tabContents["Main"], "Auto Farm")
-
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
--- FILTRO AVANZADO ANTI-ROBUX
-local function isSafeToTouch(v)
-    if not (v:IsA("BasePart") and v.Name == "Touch") then return false end
-    local parent = v.Parent
-    if not parent then return false end
-    
-    -- 1. Revisa si hay carteles que digan Robux o tengan el símbolo R$
-    for _, child in pairs(parent:GetChildren()) do
-        if child:IsA("BillboardGui") or child:IsA("SurfaceGui") then
-            for _, t in pairs(child:GetDescendants()) do
-                if t:IsA("TextLabel") and (t.Text:find("Robux") or t.Text:find("R%$")) then
-                    return false
-                end
-            end
-        end
-    end
-    
-    -- 2. Filtro por nombres prohibidos
-    local pName = parent.Name:lower()
-    local robuxKeywords = {"vip", "robux", "premium", "gamepass", "gold", "shop", "double", "moneytier", "starterpack", "speedboost"}
-    for _, kw in ipairs(robuxKeywords) do
-        if pName:find(kw) then return false end
-    end
-    
-    -- 3. Si el botón tiene objetos internos de compra
-    if parent:FindFirstChild("GoldButtonGui") or parent:FindFirstChild("RobuxGui") then
-        return false
-    end
-
-    return true
-end
+-- Lista de nombres que indican que es de pago/Robux
+local NOMBRES_PAGO = {
+    "DoubleCash", 
+    "AutoCollect", 
+    "VIP", 
+    "StarterPack", 
+    "Goldify",
+    "Robux",
+    "Buy",
+    "Premium"
+}
 
 createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
     autoBuildEnabled = state
@@ -276,12 +255,29 @@ createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
         while autoBuildEnabled do
             for _, v in pairs(workspace:GetDescendants()) do
                 if not autoBuildEnabled then break end
-                if isSafeToTouch(v) then
-                    firetouchinterest(rootPart, v, 0)
-                    firetouchinterest(rootPart, v, 1)
+                
+                if v.Name == "Touch" and v:IsA("BasePart") then
+                    
+                    local esDePago = false
+                    
+                    local parentName = v.Parent and v.Parent.Name or ""
+                    local grandparentName = v.Parent and v.Parent.Parent and v.Parent.Parent.Name or ""
+                    
+                    for _, palabra in ipairs(NOMBRES_PAGO) do
+                        if string.find(string.lower(parentName), string.lower(palabra)) or 
+                           string.find(string.lower(grandparentName), string.lower(palabra)) then
+                            esDePago = true
+                            break
+                        end
+                    end
+                    
+                    if not esDePago then
+                        firetouchinterest(rootPart, v, 0)
+                        firetouchinterest(rootPart, v, 1)
+                    end
                 end
             end
-            task.wait(0.5)
+            task.wait(0.3)
         end
     end)
 end)
