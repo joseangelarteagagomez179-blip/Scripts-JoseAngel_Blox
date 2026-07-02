@@ -1,6 +1,6 @@
--- Mansion Tycoon v1.1 ULTIMATE (FIXED MAIN)
+-- Mansion Tycoon v1.1 ULTIMATE (STABLE FIX)
 -- Creador: JoseAngel_Blox
--- Fecha: 01/07/2026
+-- Fecha: 02/07/2026
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -219,14 +219,13 @@ createSectionLabel(tabContents["Main"], "Auto Farm")
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
--- FILTRO ANTI-ROBUX
-local function isSafeToTouch(v)
-    if not (v:IsA("BasePart") and v.Name == "Touch") then return false end
+-- FILTRO DE BLOQUEO TOTAL PARA ROBUX
+local function isRobuxButton(v)
     local p = v.Parent
-    if not p then return false end
+    if not p then return true end
     
-    if p:FindFirstChild("GoldButtonGui") or p:FindFirstChild("RobuxGui") or p:FindFirstChild("ProductGui") then
-        return false
+    if p:FindFirstChild("GoldButtonGui") or p:FindFirstChild("RobuxGui") or p:FindFirstChild("ProductGui") or p:FindFirstChild("GamepassGui") then
+        return true
     end
     
     for _, child in pairs(p:GetChildren()) do
@@ -234,14 +233,20 @@ local function isSafeToTouch(v)
             for _, t in pairs(child:GetDescendants()) do
                 if t:IsA("TextLabel") then
                     local txt = t.Text:lower()
-                    if txt:find("robux") or txt:find("r%$") or txt:find("premium") or txt:find("vip") or txt:find("pack") or txt:find("like") or txt:find("goldify") then
-                        return false
+                    if txt:find("robux") or txt:find("r%$") or txt:find("premium") or txt:find("vip") or txt:find("pack") or txt:find("like") or txt:find("goldify") or txt:find("exclusive") then
+                        return true
                     end
                 end
             end
         end
     end
-    return true
+
+    local n = p.Name:lower()
+    if n:find("robux") or n:find("vip") or n:find("pack") or n:find("gold") or n:find("starter") or n:find("buycash") or n:find("like") then
+        return true
+    end
+    
+    return false
 end
 
 createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
@@ -249,11 +254,19 @@ createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
     task.spawn(function()
         while autoBuildEnabled do
             pcall(function()
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if not autoBuildEnabled then break end
-                    if isSafeToTouch(v) then
-                        firetouchinterest(rootPart, v, 0)
-                        firetouchinterest(rootPart, v, 1)
+                for _, t in pairs(workspace.Tycoons:GetChildren()) do
+                    local owner = t:FindFirstChild("Owner")
+                    if owner and owner.Value == player then
+                        local buttons = t:FindFirstChild("Buttons") or t:FindFirstChild("Unlocks")
+                        if buttons then
+                            for _, btn in pairs(buttons:GetDescendants()) do
+                                if not autoBuildEnabled then break end
+                                if btn:IsA("BasePart") and btn.Name == "Touch" and not isRobuxButton(btn) then
+                                    firetouchinterest(rootPart, btn, 0)
+                                    firetouchinterest(rootPart, btn, 1)
+                                end
+                            end
+                        end
                     end
                 end
             end)
@@ -268,10 +281,16 @@ createToggle(tabContents["Main"], "💰 Auto Collect", function(state)
         while autoCollectEnabled do
             pcall(function()
                 for _, t in pairs(workspace.Tycoons:GetChildren()) do
-                    local collector = t:FindFirstChild("Collector", true) or t:FindFirstChild("CollectorPart", true)
-                    if collector and collector:FindFirstChild("Touch") then
-                        firetouchinterest(rootPart, collector.Touch, 0)
-                        firetouchinterest(rootPart, collector.Touch, 1)
+                    local owner = t:FindFirstChild("Owner")
+                    if owner and owner.Value == player then
+                        local collector = t:FindFirstChild("Collector", true) or t:FindFirstChild("Deposit", true)
+                        if collector then
+                            local touch = collector:FindFirstChild("Touch") or collector:FindFirstChild("CollectorPart") or (collector:IsA("BasePart") and collector)
+                            if touch then
+                                firetouchinterest(rootPart, touch, 0)
+                                firetouchinterest(rootPart, touch, 1)
+                            end
+                        end
                     end
                 end
             end)
