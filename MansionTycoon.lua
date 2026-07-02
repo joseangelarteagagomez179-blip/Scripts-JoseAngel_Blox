@@ -44,7 +44,7 @@ NameLabel.Font = Enum.Font.GothamBold
 NameLabel.TextScaled = true
 NameLabel.TextStrokeTransparency = 0
 
--- ===================== GUI PRINCIPAL (CON TODAS LAS FUNCIONES) =====================
+-- ===================== GUI PRINCIPAL =====================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MansionTycoonGUI"
 ScreenGui.ResetOnSpawn = false
@@ -234,20 +234,51 @@ createLabel(tabContents["Info"], "✨ Disfruta el script!", Color3.fromRGB(160, 
 
 -- MAIN
 createSectionLabel(tabContents["Main"], "Auto Farm")
+
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
--- Lista de nombres que indican que es de pago/Robux
-local NOMBRES_PAGO = {
-    "DoubleCash", 
-    "AutoCollect", 
-    "VIP", 
-    "StarterPack", 
-    "Goldify",
-    "Robux",
-    "Buy",
-    "Premium"
-}
+-- FILTRO DEFINITIVO ANTI-ROBUX
+local function isSafeToTouch(v)
+    if not (v:IsA("BasePart") and v.Name == "Touch") then return false end
+    local parent = v.Parent
+    if not parent then return false end
+    
+    -- 1. DETECTAR GUI DE COMPRA (GoldButtonGui es el que sale en tu imagen)
+    if parent:FindFirstChild("GoldButtonGui") or 
+       parent:FindFirstChild("ButtonGui") or 
+       parent:FindFirstChild("RobuxGui") or
+       parent:FindFirstChild("ProductGui") then
+        return false
+    end
+    
+    -- 2. DETECTAR ICONOS O TEXTOS DE ROBUX EN CARTELITOS
+    for _, child in pairs(parent:GetChildren()) do
+        if child:IsA("BillboardGui") or child:IsA("SurfaceGui") then
+            local textElements = child:GetDescendants()
+            for _, t in pairs(textElements) do
+                if t:IsA("TextLabel") then
+                    local txt = t.Text:lower()
+                    if txt:find("robux") or txt:find("r%$") or txt:find("premium") or txt:find("vip") then
+                        return false
+                    end
+                end
+                if t:IsA("ImageLabel") and (t.Image:find("rbxassetid://") or t.Image:find("robux")) then
+                    return false
+                end
+            end
+        end
+    end
+    
+    -- 3. FILTRO POR NOMBRE DEL PADRE
+    local pName = parent.Name:lower()
+    local badWords = {"vip", "robux", "premium", "gamepass", "gold", "shop", "double", "moneytier", "starterpack", "boost", "buycash"}
+    for _, kw in ipairs(badWords) do
+        if pName:find(kw) then return false end
+    end
+
+    return true
+end
 
 createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
     autoBuildEnabled = state
@@ -255,29 +286,12 @@ createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
         while autoBuildEnabled do
             for _, v in pairs(workspace:GetDescendants()) do
                 if not autoBuildEnabled then break end
-                
-                if v.Name == "Touch" and v:IsA("BasePart") then
-                    
-                    local esDePago = false
-                    
-                    local parentName = v.Parent and v.Parent.Name or ""
-                    local grandparentName = v.Parent and v.Parent.Parent and v.Parent.Parent.Name or ""
-                    
-                    for _, palabra in ipairs(NOMBRES_PAGO) do
-                        if string.find(string.lower(parentName), string.lower(palabra)) or 
-                           string.find(string.lower(grandparentName), string.lower(palabra)) then
-                            esDePago = true
-                            break
-                        end
-                    end
-                    
-                    if not esDePago then
-                        firetouchinterest(rootPart, v, 0)
-                        firetouchinterest(rootPart, v, 1)
-                    end
+                if isSafeToTouch(v) then
+                    firetouchinterest(rootPart, v, 0)
+                    firetouchinterest(rootPart, v, 1)
                 end
             end
-            task.wait(0.3)
+            task.wait(0.7)
         end
     end)
 end)
