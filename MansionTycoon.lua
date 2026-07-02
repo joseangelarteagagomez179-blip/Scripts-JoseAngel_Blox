@@ -1,4 +1,4 @@
--- Mansion Tycoon v1.1 ULTIMATE
+-- Mansion Tycoon v1.1 ULTIMATE (FIXED MAIN)
 -- Creador: JoseAngel_Blox
 -- Fecha: 01/07/2026
 
@@ -16,7 +16,7 @@ for _, child in pairs(player:WaitForChild("PlayerGui"):GetChildren()) do
     if child.Name == "MansionTycoonGUI" or child.Name == "Load_JA" then child:Destroy() end
 end
 
--- ===================== PANTALLA DE CARGA (LETRAS ANIMADAS) =====================
+-- ===================== PANTALLA DE CARGA =====================
 local LoadGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 LoadGui.Name = "Load_JA"
 local Container = Instance.new("Frame", LoadGui)
@@ -31,7 +31,6 @@ WelcomeLabel.BackgroundTransparency = 1
 WelcomeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 WelcomeLabel.Font = Enum.Font.GothamBold
 WelcomeLabel.TextScaled = true
-WelcomeLabel.TextStrokeTransparency = 0
 
 local NameLabel = Instance.new("TextLabel", Container)
 NameLabel.Text = ""
@@ -41,7 +40,6 @@ NameLabel.BackgroundTransparency = 1
 NameLabel.TextColor3 = Color3.fromRGB(180, 100, 255)
 NameLabel.Font = Enum.Font.GothamBold
 NameLabel.TextScaled = true
-NameLabel.TextStrokeTransparency = 0
 
 -- ===================== GUI PRINCIPAL =====================
 local ScreenGui = Instance.new("ScreenGui")
@@ -221,13 +219,13 @@ createSectionLabel(tabContents["Main"], "Auto Farm")
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
--- FILTRO ANTI-ROBUX REFORZADO
+-- FILTRO ANTI-ROBUX
 local function isSafeToTouch(v)
     if not (v:IsA("BasePart") and v.Name == "Touch") then return false end
     local p = v.Parent
     if not p then return false end
     
-    if p:FindFirstChild("GoldButtonGui") or p:FindFirstChild("RobuxGui") or p:FindFirstChild("ProductGui") or p:FindFirstChild("ButtonGui") then
+    if p:FindFirstChild("GoldButtonGui") or p:FindFirstChild("RobuxGui") or p:FindFirstChild("ProductGui") then
         return false
     end
     
@@ -243,12 +241,6 @@ local function isSafeToTouch(v)
             end
         end
     end
-
-    local n = p.Name:lower()
-    if n:find("robux") or n:find("vip") or n:find("pack") or n:find("gold") or n:find("starter") or n:find("buycash") or n:find("like") then
-        return false
-    end
-    
     return true
 end
 
@@ -256,25 +248,27 @@ createToggle(tabContents["Main"], "🏗️ Auto Build", function(state)
     autoBuildEnabled = state
     task.spawn(function()
         while autoBuildEnabled do
-            for _, v in pairs(workspace:GetDescendants()) do
-                if not autoBuildEnabled then break end
-                if isSafeToTouch(v) and v.Parent and v.Parent:FindFirstAncestor("Buttons") then
-                    firetouchinterest(rootPart, v, 0)
-                    firetouchinterest(rootPart, v, 1)
+            pcall(function()
+                for _, v in pairs(workspace:GetDescendants()) do
+                    if not autoBuildEnabled then break end
+                    if isSafeToTouch(v) then
+                        firetouchinterest(rootPart, v, 0)
+                        firetouchinterest(rootPart, v, 1)
+                    end
                 end
-            end
+            end)
             task.wait(0.5)
         end
     end)
 end)
 
-createToggle(tabContents["Main"], "💰 Auto Collect Money", function(state)
+createToggle(tabContents["Main"], "💰 Auto Collect", function(state)
     autoCollectEnabled = state
     task.spawn(function()
         while autoCollectEnabled do
             pcall(function()
                 for _, t in pairs(workspace.Tycoons:GetChildren()) do
-                    local collector = t:FindFirstChild("Collector", true)
+                    local collector = t:FindFirstChild("Collector", true) or t:FindFirstChild("CollectorPart", true)
                     if collector and collector:FindFirstChild("Touch") then
                         firetouchinterest(rootPart, collector.Touch, 0)
                         firetouchinterest(rootPart, collector.Touch, 1)
@@ -311,7 +305,7 @@ task.spawn(function()
     MainFrame.Visible = true
 end)
 
--- MINIMIZAR (CORREGIDO)
+-- MINIMIZAR
 local isMinimized = false
 MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
