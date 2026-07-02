@@ -1,77 +1,74 @@
--- PANEL DE CONTROL ZAPIA PARA MANSION TYCOON
+-- VERSIÓN MEJORADA (BÚSQUEDA AUTOMÁTICA)
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local AutoCollectBtn = Instance.new("TextButton")
 local AutoBuyBtn = Instance.new("TextButton")
 
--- Configuración visual del panel
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-MainFrame.Name = "ZapiaPanel"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 250)
+MainFrame.Size = UDim2.new(0, 200, 0, 200)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
 Title.Parent = MainFrame
-Title.Text = "ZAPIA TYCOON"
+Title.Text = "ZAPIA REPARADO"
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Title.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 
--- Botón Auto-Recoger
 AutoCollectBtn.Parent = MainFrame
-AutoCollectBtn.Text = "Auto Recoger: OFF"
+AutoCollectBtn.Text = "AUTO-DINERO: OFF"
 AutoCollectBtn.Position = UDim2.new(0, 10, 0, 60)
-AutoCollectBtn.Size = UDim2.new(0, 180, 0, 40)
-AutoCollectBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+AutoCollectBtn.Size = UDim2.new(0, 180, 0, 50)
+AutoCollectBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
 
--- Botón Auto-Comprar
 AutoBuyBtn.Parent = MainFrame
-AutoBuyBtn.Text = "Auto Comprar: OFF"
-AutoBuyBtn.Position = UDim2.new(0, 10, 0, 110)
-AutoBuyBtn.Size = UDim2.new(0, 180, 0, 40)
-AutoBuyBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+AutoBuyBtn.Text = "AUTO-COMPRAR: OFF"
+AutoBuyBtn.Position = UDim2.new(0, 10, 0, 120)
+AutoBuyBtn.Size = UDim2.new(0, 180, 0, 50)
+AutoBuyBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
 
--- Lógica de funcionamiento
-local autoCollectActive = false
-local autoBuyActive = false
+local autoCollect = false
+local autoBuy = false
 
 AutoCollectBtn.MouseButton1Click:Connect(function()
-    autoCollectActive = not autoCollectActive
-    AutoCollectBtn.Text = "Auto Recoger: " .. (autoCollectActive and "ON" or "OFF")
-    AutoCollectBtn.BackgroundColor3 = autoCollectActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
+    autoCollect = not autoCollect
+    AutoCollectBtn.Text = "AUTO-DINERO: " .. (autoCollect and "ON" or "OFF")
+    AutoCollectBtn.BackgroundColor3 = autoCollect and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
 end)
 
 AutoBuyBtn.MouseButton1Click:Connect(function()
-    autoBuyActive = not autoBuyActive
-    AutoBuyBtn.Text = "Auto Comprar: " .. (autoBuyActive and "ON" or "OFF")
-    AutoBuyBtn.BackgroundColor3 = autoBuyActive and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
+    autoBuy = not autoBuy
+    AutoBuyBtn.Text = "AUTO-COMPRAR: " .. (autoBuy and "ON" or "OFF")
+    AutoBuyBtn.BackgroundColor3 = autoBuy and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
 end)
 
--- Bucle principal del script
+-- Bucle de ejecución
 spawn(function()
-    while true do
-        wait(1)
-        local character = game.Players.LocalPlayer.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            -- Lógica para recoger dinero
-            if autoCollectActive then
-                for _, obj in pairs(game.Workspace:GetDescendants()) do
-                    if obj.Name == "Collect" or obj.Name == "Giver" then
-                        firetouchinterest(character.HumanoidRootPart, obj, 0)
-                        firetouchinterest(character.HumanoidRootPart, obj, 1)
+    while wait(0.5) do
+        local p = game.Players.LocalPlayer
+        local char = p.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            -- Búsqueda de Dinero
+            if autoCollect then
+                for _, v in pairs(game.Workspace:GetDescendants()) do
+                    -- Busca partes que tengan "Collect" o "Giver" en el nombre
+                    if (v.Name:find("Collect") or v.Name:find("Giver") or v.Name:find("Cash")) and v:IsA("BasePart") then
+                        firetouchinterest(char.HumanoidRootPart, v, 0)
+                        firetouchinterest(char.HumanoidRootPart, v, 1)
                     end
                 end
             end
-            -- Lógica para comprar botones
-            if autoBuyActive then
-                for _, btn in pairs(game.Workspace:GetDescendants()) do
-                    if btn.Name == "Button" and btn:FindFirstChild("TouchInterest") then
-                        firetouchinterest(character.HumanoidRootPart, btn, 0)
-                        firetouchinterest(character.HumanoidRootPart, btn, 1)
+            -- Búsqueda de Botones de Compra
+            if autoBuy then
+                for _, v in pairs(game.Workspace:GetDescendants()) do
+                    -- Busca botones que tengan un detector de toque (TouchInterest)
+                    if (v.Name:find("Button") or v.Name:find("Buy")) and v:FindFirstChild("TouchInterest") then
+                        firetouchinterest(char.HumanoidRootPart, v, 0)
+                        firetouchinterest(char.HumanoidRootPart, v, 1)
                     end
                 end
             end
