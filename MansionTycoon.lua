@@ -130,7 +130,7 @@ BotLine.BorderSizePixel = 0
 BotLine.ZIndex = 101
 BotLine.Parent = LoadBG
 
--- ===================== GUI PRINCIPAL (invisible al inicio) =====================
+-- ===================== GUI PRINCIPAL =====================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MansionTycoonGUI"
 ScreenGui.ResetOnSpawn = false
@@ -147,8 +147,8 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
-
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 16)
+
 local MainStroke = Instance.new("UIStroke")
 MainStroke.Color = Color3.fromRGB(120, 80, 255)
 MainStroke.Thickness = 2
@@ -169,7 +169,7 @@ TitleFix.BorderSizePixel = 0
 TitleFix.Parent = TitleBar
 
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Text = "🏰 Mansion Tycoon v1.1"
+TitleLabel.Text = "Mansion Tycoon v1.1"
 TitleLabel.Size = UDim2.new(1, -50, 1, 0)
 TitleLabel.Position = UDim2.new(0, 10, 0, 0)
 TitleLabel.BackgroundTransparency = 1
@@ -180,7 +180,7 @@ TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = TitleBar
 
 local MinBtn = Instance.new("TextButton")
-MinBtn.Text = "—"
+MinBtn.Text = "-"
 MinBtn.Size = UDim2.new(0, 35, 0, 28)
 MinBtn.Position = UDim2.new(1, -42, 0, 8)
 MinBtn.BackgroundColor3 = Color3.fromRGB(80, 40, 180)
@@ -276,7 +276,7 @@ end
 
 local function createSectionLabel(parent, txt)
     local lbl = Instance.new("TextLabel")
-    lbl.Text = "— " .. txt .. " —"
+    lbl.Text = "-- " .. txt .. " --"
     lbl.Size = UDim2.new(1, -10, 0, 24)
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.fromRGB(140,100,255)
@@ -333,13 +333,13 @@ end
 
 -- INFO
 local infoPage = tabContents["Info"]
-createSectionLabel(infoPage, "Información")
-createLabel(infoPage, "👤 Creador: JoseAngel_Blox")
-createLabel(infoPage, "📅 Fecha: 01/07/2026")
-createLabel(infoPage, "🎮 Juego: Mansion Tycoon")
-createLabel(infoPage, "⚡ Versión: v1.1")
-createLabel(infoPage, "📱 Executor: Delta (Android)")
-createLabel(infoPage, "✨ Disfruta el script!", Color3.fromRGB(160,255,160))
+createSectionLabel(infoPage, "Informacion")
+createLabel(infoPage, "Creador: JoseAngel_Blox")
+createLabel(infoPage, "Fecha: 01/07/2026")
+createLabel(infoPage, "Juego: Mansion Tycoon")
+createLabel(infoPage, "Version: v1.1")
+createLabel(infoPage, "Executor: Delta (Android)")
+createLabel(infoPage, "Disfruta el script!", Color3.fromRGB(160,255,160))
 
 -- MAIN
 local mainPage = tabContents["Main"]
@@ -384,8 +384,11 @@ local function refreshParts()
     collectorTouchParts = {}
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("BasePart") and v.Name=="Touch" then
-            if isCollectorTouch(v) then table.insert(collectorTouchParts, v)
-            elseif not isRobuxButton(v) then table.insert(touchParts, v) end
+            if isCollectorTouch(v) then
+                table.insert(collectorTouchParts, v)
+            elseif not isRobuxButton(v) then
+                table.insert(touchParts, v)
+            end
         end
     end
 end
@@ -402,7 +405,7 @@ workspace.DescendantRemoving:Connect(function(v)
 end)
 refreshParts()
 
-createToggle(mainPage, "🏗️ Auto Build", function(state)
+createToggle(mainPage, "Auto Build", function(state)
     autoBuildEnabled = state
     if state then
         task.spawn(function()
@@ -420,7 +423,7 @@ createToggle(mainPage, "🏗️ Auto Build", function(state)
     end
 end)
 
-createToggle(mainPage, "💰 Auto Collect Money", function(state)
+createToggle(mainPage, "Auto Collect Money", function(state)
     autoCollectEnabled = state
     if state then
         task.spawn(function()
@@ -446,15 +449,15 @@ local noclipEnabled = false
 local espEnabled = false
 local espObjects = {}
 
-createToggle(playerPage, "⚡ Speed Hack", function(state)
+createToggle(playerPage, "Speed Hack", function(state)
     speedEnabled = state
     if humanoid then humanoid.WalkSpeed = state and 60 or 16 end
 end)
-createToggle(playerPage, "🦘 Salto Alto", function(state)
+createToggle(playerPage, "Salto Alto", function(state)
     jumpEnabled = state
     if humanoid then humanoid.JumpPower = state and 120 or 50 end
 end)
-createToggle(playerPage, "👻 Noclip", function(state)
+createToggle(playerPage, "Noclip", function(state)
     noclipEnabled = state
 end)
 
@@ -526,7 +529,7 @@ local function createESP()
     end
 end
 
-createToggle(playerPage, "🔍 ESP Jugadores", function(state)
+createToggle(playerPage, "ESP Jugadores", function(state)
     espEnabled = state
     if state then
         createESP()
@@ -547,7 +550,7 @@ MinBtn.MouseButton1Click:Connect(function()
     PageHolder.Visible = not minimized
     TabBar.Visible = not minimized
     MainFrame.Size = minimized and UDim2.new(0,380,0,50) or UDim2.new(0,380,0,480)
-    MinBtn.Text = minimized and "+" or "—"
+    MinBtn.Text = minimized and "+" or "-"
 end)
 
 player.CharacterAdded:Connect(function(newChar)
@@ -558,5 +561,6 @@ player.CharacterAdded:Connect(function(newChar)
     if jumpEnabled then humanoid.JumpPower = 120 end
 end)
 
--- ===================== ANIMACIÓN DE CARGA (al final, desbloquea el script) =====================
-task.spa
+-- ===================== ANIMACION DE CARGA =====================
+task.spawn(function()
+    TweenService:Create(TopLine,
