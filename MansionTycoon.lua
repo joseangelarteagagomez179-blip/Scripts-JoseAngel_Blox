@@ -11,7 +11,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- Limpiar GUIs viejas
+-- Limpiar GUIs viejas para evitar errores
 for _, child in pairs(player:WaitForChild("PlayerGui"):GetChildren()) do
     if child.Name == "MansionTycoonGUI" or child.Name == "Load_JA" then child:Destroy() end
 end
@@ -238,33 +238,29 @@ createSectionLabel(tabContents["Main"], "Auto Farm")
 local autoBuildEnabled = false
 local autoCollectEnabled = false
 
--- FILTRO DEFINITIVO ANTI-ROBUX
+-- FILTRO DEFINITIVO: ANTI-ROBUX, ANTI-PACKS Y ANTI-LIKE
 local function isSafeToTouch(v)
     if not (v:IsA("BasePart") and v.Name == "Touch") then return false end
     local parent = v.Parent
     if not parent then return false end
     
-    -- 1. DETECTAR GUI DE COMPRA (GoldButtonGui es el que sale en tu imagen)
+    -- 1. DETECCIÓN POR OBJETOS DE COMPRA
     if parent:FindFirstChild("GoldButtonGui") or 
-       parent:FindFirstChild("ButtonGui") or 
-       parent:FindFirstChild("RobuxGui") or
-       parent:FindFirstChild("ProductGui") then
+       parent:FindFirstChild("RobuxGui") or 
+       parent:FindFirstChild("ProductGui") or
+       parent:FindFirstChild("ButtonGui") then
         return false
     end
     
-    -- 2. DETECTAR ICONOS O TEXTOS DE ROBUX EN CARTELITOS
+    -- 2. DETECCIÓN POR TEXTO EN CARTELITOS
     for _, child in pairs(parent:GetChildren()) do
         if child:IsA("BillboardGui") or child:IsA("SurfaceGui") then
-            local textElements = child:GetDescendants()
-            for _, t in pairs(textElements) do
+            for _, t in pairs(child:GetDescendants()) do
                 if t:IsA("TextLabel") then
                     local txt = t.Text:lower()
-                    if txt:find("robux") or txt:find("r%$") or txt:find("premium") or txt:find("vip") then
+                    if txt:find("robux") or txt:find("r%$") or txt:find("premium") or txt:find("vip") or txt:find("pack") or txt:find("like") or txt:find("thumb") then
                         return false
                     end
-                end
-                if t:IsA("ImageLabel") and (t.Image:find("rbxassetid://") or t.Image:find("robux")) then
-                    return false
                 end
             end
         end
@@ -272,8 +268,8 @@ local function isSafeToTouch(v)
     
     -- 3. FILTRO POR NOMBRE DEL PADRE
     local pName = parent.Name:lower()
-    local badWords = {"vip", "robux", "premium", "gamepass", "gold", "shop", "double", "moneytier", "starterpack", "boost", "buycash"}
-    for _, kw in ipairs(badWords) do
+    local forbidden = {"vip", "robux", "premium", "gold", "pack", "starter", "like", "gamepass", "boost", "speed", "buycash"}
+    for _, kw in ipairs(forbidden) do
         if pName:find(kw) then return false end
     end
 
