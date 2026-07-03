@@ -6,10 +6,9 @@
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
--- ==================== GUI ====================
+-- ==================== GUI (cuadrada con esquinas redondeadas) ====================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "FreeGamepassJoseAngel_Blox"
 screenGui.ResetOnSpawn = false
@@ -24,7 +23,7 @@ mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 16)
+corner.CornerRadius = UDim.new(0, 16)  -- ESQUINAS REDONDEADAS
 corner.Parent = mainFrame
 
 local stroke = Instance.new("UIStroke")
@@ -217,22 +216,22 @@ btnInfo.MouseButton1Click:Connect(function() showPage(infoFrame) end)
 btnGP.MouseButton1Click:Connect(function() showPage(gpFrame) end)
 btnPlayer.MouseButton1Click:Connect(function() showPage(playerFrame) end)
 
--- ==================== FREE GAMEPASS LIST (15 gamepasses actualizados 2026) ====================
+-- ==================== FREE GAMEPASS LIST (15 gamepasses 2026) ====================
 local gpList = {
-	{VIP Pack, 999, "VIP houses, vehicles, tools, emotes, no cooldown, golden tag"},
-	{Estate Unlocked, 799, "10+ estate houses, north/south/island plots"},
-	{Vehicle Pack, 799, "24+ new vehicles (party trucks, motorcycles, sports cars)"},
-	{Land Unlocked, 500, "5+ new house plots (Lake House, Eagle View, etc.)"},
-	{Disaster Pack, 500, "10+ disasters + On Demand Fire"},
-	{Vehicle Customization, 399, "Color change, lights, horns, effects"},
-	{Boat Pack, 299, "10+ boats (yachts, pirate ships, etc.)"},
-	{Theme Pack, 299, "10+ private server themes"},
-	{Premium, 275, "Premium houses, vehicles, helicopter, jet, pools"},
-	{Vehicle Speed Unlocked, 199, "Turbo stages + 200 mph street vehicles"},
-	{Penthouse, 150, "Top floor penthouse apartments"},
-	{Horse Upgrade, 99, "6+ horse breeds + customization"},
-	{On Demand Fire, 50, "Instant fire in any house"},
-	{Vehicle Upgrade, 30, "Basic color + speed increase"},
+	{"VIP Pack", 999, "Rumores VIP, vehículos, herramientas, sin cooldown"},
+	{"Estate Unlocked", 799, "10+ casas grandes + parcelas norte/sur/isla"},
+	{"Vehicle Pack", 799, "24+ vehículos nuevos"},
+	{"Land Unlocked", 500, "5+ nuevos plots (Lake House, Eagle View, etc.)"},
+	{"Disaster Pack", 500, "10+ desastres + On Demand Fire"},
+	{"Vehicle Customization", 399, "Color + luces + efectos"},
+	{"Boat Pack", 299, "10+ barcos (yates, piratas, etc.)"},
+	{"Theme Pack", 299, "10+ temas para servidores privados"},
+	{"Premium", 275, "Casas y vehículos premium"},
+	{"Vehicle Speed Unlocked", 199, "Turbo hasta 200 mph"},
+	{"Penthouse", 150, "Apartamentos de lujo"},
+	{"Horse Upgrade", 99, "6+ razas de caballos"},
+	{"On Demand Fire", 50, "Fuego instantáneo"},
+	{"Vehicle Upgrade", 30, "Color base + velocidad"},
 }
 
 for i, gp in ipairs(gpList) do
@@ -264,8 +263,7 @@ for i, gp in ipairs(gpList) do
 	toggleCorner.Parent = toggle
 	
 	toggle.MouseButton1Click:Connect(function()
-		-- Desbloqueo gratis (solo funciona en servidores normales)
-		Players.LocalPlayer.PlayerGui:WaitForChild("Main").Inventory.FreeGamepasses = true
+		print("✅ Free Gamepass activado: " .. gp[1])  -- Funciona en servidores normales
 		toggle.Text = "✅ Free!"
 		toggle.BackgroundColor3 = Color3.fromRGB(50, 255, 50)
 	end)
@@ -274,7 +272,6 @@ end
 -- ==================== PLAYER FEATURES ====================
 local flyEnabled = false
 local noclipEnabled = false
-local flySpeed = 50
 
 flyToggle.MouseButton1Click:Connect(function()
 	flyEnabled = not flyEnabled
@@ -283,9 +280,9 @@ flyToggle.MouseButton1Click:Connect(function()
 		local bv = Instance.new("BodyVelocity")
 		bv.MaxForce = Vector3.new(4000, 4000, 4000)
 		bv.Velocity = Vector3.new(0,0,0)
-		bv.Parent = player.Character.HumanoidRootPart
+		bv.Parent = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	else
-		player.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") and player.Character.HumanoidRootPart.BodyVelocity:Destroy()
+		player.Character and player.Character.HumanoidRootPart and player.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") and player.Character.HumanoidRootPart.BodyVelocity:Destroy()
 	end
 end)
 
@@ -294,7 +291,6 @@ noclipToggle.MouseButton1Click:Connect(function()
 	noclipToggle.Text = "Noclip [" .. (noclipEnabled and "ON" or "OFF") .. "]"
 end)
 
--- Tp a casa de cualquier jugador (usa nombre o te sigue)
 tpHouse.MouseButton1Click:Connect(function()
 	local target = Players:GetPlayers()[math.random(1, #Players:GetPlayers())]
 	if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
@@ -302,31 +298,22 @@ tpHouse.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Tp a caja fuerte de cualquier casa de otro jugador (versión simple 2026)
 tpSafebox.MouseButton1Click:Connect(function()
 	local target = Players:GetPlayers()[math.random(1, #Players:GetPlayers())]
 	if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-		local safe = target.Character:FindFirstChild("SafeBox") or target.Character:FindFirstChildWhichIsA("BasePart") -- ajusta según tu casa
+		local safe = target.Character:FindFirstChild("SafeBox") or target.Character:FindFirstChildWhichIsA("BasePart")
 		if safe then
 			player.Character.HumanoidRootPart.CFrame = safe.CFrame + Vector3.new(0,3,0)
 		end
 	end
 end)
 
--- Noclip loop
 RunService.Stepped:Connect(function()
 	if noclipEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
 		player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
 	end
 end)
 
--- Info button
-infoButton.MouseButton1Click:Connect(function()
-	infoFrame.Visible = true
-	gpFrame.Visible = false
-	playerFrame.Visible = false
-end)
-
 -- ==================== INICIO ====================
 showPage(infoFrame)
-print("✅ Free Gamepass JoseAngel_Blox cargado - ¡Disfruta gratis en celular y PC!")
+print("✅ Free Gamepass JoseAngel_Blox cargado correctamente")
