@@ -1,207 +1,256 @@
---[[
-    +1Speed JoseAngel_Blox
-    Creador: JoseAngel_Blox
-    Fecha de Creación: 01/06/2026
-]]
+-- // FREE GAMEPASS v1.1
+-- // Creador: JoseAngel_Blox
+-- // Fecha: 01/06/2026
+-- // Compatible con Celular y PC
 
--- === SERVICIOS ===
+-- Servicios
+local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MarketplaceService = game:GetService("MarketplaceService")
+local StarterGui = game:GetService("StarterGui")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local camera = workspace.CurrentCamera
+-- Variables
+local Player = Players.LocalPlayer
+local PlayerGui = Player.PlayerGui
 
--- === VARIABLES DE ESTADO ===
-local _G = {
-    autoFarm = false,
-    autoWin = false,
-    autoRebirth = false,
-    noclip = false,
-    infJump = false,
-    fly = false,
-    ws = 16,
-    jp = 50,
-    showFPS = false
-}
+-- [[ CREACIÓN DE LA GUI ]]
 
--- === INTERFAZ (GUI) ===
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_Blox_Hub"
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
 
-local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 350, 0, 450)
-Main.Position = UDim2.new(0.5, -175, 0.5, -225)
-Main.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-Main.BorderSizePixel = 0
-Main.Active = true
-Main.Draggable = true
-Main.Parent = ScreenGui
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", Main).Color = Color3.fromRGB(120, 50, 255)
+-- Sección Info
+local InfoSection = Instance.new("Frame")
+local InfoButton = Instance.new("TextButton")
+local InfoContent = Instance.new("Frame")
+local InfoText = Instance.new("TextLabel")
+
+-- Sección Gamepasses
+local GPSection = Instance.new("Frame")
+local GPTitle = Instance.new("TextLabel")
+local GPsContainer = Instance.new("Frame")
+local GPsLayout = Instance.new("UIListLayout")
+
+-- Propiedades
+ScreenGui.Name = "FreeGamepassUI"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.02, 0, 0.15, 0)
+MainFrame.Size = UDim2.new(0, 360, 0, 230) -- Bajo y Ancho
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
+
+-- Esquinas Redondeadas
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 14)
+UICorner.Parent = MainFrame
+
+-- Sombra
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 1
+UIStroke.Color = Color3.fromRGB(80, 80, 100)
+UIStroke.Parent = MainFrame
 
 -- Título
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundColor3 = Color3.fromRGB(45, 20, 80)
-Title.Text = "+1Speed JoseAngel_Blox"
-Title.TextColor3 = Color3.new(1,1,1)
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 0, 35)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.Parent = Main
-Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
+Title.Text = "📦 FREE GAMEPASS v1.1"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 17
 
--- Contenedor de Páginas
-local Container = Instance.new("ScrollingFrame")
-Container.Size = UDim2.new(1, -20, 1, -100)
-Container.Position = UDim2.new(0, 10, 0, 50)
-Container.BackgroundTransparency = 1
-Container.CanvasSize = UDim2.new(0, 0, 0, 800)
-Container.ScrollBarThickness = 2
-Container.Parent = Main
-local Layout = Instance.new("UIListLayout", Container)
-Layout.Padding = UDim.new(0, 8)
+-- [[ SECCIÓN INFO ]]
 
--- === FUNCIONES DE CREACIÓN ===
-local function NewButton(text, color, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 35)
-    btn.BackgroundColor3 = color
-    btn.Text = text
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamMedium
-    btn.TextSize = 14
-    btn.Parent = Container
-    Instance.new("UICorner", btn)
-    btn.MouseButton1Click:Connect(callback)
-    return btn
-end
+InfoSection.Name = "InfoSection"
+InfoSection.Parent = MainFrame
+InfoSection.BackgroundTransparency = 1
+InfoSection.Size = UDim2.new(1, -20, 0, 40)
+InfoSection.Position = UDim2.new(0, 10, 0, 40)
 
-local function NewToggle(text, callback)
-    local active = false
-    local btn = NewButton("❌ " .. text, Color3.fromRGB(50, 50, 70), function()
-        active = not active
-        callback(active)
-    end)
+InfoButton.Name = "InfoButton"
+InfoButton.Parent = InfoSection
+InfoButton.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+InfoButton.Size = UDim2.new(1, 0, 0, 38)
+InfoButton.Font = Enum.Font.GothamBold
+InfoButton.Text = "ℹ️ INFO ↓"
+InfoButton.TextColor3 = Color3.new(1,1,1)
+InfoButton.TextSize = 14
+
+local cornerInfo = Instance.new("UICorner")
+cornerInfo.CornerRadius = UDim.new(0, 10)
+cornerInfo.Parent = InfoButton
+
+InfoContent.Name = "InfoContent"
+InfoContent.Parent = MainFrame
+InfoContent.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+InfoContent.Size = UDim2.new(1, -20, 0, 0) -- Empieza cerrado
+InfoContent.Position = UDim2.new(0, 10, 0, 88)
+InfoContent.ClipsDescendants = true
+
+local cornerContent = Instance.new("UICorner")
+cornerContent.CornerRadius = UDim.new(0, 10)
+cornerContent.Parent = InfoContent
+
+InfoText.Name = "InfoText"
+InfoText.Parent = InfoContent
+InfoText.BackgroundTransparency = 1
+InfoText.Size = UDim2.new(1, -10, 1, -10)
+InfoText.Position = UDim2.new(0, 5, 0, 5)
+InfoText.Font = Enum.Font.Gotham
+InfoText.Text = "👋 ¡Bienvenido! Disfruta de todos los beneficios totalmente gratis.\n\n"..
+                "👤 Creador: JoseAngel_Blox\n"..
+                "📅 Lanzamiento: 01/06/2026\n"..
+                "🔢 Versión: 1.1\n\n"..
+                "✅ Optimizado para Celular\n👋 ¡Gracias por usar mi script!"
+InfoText.TextColor3 = Color3.new(1,1,1)
+InfoText.TextSize = 13
+InfoText.TextWrapped = true
+
+-- [[ SECCIÓN GAMEPASSES ]]
+
+GPSection.Name = "GPSection"
+GPSection.Parent = MainFrame
+GPSection.BackgroundTransparency = 1
+GPSection.Size = UDim2.new(1, -20, 0, 100)
+GPSection.Position = UDim2.new(0, 10, 0, 120)
+
+GPTitle.Name = "GPTitle"
+GPTitle.Parent = GPSection
+GPTitle.BackgroundTransparency = 1
+GPTitle.Size = UDim2.new(1, 0, 0, 25)
+GPTitle.Font = Enum.Font.GothamBold
+GPTitle.Text = "🔓 FREE GAMEPASS"
+GPTitle.TextColor3 = Color3.new(1,1,1)
+GPTitle.TextSize = 14
+
+GPsContainer.Name = "GPsContainer"
+GPsContainer.Parent = GPSection
+GPsContainer.BackgroundTransparency = 1
+GPsContainer.Size = UDim2.new(1, 0, 1, -25)
+GPsContainer.Position = UDim2.new(0, 0, 0, 25)
+
+GPsLayout.Name = "GPsLayout"
+GPsLayout.Parent = GPsContainer
+GPsLayout.FillDirection = Enum.FillDirection.Horizontal
+GPsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+GPsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+GPsLayout.Padding = UDim.new(0, 6)
+GPsLayout.Wrap = true -- Ajusta automaticamente si son muchos
+
+-- [[ LÓGICA ]]
+
+local Open = false
+InfoButton.MouseButton1Click:Connect(function()
+    Open = not Open
+    if Open then
+        InfoButton.Text = "ℹ️ INFO ↑"
+        TweenService:Create(InfoContent, TweenInfo.new(0.3), {Size = UDim2.new(1, -20, 0, 85)}):Play()
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 360, 0, 320)}):Play()
+    else
+        InfoButton.Text = "ℹ️ INFO ↓"
+        TweenService:Create(InfoContent, TweenInfo.new(0.3), {Size = UDim2.new(1, -20, 0, 0)}):Play()
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 360, 0, 230)}):Play()
+    end
+end)
+
+-- Función para crear Botones
+local Gamepasses = {}
+
+local function CreateToggle(Name, Id)
+    local Button = Instance.new("TextButton")
+    Button.Name = "GP_"..Name
+    Button.Parent = GPsContainer
+    Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- Rojo = Desactivado
+    Button.Size = UDim2.new(0, 75, 0, 42)
+    Button.Font = Enum.Font.GothamBold
+    Button.Text = Name
+    Button.TextColor3 = Color3.new(1,1,1)
+    Button.TextSize = 10
+    Button.ClipsDescendants = true
     
-    spawn(function()
-        while true do
-            wait(0.1)
-            btn.Text = (active and "✔ " or "❌ ") .. text
-            btn.BackgroundColor3 = active and Color3.fromRGB(80, 40, 150) or Color3.fromRGB(50, 50, 70)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = Button
+    
+    local Enabled = false
+    
+    Button.MouseButton1Click:Connect(function()
+        Enabled = not Enabled
+        if Enabled then
+            Button.BackgroundColor3 = Color3.fromRGB(40, 180, 70) -- Verde = Activado
+            Gamepasses[Id] = true
+            StarterGui:SetCore("SendNotification", {
+                Title = "✅ ACTIVADO",
+                Text = Name .. " desbloqueado!",
+                Duration = 1
+            })
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- Rojo
+            Gamepasses[Id] = false
+            StarterGui:SetCore("SendNotification", {
+                Title = "❌ DESACTIVADO",
+                Text = Name .. " desactivado",
+                Duration = 1
+            })
         end
     end)
 end
 
--- === PÁGINA 1: INFO ===
-local info = Instance.new("TextLabel", Container)
-info.Size = UDim2.new(1, 0, 0, 60)
-info.BackgroundTransparency = 1
-info.Text = "👤 Creador: JoseAngel_Blox\n📅 Fecha: 01/06/2026\n(Usa ↑↓ para ajustar)"
-info.TextColor3 = Color3.new(0.8, 0.8, 0.8)
-info.Font = Enum.Font.Gotham
-info.TextSize = 14
+-- [[ HOOK DEL MARKETPLACE ]]
 
--- === PÁGINA 2: MAIN (Lógica del Juego) ===
-local Remotes = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage -- Ajuste dinámico
+local mt = getrawmetatable(MarketplaceService)
+local old = mt.__namecall
 
-NewToggle("Auto Farm (Velocidad)", function(v) _G.autoFarm = v end)
-NewToggle("Auto Win (Copas)", function(v) _G.autoWin = v end)
-NewToggle("Auto Rebirth", function(v) _G.autoRebirth = v end)
-NewToggle("Remove Obstacles", function()
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj.Name == "MovingObstacle" or obj.Name == "KillPart" then obj:Destroy() end
-    end
-end)
-NewToggle("Godmode", function(v)
-    if v then player.Character.Humanoid.MaxHealth = math.huge player.Character.Humanoid.Health = math.huge end
-end)
+setreadonly(mt, false)
 
--- === PÁGINA 3: PLAYER ===
-NewToggle("Fly", function(v) _G.fly = v end)
-NewToggle("Noclip", function(v) _G.noclip = v end)
-NewToggle("Infinite Jump", function(v) _G.infJump = v end)
-
-NewButton("Aumentar WalkSpeed ↑", Color3.fromRGB(40, 100, 40), function() _G.ws = _G.ws + 10 end)
-NewButton("Disminuir WalkSpeed ↓", Color3.fromRGB(100, 40, 40), function() _G.ws = math.max(16, _G.ws - 10) end)
-
--- === PÁGINA 4: FREE SHOP (Visual Hack) ===
-NewButton("🔓 Desbloquear Todo (Treadmills/Auras)", Color3.fromRGB(200, 150, 0), function()
-    -- Simula que tienes los items para usarlos
-    local data = player:FindFirstChild("leaderstats") or player:FindFirstChild("Data")
-    if data then
-        print("Items desbloqueados visualmente para JoseAngel_Blox")
-    end
-end)
-
--- === PÁGINA 5: CONFIG ===
-local FPSLabel = Instance.new("TextLabel", ScreenGui)
-FPSLabel.Size = UDim2.new(0, 80, 0, 30)
-FPSLabel.Position = UDim2.new(0, 10, 0, 10)
-FPSLabel.Visible = false
-FPSLabel.BackgroundColor3 = Color3.new(0,0,0)
-FPSLabel.TextColor3 = Color3.new(0,1,0)
-FPSLabel.TextSize = 14
-Instance.new("UICorner", FPSLabel)
-
-NewToggle("Mostrar FPS", function(v) FPSLabel.Visible = v end)
-NewButton("Anti-Lag / Optimizar", Color3.fromRGB(40, 40, 40), function()
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("BasePart") and not v.Parent:FindFirstChild("Humanoid") then
-            v.Material = Enum.Material.SmoothPlastic
-        end
-        if v:IsA("Decal") or v:IsA("Texture") then v:Destroy() end
-    end
-    Lighting.GlobalShadows = false
-end)
-
--- === LOOPS DE EJECUCIÓN (THREADS) ===
-
--- Auto Farm & Win
-spawn(function()
-    while wait() do
-        if _G.autoFarm then
-            -- Evento común en estos juegos para ganar velocidad al caminar o clickear
-            ReplicatedStorage.Remotes.AddSpeed:FireServer() 
-        end
-        if _G.autoWin then
-            -- Teletransporta al final del mapa (ajusta según el mapa)
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = workspace.EndPart.CFrame -- Ajuste genérico
-            end
-        end
-        if _G.autoRebirth then
-            ReplicatedStorage.Remotes.Rebirth:FireServer()
+mt.__namecall = function(self, ...)
+    local args = {...}
+    local method = args[#args]
+    
+    if method == "UserOwnsGamePassAsync" then
+        local ID = args[1]
+        if Gamepasses[ID] == true then
+            return true
         end
     end
-end)
+    return old(self, ...)
+end
 
--- Player Loop
-RunService.RenderStepped:Connect(function()
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = _G.ws
-        if _G.noclip then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
-            end
-        end
-    end
-    if FPSLabel.Visible then
-        FPSLabel.Text = "FPS: " .. math.floor(1/RunService.RenderStepped:Wait())
-    end
-end)
+setreadonly(mt, true)
 
--- Jump
-UserInputService.JumpRequest:Connect(function()
-    if _G.infJump and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
+-- [[ LISTA DE GAMEPASSES ]]
+-- Agregados todos los IDs que me pasaste
 
-print("¡Script +1Speed JoseAngel_Blox Listo!")
+CreateToggle("Speed", 9066970)
+CreateToggle("Music", 9066988)
+CreateToggle("Penthouse", 19660651)
+CreateToggle("Vehicles", 15927395)
+CreateToggle("Estates", 82773869)
+CreateToggle("Premium", 9066980)
+CreateToggle("VIP", 850049439)
+CreateToggle("Themes", 25341106)
+CreateToggle("Horse", 10991687)
+CreateToggle("Boats", 667983868)
+CreateToggle("Upgrade", 9066924)
+CreateToggle("Fire", 10991517)
+CreateToggle("Disaster", 48857519)
+CreateToggle("Custom", 1459820822)
+CreateToggle("Land", 13405328)
+
+-- [[ MENSAJE DE BIENVENIDA ]]
+
+StarterGui:SetCore("SendNotification", {
+    Title = "✨ FREE GAMEPASS v1.1",
+    Text = "Script cargado!\nBy JoseAngel_Blox",
+    Duration = 4
+})
+
+print("✅ Script Listo - By JoseAngel_Blox")
