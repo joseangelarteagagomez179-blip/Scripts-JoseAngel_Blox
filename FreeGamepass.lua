@@ -1,7 +1,7 @@
 -- // FREE GAMEPASS v1.1
 -- // Creador: JoseAngel_Blox
 -- // Fecha: 01/06/2026
--- // Compatible con Celular y PC
+-- // CORREGIDO: Ahora sí muestran los botones y la info
 
 -- Servicios
 local TweenService = game:GetService("TweenService")
@@ -41,7 +41,7 @@ MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 MainFrame.BorderSizePixel = 0
 MainFrame.Position = UDim2.new(0.02, 0, 0.15, 0)
-MainFrame.Size = UDim2.new(0, 360, 0, 230) -- Bajo y Ancho
+MainFrame.Size = UDim2.new(0, 360, 0, 230)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.ClipsDescendants = true
@@ -50,12 +50,6 @@ MainFrame.ClipsDescendants = true
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 14)
 UICorner.Parent = MainFrame
-
--- Sombra
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Thickness = 1
-UIStroke.Color = Color3.fromRGB(80, 80, 100)
-UIStroke.Parent = MainFrame
 
 -- Título
 Title.Name = "Title"
@@ -91,7 +85,7 @@ cornerInfo.Parent = InfoButton
 InfoContent.Name = "InfoContent"
 InfoContent.Parent = MainFrame
 InfoContent.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-InfoContent.Size = UDim2.new(1, -20, 0, 0) -- Empieza cerrado
+InfoContent.Size = UDim2.new(1, -20, 0, 0)
 InfoContent.Position = UDim2.new(0, 10, 0, 88)
 InfoContent.ClipsDescendants = true
 
@@ -119,8 +113,8 @@ InfoText.TextWrapped = true
 GPSection.Name = "GPSection"
 GPSection.Parent = MainFrame
 GPSection.BackgroundTransparency = 1
-GPSection.Size = UDim2.new(1, -20, 0, 100)
-GPSection.Position = UDim2.new(0, 10, 0, 120)
+GPSection.Size = UDim2.new(1, -20, 0, 120) -- Aumentado el tamaño
+GPSection.Position = UDim2.new(0, 10, 0, 90) -- Bajado un poco
 
 GPTitle.Name = "GPTitle"
 GPTitle.Parent = GPSection
@@ -143,7 +137,7 @@ GPsLayout.FillDirection = Enum.FillDirection.Horizontal
 GPsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 GPsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 GPsLayout.Padding = UDim.new(0, 6)
-GPsLayout.Wrap = true -- Ajusta automaticamente si son muchos
+GPsLayout.Wrap = true
 
 -- [[ LÓGICA ]]
 
@@ -168,7 +162,7 @@ local function CreateToggle(Name, Id)
     local Button = Instance.new("TextButton")
     Button.Name = "GP_"..Name
     Button.Parent = GPsContainer
-    Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- Rojo = Desactivado
+    Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     Button.Size = UDim2.new(0, 75, 0, 42)
     Button.Font = Enum.Font.GothamBold
     Button.Text = Name
@@ -185,7 +179,7 @@ local function CreateToggle(Name, Id)
     Button.MouseButton1Click:Connect(function()
         Enabled = not Enabled
         if Enabled then
-            Button.BackgroundColor3 = Color3.fromRGB(40, 180, 70) -- Verde = Activado
+            Button.BackgroundColor3 = Color3.fromRGB(40, 180, 70)
             Gamepasses[Id] = true
             StarterGui:SetCore("SendNotification", {
                 Title = "✅ ACTIVADO",
@@ -193,7 +187,7 @@ local function CreateToggle(Name, Id)
                 Duration = 1
             })
         else
-            Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- Rojo
+            Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
             Gamepasses[Id] = false
             StarterGui:SetCore("SendNotification", {
                 Title = "❌ DESACTIVADO",
@@ -227,7 +221,6 @@ end
 setreadonly(mt, true)
 
 -- [[ LISTA DE GAMEPASSES ]]
--- Agregados todos los IDs que me pasaste
 
 CreateToggle("Speed", 9066970)
 CreateToggle("Music", 9066988)
@@ -245,12 +238,13 @@ CreateToggle("Disaster", 48857519)
 CreateToggle("Custom", 1459820822)
 CreateToggle("Land", 13405328)
 
--- [[ MENSAJE DE BIENVENIDA ]]
+-- [[ MENSAJE ]]
 
 StarterGui:SetCore("SendNotification", {
     Title = "✨ FREE GAMEPASS v1.1",
-    Text = "Script cargado!\nBy JoseAngel_Blox",
+    Text = "Script cargado y corregido!\nBy JoseAngel_Blox",
     Duration = 4
 })
 
 print("✅ Script Listo - By JoseAngel_Blox")
+
