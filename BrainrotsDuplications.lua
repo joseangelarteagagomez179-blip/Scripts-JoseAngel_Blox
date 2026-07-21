@@ -1,202 +1,255 @@
 -- =============================================
--- 🧠 Nombre: Brainrots Duplications
--- 👤 Creador: JoseAngel_Blox
--- 📅 Fecha: 20/07/2026
--- 🔖 Versión: 1.1
--- 📱 Compatible: Móvil ✅ | PC ✅
--- 🎮 Juego: Kick a Lucky Block
+-- BRAINROTS DUPLICATIONS
+-- Script Profesional para duplicar Brainrots
+-- Creado por: JoseAngel_Blox
+-- Fecha: 20/07/2026
+-- Versión: 1.1
 -- =============================================
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Player = Players.LocalPlayer
-local PlayerGui = Player.PlayerGui
+local player = Players.LocalPlayer
 
--- ✅ INTERFAZ CUADRADA CON ESQUINAS REDONDEADAS
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "BrainrotsDuplications"
-ScreenGui.Parent = PlayerGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
-if gethui then ScreenGui.Parent = gethui() end
+-- ==================== VARIABLES ====================
+local guiEnabled = false
+local dupeEnabled = false
+local selectedBrainrot = nil
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-MainFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
-MainFrame.Size = UDim2.new(0, 300, 0, 480) -- Formato cuadrado/rectangular
-MainFrame.Active = true
-MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 18) -- Esquinas redondeadas
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
 
--- SECCIÓN INFO
-local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Parent = MainFrame
-InfoLabel.BackgroundTransparency = 1
-InfoLabel.Position = UDim2.new(0, 15, 0, 12)
-InfoLabel.Size = UDim2.new(1, -30, 0, 70)
-InfoLabel.Font = Enum.Font.GothamSemibold
-InfoLabel.Text = "🧠 Brainrots Duplications\n👤 Creador: JoseAngel_Blox\n📅 Lanzamiento: 20/07/2026\n🔖 Versión: 1.1"
-InfoLabel.TextColor3 = Color3.fromRGB(255, 215, 60)
-InfoLabel.TextScaled = true
-InfoLabel.TextWrapped = true
+-- ==================== CREAR GUI PROFESIONAL ====================
+local function createGui()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "BrainrotsDuplications"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- SECCIÓN MAIN
-local MainTitle = Instance.new("TextLabel")
-MainTitle.Parent = MainFrame
-MainTitle.BackgroundTransparency = 1
-MainTitle.Position = UDim2.new(0, 15, 0, 90)
-MainTitle.Size = UDim2.new(1, -30, 0, 28)
-MainTitle.Font = Enum.Font.GothamBold
-MainTitle.Text = "⚙️ MAIN"
-MainTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
-MainTitle.TextScaled = true
+    -- Fondo bonito y moderno
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 520, 0, 420)
+    mainFrame.Position = UDim2.new(0.5, -260, 0.5, -210)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
 
-local BtnActivar = Instance.new("TextButton")
-BtnActivar.Parent = MainFrame
-BtnActivar.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
-BtnActivar.Position = UDim2.new(0, 15, 0, 122)
-BtnActivar.Size = UDim2.new(1, -30, 0, 42)
-BtnActivar.Font = Enum.Font.GothamSemibold
-BtnActivar.Text = "🔘 Duplicar: DESACTIVADO"
-BtnActivar.TextColor3 = Color3.fromRGB(230, 230, 230)
-BtnActivar.TextScaled = true
-Instance.new("UICorner", BtnActivar).CornerRadius = UDim.new(0, 12)
+    -- Esquinas redondeadas
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 16)
+    corner.Parent = mainFrame
 
--- SECCIÓN LISTA
-local ListTitle = Instance.new("TextLabel")
-ListTitle.Parent = MainFrame
-ListTitle.BackgroundTransparency = 1
-ListTitle.Position = UDim2.new(0, 15, 0, 175)
-ListTitle.Size = UDim2.new(1, -30, 0, 28)
-ListTitle.Font = Enum.Font.GothamBold
-ListTitle.Text = "📋 LISTA DE BRAINROTS"
-ListTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
-ListTitle.TextScaled = true
+    -- Sombra elegante
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(0, 170, 255)
+    stroke.Thickness = 2
+    stroke.Parent = mainFrame
 
-local ListaContainer = Instance.new("Frame")
-ListaContainer.Parent = MainFrame
-ListaContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
-ListaContainer.Position = UDim2.new(0, 15, 0, 210)
-ListaContainer.Size = UDim2.new(1, -30, 0, 200)
-Instance.new("UICorner", ListaContainer).CornerRadius = UDim.new(0, 12)
+    -- Título principal
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 60)
+    title.BackgroundTransparency = 1
+    title.Text = "BRAINROTS DUPLICATIONS"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextScaled = true
+    title.Font = Enum.Font.GothamBold
+    title.Parent = mainFrame
 
-local ScrollLista = Instance.new("ScrollingFrame")
-ScrollLista.Parent = ListaContainer
-ScrollLista.BackgroundTransparency = 1
-ScrollLista.Size = UDim2.new(1, -10, 1, -10)
-ScrollLista.Position = UDim2.new(0, 5, 0, 5)
-ScrollLista.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollLista.ScrollBarThickness = 6
+    -- Línea decorativa
+    local line = Instance.new("Frame")
+    line.Size = UDim2.new(0.9, 0, 0, 3)
+    line.Position = UDim2.new(0.05, 0, 0, 55)
+    line.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    line.BorderSizePixel = 0
+    line.Parent = mainFrame
+    local lineCorner = Instance.new("UICorner")
+    lineCorner.CornerRadius = UDim.new(0, 2)
+    lineCorner.Parent = line
 
-local BtnDuplicarSeleccion = Instance.new("TextButton")
-BtnDuplicarSeleccion.Parent = MainFrame
-BtnDuplicarSeleccion.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
-BtnDuplicarSeleccion.Position = UDim2.new(0, 15, 0, 425)
-BtnDuplicarSeleccion.Size = UDim2.new(1, -30, 0, 40)
-BtnDuplicarSeleccion.Font = Enum.Font.GothamSemibold
-BtnDuplicarSeleccion.Text = "🔘 Duplicar Seleccionado"
-BtnDuplicarSeleccion.TextColor3 = Color3.fromRGB(230, 230, 230)
-BtnDuplicarSeleccion.TextScaled = true
-Instance.new("UICorner", BtnDuplicarSeleccion).CornerRadius = UDim.new(0, 12)
+    -- Info (sección superior)
+    local infoLabel = Instance.new("TextLabel")
+    infoLabel.Size = UDim2.new(1, -20, 0, 80)
+    infoLabel.Position = UDim2.new(0.05, 0, 0, 70)
+    infoLabel.BackgroundTransparency = 1
+    infoLabel.Text = [[
+Nombre del Creador: JoseAngel_Blox
+Fecha de lanzamiento: 20/07/2026
+Versión: 1.1
+    ]]
+    infoLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+    infoLabel.TextXAlignment = Enum.TextXAlignment.Left
+    infoLabel.TextYAlignment = Enum.TextYAlignment.Top
+    infoLabel.TextScaled = false
+    infoLabel.Font = Enum.Font.Gotham
+    infoLabel.Parent = mainFrame
 
--- Animación de entrada
-TweenService:Create(MainFrame, TweenInfo.new(0.4), {Transparency = 0}):Play()
+    -- Sección "Duplicar"
+    local dupLabel = Instance.new("TextLabel")
+    dupLabel.Size = UDim2.new(1, -20, 0, 35)
+    dupLabel.Position = UDim2.new(0.05, 0, 0, 155)
+    dupLabel.BackgroundTransparency = 1
+    dupLabel.Text = "Duplicar"
+    dupLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+    dupLabel.TextScaled = true
+    dupLabel.Font = Enum.Font.GothamBold
+    dupLabel.Parent = mainFrame
 
--- ⚙️ VARIABLES
-local DuplicarActivo = false
-local BrainrotSeleccionado = nil
-local Remotes = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
-local ListaObjetos = {}
+    -- Toggle bonito
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(0, 80, 0, 40)
+    toggleFrame.Position = UDim2.new(0.75, 0, 0, 155)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    toggleFrame.Parent = mainFrame
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 20)
+    toggleCorner.Parent = toggleFrame
 
--- 📋 CARGAR LISTA DE BRAINROTS DEL INVENTARIO
-local function CargarLista()
-    -- Limpiar lista anterior
-    for _, v in pairs(ScrollLista:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
-    ListaObjetos = {}
-    BrainrotSeleccionado = nil
-    BtnDuplicarSeleccion.Text = "🔘 Duplicar Seleccionado"
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(1, 0, 1, 0)
+    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+    toggleButton.Text = "OFF"
+    toggleButton.TextColor3 = Color3.new(1, 1, 1)
+    toggleButton.TextScaled = true
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.Parent = toggleFrame
+    local toggleBtnCorner = Instance.new("UICorner")
+    toggleBtnCorner.CornerRadius = UDim.new(0, 20)
+    toggleBtnCorner.Parent = toggleButton
 
-    local Inventario = Player:FindFirstChild("Data") or Player:FindFirstChild("Inventory") or Player:FindFirstChild("leaderstats")
-    if not Inventario then return end
+    -- Lista de Brainrots (scrolling)
+    local listFrame = Instance.new("ScrollingFrame")
+    listFrame.Size = UDim2.new(0.9, 0, 0, 180)
+    listFrame.Position = UDim2.new(0.05, 0, 0, 200)
+    listFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    listFrame.ScrollBarThickness = 8
+    listFrame.Parent = mainFrame
+    local listCorner = Instance.new("UICorner")
+    listCorner.CornerRadius = UDim.new(0, 12)
+    listCorner.Parent = listFrame
 
-    local PosY = 5
-    for _, Item in pairs(Inventario:GetChildren()) do
-        if (Item:IsA("IntValue") or Item:IsA("NumberValue")) 
-        and not Item.Name:find("Money") and not Item.Name:find("Rebirth") then
-            table.insert(ListaObjetos, Item.Name)
-            
-            local BtnItem = Instance.new("TextButton")
-            BtnItem.Parent = ScrollLista
-            BtnItem.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
-            BtnItem.Position = UDim2.new(0, 8, 0, PosY)
-            BtnItem.Size = UDim2.new(1, -16, 0, 32)
-            BtnItem.Font = Enum.Font.Gotham
-            BtnItem.Text = "• "..Item.Name
-            BtnItem.TextColor3 = Color3.fromRGB(200, 200, 200)
-            BtnItem.TextScaled = true
-            BtnItem.AutoLocalize = false
-            Instance.new("UICorner", BtnItem).CornerRadius = UDim.new(0, 8)
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Padding = UDim.new(0, 8)
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Parent = listFrame
 
-            -- Seleccionar brainrot
-            BtnItem.MouseButton1Click:Connect(function()
-                for _, b in pairs(ScrollLista:GetChildren()) do if b:IsA("TextButton") then b.BackgroundColor3 = Color3.fromRGB(40,40,48) end end
-                BtnItem.BackgroundColor3 = Color3.fromRGB(35, 140, 70)
-                BrainrotSeleccionado = Item.Name
-                BtnDuplicarSeleccion.Text = "✅ Duplicar: "..BrainrotSeleccionado
-            end)
+    -- Función para actualizar lista
+    local function updateList()
+        for _, child in ipairs(listFrame:GetChildren()) do
+            if child:IsA("TextButton") then child:Destroy() end
+        end
 
-            PosY += 38
+        local brainrotsFolder = workspace:FindFirstChild("Brainrots") or workspace:FindFirstChild("Brainrot") or ReplicatedStorage:FindFirstChild("Brainrots")
+        if not brainrotsFolder then return end
+
+        for _, obj in ipairs(brainrotsFolder:GetChildren()) do
+            if obj:IsA("Model") or obj:IsA("Part") then
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(1, -10, 0, 45)
+                btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                btn.Text = obj.Name
+                btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                btn.TextScaled = true
+                btn.Font = Enum.Font.Gotham
+                btn.Parent = listFrame
+                local btnCorner = Instance.new("UICorner")
+                btnCorner.CornerRadius = UDim.new(0, 10)
+                btnCorner.Parent = btn
+
+                btn.MouseButton1Click:Connect(function()
+                    selectedBrainrot = obj
+                    -- Feedback visual
+                    for _, b in ipairs(listFrame:GetChildren()) do
+                        if b:IsA("TextButton") then
+                            b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                        end
+                    end
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+                end)
+            end
         end
     end
-    ScrollLista.CanvasSize = UDim2.new(0, 0, 0, PosY + 10)
+
+    -- Toggle dupe
+    toggleButton.MouseButton1Click:Connect(function()
+        dupeEnabled = not dupeEnabled
+        if dupeEnabled then
+            toggleButton.Text = "ON"
+            toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        else
+            toggleButton.Text = "OFF"
+            toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        end
+    end)
+
+    -- Loop para mantener lista actualizada
+    task.spawn(function()
+        while true do
+            updateList()
+            task.wait(1)
+        end
+    end)
+
+    -- Loop de duplicación
+    RunService.Heartbeat:Connect(function()
+        if not dupeEnabled or not selectedBrainrot then return end
+
+        local brainrotsFolder = workspace:FindFirstChild("Brainrots") or workspace:FindFirstChild("Brainrot")
+        if not brainrotsFolder then return end
+
+        -- Crear copia perfecta (mismo nombre y apariencia)
+        local clone = selectedBrainrot:Clone()
+        clone.Name = selectedBrainrot.Name
+        clone.Parent = brainrotsFolder
+
+        -- Animación de "duplicación"
+        clone:PivotTo(selectedBrainrot:GetPivot())
+        clone:MakeJoints()
+
+        -- Efecto visual bonito
+        local effect = Instance.new("ParticleEmitter")
+        effect.Texture = "rbxassetid://241837771"
+        effect.Color = ColorSequence.new(Color3.fromRGB(0, 255, 150))
+        effect.Rate = 50
+        effect.Lifetime = NumberRange.new(0.8)
+        effect.Speed = NumberRange.new(3)
+        effect.Parent = clone
+
+        task.delay(2, function()
+            effect:Destroy()
+        end)
+
+        -- Pequeño delay para que no spamee
+        task.wait(0.3)
+    end)
+
+    -- Cerrar con ESC
+    UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.Escape then
+            screenGui.Enabled = false
+        end
+    end)
+
+    -- Auto abrir al cargar
+    print("✅ Brainrots Duplications cargado correctamente")
+    print("Presiona ESC para cerrar • Selecciona un Brainrot de la lista y actívalo el toggle")
+
+    return screenGui
 end
 
--- 🚀 FUNCIÓN DUPLICAR COPIAS REALES
-local function DuplicarBrainrot(Nombre)
-    if not Nombre then return end
-    local Char = Player.Character
-    if not Char or not Char.PrimaryPart then return end
+-- ==================== INICIO ====================
+local gui = createGui()
 
-    -- 1️⃣ Aumentar cantidad en inventario (valor real)
-    local Inventario = Player:FindFirstChild("Data") or Player:FindFirstChild("Inventory")
-    if Inventario and Inventario:FindFirstChild(Nombre) then
-        Inventario[Nombre].Value += 1
-        if Remotes and Remotes:FindFirstChild("Duplicate") then
-            Remotes.Duplicate:FireServer(Nombre, 1)
-        end
-    end
-
-    -- 2️⃣ CREAR COPIA FÍSICA REAL PARA COLOCAR EN BASE
-    for _, v in pairs(workspace:GetChildren()) do
-        if v:IsA("Model") and v.Name == Nombre or v.Name:find(Nombre) then
-            local CopiaReal = v:Clone()
-            CopiaReal.Parent = workspace
-            CopiaReal:PivotTo(Char.PrimaryPart.CFrame * CFrame.new(math.random(-6,6), 2, math.random(-6,6)))
-            CopiaReal:SetAttribute("EsDuplicado", true)
-            break
-        end
-    end
-end
-
--- 🎮 BOTONES
-BtnActivar.MouseButton1Click:Connect(function()
-    DuplicarActivo = not DuplicarActivo
-    BtnActivar.BackgroundColor3 = DuplicarActivo and Color3.fromRGB(32, 160, 85) or Color3.fromRGB(45, 45, 52)
-    BtnActivar.Text = DuplicarActivo and "✅ Duplicar: ACTIVADO" or "🔘 Duplicar: DESACTIVADO"
-    CargarLista()
-end)
-
-BtnDuplicarSeleccion.MouseButton1Click:Connect(function()
-    if not BrainrotSeleccionado then return end
-    DuplicarBrainrot(BrainrotSeleccionado)
-end)
-
--- Recargar lista al reaparecer
-Player.CharacterAdded:Connect(CargarLista)
+-- Actualizar lista inicial
 task.wait(1)
-CargarLista()
+updateList()
+
+-- Character added
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = newChar:WaitForChild("Humanoid")
+    root = newChar:WaitForChild("HumanoidRootPart")
+end)
