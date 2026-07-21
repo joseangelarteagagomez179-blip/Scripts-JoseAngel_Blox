@@ -1,74 +1,79 @@
--- ==============================================
--- 🎭 TODAS LAS SKINS DE LA TIENDA | SOLO VISUAL
--- Creado por: JoseAngel_Blox 🇻🇪
--- ⚠️ AVISO: Solo tú verás los cambios, es local
--- ==============================================
+-- ========================================================= --
+-- ||        SCRIPT CREADOR DE CONTENIDO (SKINS V2)       || --
+-- ========================================================= --
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local OriginalCaracteristicas = {}
+-- ⚙️ ELIGE EL MODO AQUÍ ⚙️
+-- Escribe 1 para copiar a un jugador (por Nombre o ID).
+-- Escribe 2 para cargar un Avatar/Atuendo completo por su ID.
+local MODO_ELEGIDO = 1 
 
--- Guardamos tu apariencia original para restaurarla
-for _, Objeto in pairs(Character:GetChildren()) do
-    if Objeto:IsA("Shirt") or Objeto:IsA("Pants") or Objeto:IsA("Accessory") or Objeto:IsA("BodyColors") then
-        table.insert(OriginalCaracteristicas, {Objeto = Objeto, Padre = Objeto.Parent})
-    end
-end
 
--- Interfaz bonita y lista para usar
-local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/78n/SimpleUI/main/Source.lua"))()
-local Ventana = UI:CreateWindow("🎭 Tienda Completa | JoseAngel_Blox")
+-- 👤 [ OPCIÓN 1: COPIAR JUGADOR ] --
+-- Puedes poner el nombre del jugador entre comillas (Ej: "Roblox") 
+-- O puedes poner el ID numérico sin comillas (Ej: 1)
+local JUGADOR_OBJETIVO = "Roblox" 
 
--- Secciones igual que en la tienda
-local SeccionAvatares = Ventana:AddFolder("👤 Avatares Completos")
-local SeccionRopa = Ventana:AddFolder("👕 Ropa y Accesorios")
-local SeccionUtilidades = Ventana:AddFolder("⚙️ Opciones")
 
--- Función para equipar cualquier ID del catálogo
-local function EquiparID(IdAsset)
-    task.spawn(function()
-        local exito, asset = pcall(function()
-            return game:GetService("InsertService"):LoadAsset(IdAsset):GetChildren()
+-- 📦 [ OPCIÓN 2: AVATAR COMPLETO ] --
+-- Coloca aquí el ID numérico del Avatar/Atuendo completo.
+local ID_DEL_AVATAR = 0 
+
+
+-- ========================================================= --
+-- || 🚫 NO MODIFIQUES NADA DE AQUÍ PARA ABAJO 🚫         || --
+-- ========================================================= --
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+if MODO_ELEGIDO == 1 then
+    print("Buscando datos del jugador...")
+    local userId = 0
+    
+    -- Detectar si escribiste un nombre (texto) o un ID (número)
+    if type(JUGADOR_OBJETIVO) == "string" then
+        local success, result = pcall(function()
+            return game.Players:GetUserIdFromNameAsync(JUGADOR_OBJETIVO)
         end)
-        if exito and asset then
-            for _, parte in pairs(asset) do
-                if parte:IsA("Model") then parte = parte:FindFirstChildWhichIsA("Model") or parte end
-                if parte:IsA("Accessory") or parte:IsA("Shirt") or parte:IsA("Pants") or parte:IsA("Character") then
-                    parte.Parent = Character
-                end
-            end
-            game:GetService("StarterGui"):SetCore("SendNotification",{
-                Title = "✅ PUESTO",
-                Text = "¡Ahora lo ves puesto!",
-                Duration = 2.5
-            })
+        if success then
+            userId = result
+        else
+            warn("No se encontró ese nombre de usuario. Revisa cómo está escrito.")
+            return
         end
+    elseif type(JUGADOR_OBJETIVO) == "number" then
+        userId = JUGADOR_OBJETIVO
+    end
+
+    -- Aplicar la skin del jugador
+    local success, nuevaApariencia = pcall(function()
+        return game.Players:GetHumanoidDescriptionFromUserId(userId)
     end)
+
+    if success and nuevaApariencia then
+        humanoid:ApplyDescription(nuevaApariencia)
+        print("¡Éxito! Skin del jugador cargada localmente.")
+    else
+        warn("Error al cargar la skin del jugador. El perfil podría ser privado o el ID incorrecto.")
+    end
+
+elseif MODO_ELEGIDO == 2 then
+    print("Cargando Avatar/Atuendo completo desde el catálogo...")
+    
+    -- Aplicar el avatar por ID de outfit
+    local success, nuevaApariencia = pcall(function()
+        return game.Players:GetHumanoidDescriptionFromOutfitId(ID_DEL_AVATAR)
+    end)
+
+    if success and nuevaApariencia then
+        humanoid:ApplyDescription(nuevaApariencia)
+        print("¡Éxito! Avatar completo cargado localmente.")
+    else
+        warn("Error al cargar el Avatar. Asegúrate de que el ID ingresado pertenezca a un Atuendo (Outfit ID) válido y público.")
+    end
+
+else
+    warn("El MODO_ELEGIDO es incorrecto. Por favor escribe 1 o 2 en la configuración de
+        arriba.")
 end
-
--- 📋 Ejemplos de los estilos que salían en tu foto
-SeccionAvatares:AddButton("😈 Vamp Y2K", function() EquiparID(1234567890) end) -- Cambia el ID por el real
-SeccionAvatares:AddButton("🖤 Emo Vkei", function() EquiparID(1234567891) end)
-SeccionAvatares:AddButton("⚡ Rey Ecliptix", function() EquiparID(1234567892) end)
-SeccionAvatares:AddButton("🤍 Foltyn Blanco", function() EquiparID(1234567893) end)
-SeccionAvatares:AddButton("🥷 Chico Emo Anime", function() EquiparID(1234567894) end)
-
--- 📝 Campo para poner CUALQUIER ID de la tienda
-SeccionUtilidades:AddTextbox("Pega ID de cualquier objeto:", function(texto)
-    local id = tonumber(texto)
-    if id then EquiparID(id) end
-end)
-
--- Restaurar tu apariencia
-SeccionUtilidades:AddButton("↩️ Volver a mi Avatar", function()
-    Player:LoadCharacter()
-    game:GetService("StarterGui"):SetCore("SendNotification",{
-        Title = "✅ RESTAURADO",
-        Text = "Volviste a tu apariencia normal",
-        Duration = 2
-    })
-end)
-
-Ventana:AddLabel("© JoseAngel_Blox | Solo visual 🎨")
-U
-I:Init()
